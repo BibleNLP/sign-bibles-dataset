@@ -172,3 +172,13 @@ cython_debug/
 
 # PyPI configuration file
 .pypirc
+
+# Windsurf rules
+.windsurfrules
+
+# Input and output folders
+input/
+output/
+*/input/
+*/output/
+

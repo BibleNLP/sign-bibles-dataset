@@ -1,0 +1,10 @@
+requests>=2.25.1
+boto3>=1.17.0
+numpy>=1.20.0
+opencv-python>=4.5.0
+torch>=1.9.0
+webdataset>=0.2.0
+tqdm>=4.60.0
+pympi-ling>=1.70.0
+mediapipe>=0.8.9
+vidgear>=0.2.5
