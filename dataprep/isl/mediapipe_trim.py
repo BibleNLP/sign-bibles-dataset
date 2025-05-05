@@ -12,7 +12,6 @@ class VideoTrimmer:
     def __init__(self, video_stream, id):
         """Initialize with a video source (file path or camera index)."""
         # print("comes in videotrimmer init")
-        self.stream = video_stream
         self.thread_id = id
 
     def find_trim_frame_opencv(self):
@@ -59,8 +58,8 @@ class VideoTrimmer:
                 break
           cap.release()
           cv2.destroyAllWindows()
-        finally:
-          self.stream.seek(0)
+        except Exception as exce:
+          raise Exception("Error with video processing with mediapipe") from exce
 
         return trim_frame
 
@@ -73,12 +72,14 @@ class VideoTrimmer:
             print("No valid trim frame found. Returning None.")
             return None
         # print(f"Trim frame found at frame {trim_frame}.")
-        if trim_frame < 10:
-          # os.remove(f"./{self.thread_id}.mp4")
-          self.stream.seek(0)
-          return self.stream
-
         output_stream = io.BytesIO()
+        if trim_frame < 10:
+          with open(f"{id}.mp4", "rb") as f:
+            output_stream.write(f.read())
+          # os.remove(f"./{self.thread_id}.mp4")
+          output_stream.seek(0)
+          return output_stream
+
         # trim_frame += 10
 
         try:
@@ -111,7 +112,7 @@ class VideoTrimmer:
         finally:
           os.remove(f"./{self.thread_id}.mp4")
           os.rename(temp_file2, f"./{self.thread_id}.mp4")
-          self.stream.seek(0)
+          # self.stream.seek(0)
 
         output_stream.seek(0)
         return output_stream  # Return the processed video stream

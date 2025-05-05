@@ -177,3 +177,40 @@ def generate_mask_and_pose_video_streams(id):
     output_stream_mask.seek(0);
     output_stream_pose.seek(0);
     return output_stream_mask, output_stream_pose
+
+def generate_mask_and_pose_video_files(id):
+    try:
+      temp_file_mask =f"./{id}_mask.mp4"
+      temp_file_pose =f"./{id}_pose.mp4"
+
+      cap = cv2.VideoCapture(f"./{id}.mp4")
+      width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+      height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+      fps = int(cap.get(cv2.CAP_PROP_FPS))
+      cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
+
+      # print(f"about to trim! Width: {width}, Height: {height}, FPS: {fps}")
+
+      fourcc="mp4v"
+      fourcc_code = cv2.VideoWriter_fourcc(*fourcc)  # Codec (e.g., 'mp4v', 'XVID')
+      video_writer1 = cv2.VideoWriter(temp_file_mask, fourcc_code, fps, (width, height))
+      video_writer2 = cv2.VideoWriter(temp_file_pose, fourcc_code, fps, (width, height))
+
+      while True:
+          ret, frame = cap.read()
+          if not ret:
+              break
+          image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+          image.flags.writeable = False
+
+          skeleton, mask = pose_estimate(image)
+
+          # Write frame to video
+          video_writer1.write(mask)
+          video_writer2.write(skeleton)
+      video_writer1.release()
+      video_writer2.release()
+      cap.release()
+    except Exception as exce:
+        raise Exception("Error in pose and mask generation using dwpose")
+
