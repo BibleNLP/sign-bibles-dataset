@@ -31,7 +31,7 @@ class NextCloud_connection:
         }
         # Create an S3 client
         self.client = Client(options)
-        print(dir(self.client))
+
 
 
     def download_video(self, remote_path, local_path):

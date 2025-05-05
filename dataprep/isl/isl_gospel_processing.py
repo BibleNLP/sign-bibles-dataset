@@ -3,6 +3,7 @@ import os
 import re
 import asyncio
 import json
+import sys
 
 from nextcloud_connect import NextCloud_connection
 from ffmpeg_downsample import downsample_video_ondisk
@@ -11,21 +12,21 @@ from dwpose_processing import generate_mask_and_pose_video_files
 
 junk_pattern_in_filename = re.compile(r'\-[\w]+')
 
-def process_video(remote_path, id, nxt_cld_conn):
-	# nxt_cld_conn.download_video(remote_path, f"{id}_large.mp4")
+def process_video(id, remote_path, nxt_cld_conn):
+	nxt_cld_conn.download_video(remote_path, f"{id}_large.mp4")
 
-	# downsample_video_ondisk(f"{id}_large.mp4", f"{id}.mp4")
+	downsample_video_ondisk(f"{id}_large.mp4", f"{id}.mp4")
 
-	# trimmed_stream = trim_off_storyboard(None, id)
+	trimmed_stream = trim_off_storyboard(None, id)
 	try:
-	# 	if not trimmed_stream:
-	# 		raise Exception("Processing with mediapipe failed")
-	# 	generate_mask_and_pose_video_files(id)
+		if not trimmed_stream:
+			raise Exception("Processing with mediapipe failed")
+		generate_mask_and_pose_video_files(id)
 
-	# 	output_path = f"ISLGospels_processed/{id}.mp4"
-	# 	nxt_cld_conn.upload_file(f"{id}.mp4", output_path)
-	# 	nxt_cld_conn.upload_file(f"{id}_pose.mp4", f"ISLGospels_processed/{id}.pose.mp4")
-	# 	nxt_cld_conn.upload_file(f"{id}_mask.mp4", f"ISLGospels_processed/{id}.mask.mp4")
+		output_path = f"ISLGospels_processed/{id}.mp4"
+		nxt_cld_conn.upload_file(f"{id}.mp4", output_path)
+		nxt_cld_conn.upload_file(f"{id}_pose.mp4", f"ISLGospels_processed/{id}.pose.mp4")
+		nxt_cld_conn.upload_file(f"{id}_mask.mp4", f"ISLGospels_processed/{id}.mask.mp4")
 
 		parts = remote_path.split("/")
 		ref = f"{parts[0]} {parts[1].replace("Ch ", "")} "
@@ -51,26 +52,57 @@ def process_video(remote_path, id, nxt_cld_conn):
 								}]
 					}
 		with open(f"{id}.json", "w") as f:
-		    json.dump(metadata, f, indent=4, sort_keys=True)
+			json.dump(metadata, f, indent=4, sort_keys=True)
 		nxt_cld_conn.upload_file(f"{id}.json", f"ISLGospels_processed/{id}.json")
 		print(f'Uploaded {id}!!!!!!!!!!!!!!!!!!!!')
 	except Exception as exce:
 		print(exce)
+		# raise exce
 	finally:
-		# os.remove(f"{id}_large.mp4")
-		# os.remove(f"{id}.mp4")
-		# os.remove(f"{id}_mask.mp4")
-		# os.remove(f"{id}_pose.mp4")
-		# os.remove(f"{id}.json")
+		clear_space(f"{id}_large.mp4")
+		clear_space(f"{id}.mp4")
+		clear_space(f"{id}_mask.mp4")
+		clear_space(f"{id}_pose.mp4")
+		clear_space(f"{id}.json")
 		pass
 
+def clear_space(file_path):
+	if os.path.exists(file_path):
+		os.remove(file_path)
+
 def main():
+	if len(sys.argv) != 3:
+		print("Usage: python process_video_script.py <path> <id>")
+		sys.exit(1)
+
+	video_id = int(sys.argv[1])
+	video_path = sys.argv[2]
+
 	nxt_cld_conn = NextCloud_connection()
+	process_video(video_id, video_path, nxt_cld_conn)
 
-	print(nxt_cld_conn.get_files("/Matthew/"))
+def list_videofile_inputs(path, count_start=0):
+	nxt_cld_conn = NextCloud_connection()
+	files = nxt_cld_conn.get_files(path)
+	i = count_start
+	for file in files:
+		if not file.endswith("/"):
+			i += 1
+			print(f"{i}\t{path}{file}")
+	return i
 
-	process_video("/Matthew/Ch 1/1 1-0D5A1049.MP4", 1, nxt_cld_conn)
 
-if __name__ == '__main__':
-	# asyncio.run(main())
+if __name__ == "__main__":
+	# num = list_videofile_inputs("Matthew/Ch 1/", count_start=0)
+	# num = list_videofile_inputs("Matthew/Ch 2/", count_start=num)
+	# num = list_videofile_inputs("Matthew/Ch 3/", count_start=num)
+	# num = list_videofile_inputs("Matthew/Ch 4/", count_start=num)
+	# num = list_videofile_inputs("Matthew/Ch 5/", count_start=num)
+	# num = list_videofile_inputs("Matthew/Ch 6/", count_start=num)
+	# num = list_videofile_inputs("Matthew/Ch 7/", count_start=num)
+	# num = list_videofile_inputs("Matthew/Ch 8/", count_start=num)
+	# num = list_videofile_inputs("Matthew/Ch 9/", count_start=num)
+	# num = list_videofile_inputs("Matthew/Ch 10/", count_start=num)
+	
 	main()
+
