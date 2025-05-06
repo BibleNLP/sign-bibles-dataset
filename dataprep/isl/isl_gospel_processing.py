@@ -98,7 +98,8 @@ def process_video_onmount(id, orig_path, processed_path):
 		metadata = {"filename": f"{id}.mp4",
 					"pose":f"{id}.pose.mp4", 
 					"mask":f"{id}.pose.mp4",
-					"source": remote_path,
+					"source": f"{ref} of https://www.youtube.com/@islv-holybible",
+					"license": "CC-BY-SA",
 					"bible-ref": ref,
 					"transcripts": [{
 								"text": get_verses(ref),
