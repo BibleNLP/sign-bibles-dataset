@@ -26,7 +26,7 @@ run_job() {
 export -f run_job
 
 # Run in parallel
-parallel -j 10 --colsep '\t' run_job {1} {2} :::: "$INPUT_FILE"
+parallel -j 4 --colsep '\t' run_job {1} {2} :::: "$INPUT_FILE"
 
 
 if [ -s logs/fail.log ]; then
@@ -34,5 +34,5 @@ if [ -s logs/fail.log ]; then
     cp logs/fail.log retry.txt
     > logs/fail.log  # Clear old failures
 
-    parallel -j 10 --colsep '\t' run_job {1} {2} :::: retry.txt
+    parallel -j 4 --colsep '\t' run_job {1} {2} :::: retry.txt
 fi

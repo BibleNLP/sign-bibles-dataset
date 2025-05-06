@@ -135,6 +135,17 @@ def main():
 	output_path = "/mnt/share/processed_path"
 	process_video_onmount(video_id, video_path, output_path)
 
+def main_nxtcld():
+	if len(sys.argv) != 3:
+		print("Usage: python process_video_script.py <path> <id>")
+		sys.exit(1)
+
+	video_id = int(sys.argv[1])
+	video_path = sys.argv[2]
+
+	nxt_cld_conn = NextCloud_connection()
+	process_video(video_id, video_path, nxt_cld_conn)
+
 def list_videofile_inputs(path, count_start=0):
 	nxt_cld_conn = NextCloud_connection()
 	files = nxt_cld_conn.get_files(path)
@@ -155,18 +166,21 @@ def list_videofile_inputs_onmount(path, count_start=0):
 	return i
 
 if __name__ == "__main__":
-	source_data_path = "/mnt/share"
-	num = list_videofile_inputs_onmount(f"{source_data_path}/matthew/Ch 1/", count_start=0)
-	num = list_videofile_inputs_onmount(f"{source_data_path}/matthew/Ch 2/", count_start=num)
-	num = list_videofile_inputs_onmount(f"{source_data_path}/matthew/Ch 3/", count_start=num)
-	num = list_videofile_inputs_onmount(f"{source_data_path}/matthew/Ch 4/", count_start=num)
-	num = list_videofile_inputs_onmount(f"{source_data_path}/matthew/Ch 5/", count_start=num)
-	num = list_videofile_inputs_onmount(f"{source_data_path}/matthew/Ch 6/", count_start=num)
-	num = list_videofile_inputs_onmount(f"{source_data_path}/matthew/Ch 7/", count_start=num)
-	num = list_videofile_inputs_onmount(f"{source_data_path}/matthew/Ch 8/", count_start=num)
-	num = list_videofile_inputs_onmount(f"{source_data_path}/matthew/Ch 9/", count_start=num)
-	num = list_videofile_inputs_onmount(f"{source_data_path}/matthew/Ch 10/", count_start=num)
+	# source_data_path = "/mnt/share"
+	# num = list_videofile_inputs_onmount(f"{source_data_path}/matthew/Ch 1/", count_start=0)
+	# num = list_videofile_inputs_onmount(f"{source_data_path}/matthew/Ch 2/", count_start=num)
+	# num = list_videofile_inputs_onmount(f"{source_data_path}/matthew/Ch 3/", count_start=num)
+	# num = list_videofile_inputs_onmount(f"{source_data_path}/matthew/Ch 4/", count_start=num)
+	# num = list_videofile_inputs_onmount(f"{source_data_path}/matthew/Ch 5/", count_start=num)
+	# num = list_videofile_inputs_onmount(f"{source_data_path}/matthew/Ch 6/", count_start=num)
+	# num = list_videofile_inputs_onmount(f"{source_data_path}/matthew/Ch 7/", count_start=num)
+	# num = list_videofile_inputs_onmount(f"{source_data_path}/matthew/Ch 8/", count_start=num)
+	# num = list_videofile_inputs_onmount(f"{source_data_path}/matthew/Ch 9/", count_start=num)
+	# num = list_videofile_inputs_onmount(f"{source_data_path}/matthew/Ch 10/", count_start=num)
 	
 	# main()
-	
+
+
+	# num = list_videofile_inputs("/Matthew/Ch 1/", count_start=0)
+	main_nxtcld()
 
