@@ -1,0 +1,19 @@
+mediapipe>=0.10.15
+vidgear>=0.3.1
+pose-format>=0.0.11
+pympi-ling>=1.70
+opencv-python
+numpy
+pillow
+torch==2.0.0+cpu
+tqdm>=4.67.1
+onnx==1.17.0
+onnxruntime==1.15.1
+einops>=0.8.0
+autodistill-grounded-sam-2==0.1.0
+segment-anything-hq==0.3
+supervision>=0.18.0
+git+https://github.com/sign-language-processing/transcription.git@1f2cef8
+boto3>=1.34.0
+matplotlib>=3.10.0
+--extra-index-url https://download.pytorch.org/whl/cpu
