@@ -4,8 +4,8 @@ import re
 import asyncio
 import json
 import sys
-import shuitl
-import pathlib
+import shutil
+from pathlib import Path
 
 from nextcloud_connect import NextCloud_connection
 from ffmpeg_downsample import downsample_video_ondisk
@@ -85,9 +85,9 @@ def process_video_onmount(id, orig_path, processed_path):
 		generate_mask_and_pose_video_files(id)
 
 		output_path = f"{processed_path}/{id}.mp4"
-		shuitl.move(f"{id}.mp4", output_path)
-		shuitl.move(f"{id}_pose.mp4", f"{output_path}/{id}.pose.mp4")
-		shuitl.move(f"{id}_mask.mp4", f"{output_path}/{id}.mask.mp4")
+		shutil.move(f"{id}.mp4", output_path)
+		shutil.move(f"{id}_pose.mp4", f"{output_path}/{id}.pose.mp4")
+		shutil.move(f"{id}_mask.mp4", f"{output_path}/{id}.mask.mp4")
 
 		parts = remote_path.split("/")
 		ref = f"{parts[0]} {parts[1].replace("Ch ", "")} "
@@ -115,7 +115,7 @@ def process_video_onmount(id, orig_path, processed_path):
 					}
 		with open(f"{id}.json", "w") as f:
 			json.dump(metadata, f, indent=4, sort_keys=True)
-		shuitl.move(f"{id}.json", f"{output_path}/{id}.json")
+		shutil.move(f"{id}.json", f"{output_path}/{id}.json")
 		print(f'processed {id}!!!!!!!!!!!!!!!!!!!!')
 	except Exception as exce:
 		# print(exce)
@@ -156,16 +156,17 @@ def list_videofile_inputs_onmount(path, count_start=0):
 
 if __name__ == "__main__":
 	source_data_path = "/mnt/share"
-	num = list_videofile_inputs_onmount(f"{source_data_path}/Matthew/Ch 1/", count_start=0)
-	num = list_videofile_inputs_onmount(f"{source_data_path}/Matthew/Ch 2/", count_start=num)
-	num = list_videofile_inputs_onmount(f"{source_data_path}/Matthew/Ch 3/", count_start=num)
-	num = list_videofile_inputs_onmount(f"{source_data_path}/Matthew/Ch 4/", count_start=num)
-	num = list_videofile_inputs_onmount(f"{source_data_path}/Matthew/Ch 5/", count_start=num)
-	num = list_videofile_inputs_onmount(f"{source_data_path}/Matthew/Ch 6/", count_start=num)
-	num = list_videofile_inputs_onmount(f"{source_data_path}/Matthew/Ch 7/", count_start=num)
-	num = list_videofile_inputs_onmount(f"{source_data_path}/Matthew/Ch 8/", count_start=num)
-	num = list_videofile_inputs_onmount(f"{source_data_path}/Matthew/Ch 9/", count_start=num)
-	num = list_videofile_inputs_onmount(f"{source_data_path}/Matthew/Ch 10/", count_start=num)
+	num = list_videofile_inputs_onmount(f"{source_data_path}/matthew/Ch 1/", count_start=0)
+	num = list_videofile_inputs_onmount(f"{source_data_path}/matthew/Ch 2/", count_start=num)
+	num = list_videofile_inputs_onmount(f"{source_data_path}/matthew/Ch 3/", count_start=num)
+	num = list_videofile_inputs_onmount(f"{source_data_path}/matthew/Ch 4/", count_start=num)
+	num = list_videofile_inputs_onmount(f"{source_data_path}/matthew/Ch 5/", count_start=num)
+	num = list_videofile_inputs_onmount(f"{source_data_path}/matthew/Ch 6/", count_start=num)
+	num = list_videofile_inputs_onmount(f"{source_data_path}/matthew/Ch 7/", count_start=num)
+	num = list_videofile_inputs_onmount(f"{source_data_path}/matthew/Ch 8/", count_start=num)
+	num = list_videofile_inputs_onmount(f"{source_data_path}/matthew/Ch 9/", count_start=num)
+	num = list_videofile_inputs_onmount(f"{source_data_path}/matthew/Ch 10/", count_start=num)
 	
 	# main()
+	
 
