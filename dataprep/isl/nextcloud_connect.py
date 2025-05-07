@@ -34,16 +34,10 @@ class NextCloud_connection:
 
 
 
-    def download_video(self, remote_path, local_path):
-        # kwargs = {
-        #  'remote_path': remote_path,
-        #  'local_path':  local_path,
-        #  'callback':    callback
-        # }
-        # self.client.download_async(**kwargs)
+    def download_file(self, remote_path, local_path):
         with open(local_path, 'wb') as f:
             response = self.client.session.request('GET',
-                                                self.client.get_url("/Matthew/Ch 1/1 1-0D5A1049.MP4"),
+                                                self.client.get_url(remote_path),
                                                 stream=True,
                                                 auth=(self.user, self.password)
                                                 )
