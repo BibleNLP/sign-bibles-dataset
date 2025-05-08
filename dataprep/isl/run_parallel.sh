@@ -1,6 +1,6 @@
 #!/bin/bash
 
-INPUT_FILE="mathew_video_files_oncloud.txt"
+INPUT_FILE="mat_list.txt"
 LOG_DIR="logs"
 SUCCESS_LOG="$LOG_DIR/success.log"
 FAIL_LOG="$LOG_DIR/fail.log"
