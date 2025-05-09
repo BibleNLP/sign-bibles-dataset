@@ -13,7 +13,9 @@ from mediapipe_trim import trim_off_storyboard
 from dwpose_processing import generate_mask_and_pose_video_files
 from bible_text_access import get_verses
 
-def process_video(id, remote_path, nxt_cld_conn):
+def process_video(id, remote_path, nxt_cld_conn, output_path):
+	if output_path.endswith("/"):
+		output_path = output_path[:-1]
 	try:
 		nxt_cld_conn.download_file(remote_path, f"{id}_large.mp4")
 
@@ -24,14 +26,14 @@ def process_video(id, remote_path, nxt_cld_conn):
 			raise Exception("Processing with mediapipe failed")
 		generate_mask_and_pose_video_files(id)
 
-		output_path = f"ISLGospels_processed/{id}.mp4"
-		nxt_cld_conn.upload_file(f"{id}.mp4", output_path)
-		nxt_cld_conn.upload_file(f"{id}_pose.mp4", f"ISLGospels_processed/{id}.pose.mp4")
-		nxt_cld_conn.upload_file(f"{id}_mask.mp4", f"ISLGospels_processed/{id}.mask.mp4")
+		main_path = f"{output_path}/{id}.mp4"
+		shutil.move(f"{id}.mp4", output_path)
+		shutil.move(f"{id}_pose.mp4", f"{output_path}/{id}.pose.mp4")
+		shutil.move(f"{id}_mask.mp4", f"{output_path}/{id}.mask.mp4")
 
 		parts = remote_path.split("/")
 		ref = f"{parts[1]} {parts[2].replace("Ch ", "")}"
-		verse = parts[-1].split(".")[0].split(" ")[-1]
+		verse = parts[-1].split(".")[0].split(" ")[1]
 		verse_parts = "-".join(verse.split("-")[:-1])
 		ref = f"{ref}:{verse_parts}"
 
@@ -53,11 +55,11 @@ def process_video(id, remote_path, nxt_cld_conn):
 
 								}]
 					}
-		print(f"{metadata['bible-ref']} ---> {metadata['transcripts'][0]['text']}")
+		# print(f"{metadata['bible-ref']} ---> {metadata['transcripts'][0]['text']}")
 		with open(f"{id}.json", "w") as f:
 			json.dump(metadata, f, indent=4)
-		nxt_cld_conn.upload_file(f"{id}.json", f"ISLGospels_processed/{id}.json")
-		print(f'Uploaded {id}!!!!!!!!!!!!!!!!!!!!')
+		shutil.move(f"{id}.json", f"{output_path}/{id}.json")
+		print(f'Processed {id}!!!!!!!!!!!!!!!!!!!!')
 	finally:
 		clear_space(f"{id}_large.mp4")
 		clear_space(f"{id}.mp4")
@@ -84,6 +86,13 @@ def process_video_onmount(id, orig_path, processed_path):
 		shutil.move(f"{id}.mp4", output_path)
 		shutil.move(f"{id}_pose.mp4", f"{output_path}/{id}.pose.mp4")
 		shutil.move(f"{id}_mask.mp4", f"{output_path}/{id}.mask.mp4")
+
+		parts = orig_path.split("/")
+		ref = f"{parts[-3]} {parts[-2].replace("Ch ", "")}"
+		verse = parts[-1].split(".")[0].split(" ")[1]
+		verse_parts = "-".join(verse.split("-")[:-1])
+		ref = f"{ref}:{verse_parts}"
+
 
 		parts = remote_path.split("/")
 		ref = f"{parts[0]} {parts[1].replace("Ch ", "")} "
@@ -120,7 +129,7 @@ def process_video_onmount(id, orig_path, processed_path):
 
 
 def main():
-	if len(sys.argv) != 3:
+	if len(sys.argv) != 4:
 		print("Usage: python process_video_script.py <path> <id>")
 		sys.exit(1)
 
@@ -132,19 +141,21 @@ def main():
 	process_video_onmount(video_id, video_path, output_path)
 
 def main_nxtcld():
-	if len(sys.argv) != 3:
+	if len(sys.argv) != 4:
 		print("Usage: python process_video_script.py <path> <id>")
 		sys.exit(1)
 
 	video_id = int(sys.argv[1])
 	video_path = sys.argv[2]
+	output_path = sys.argv[3]
 
 	nxt_cld_conn = NextCloud_connection()
-	process_video(video_id, video_path, nxt_cld_conn)
+	process_video(video_id, video_path, nxt_cld_conn, output_path)
 
 
 if __name__ == "__main__":
-	# process_video("1", "/Matthew/Ch 1/1 1-0D5A1049.MP4", NextCloud_connection())
+
+	# process_video("244", "/Mark/Ch 1/1 1-3-A082C001_221013_H10P (New).MP4", NextCloud_connection(), "../../../Mark_processed")
 	# main()
 
 	main_nxtcld()

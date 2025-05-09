@@ -42,9 +42,10 @@ def group_files_into_chunks(grouped, base_path, max_size):
 
     return chunks
 
-def create_tarballs(chunks, output_dir):
+def create_tarballs(chunks, output_dir, count_start):
     for idx, chunk in enumerate(chunks, 1):
-        tar_name = os.path.join(output_dir, f"chunk_{idx:03d}.tar")
+        num = count_start+idx
+        tar_name = os.path.join(output_dir, f"chunk_{num:05d}.tar")
         with tarfile.open(tar_name, "w") as tar:
             for base, filepaths in chunk:
                 for filepath in filepaths:
@@ -59,6 +60,7 @@ if __name__ == '__main__':
 
     SOURCE_DIR = "../../../ISLGospels_processed"
     OUTPUT_DIR = "../../../ISLGospels_tar_chunks"
+    COUNT_START = 14
     MAX_TAR_SIZE = 1 * 1024 * 1024 * 1024 # 1 GB
 
     # Ensure output directory exists
@@ -68,4 +70,4 @@ if __name__ == '__main__':
     print(f"Grouped files: {len(grouped_files)}")
     chunks = group_files_into_chunks(grouped_files, SOURCE_DIR, MAX_TAR_SIZE)
     print(f"Created chunks: {len(chunks)}")
-    create_tarballs(chunks, OUTPUT_DIR)
+    create_tarballs(chunks, OUTPUT_DIR, count_start=COUNT_START)

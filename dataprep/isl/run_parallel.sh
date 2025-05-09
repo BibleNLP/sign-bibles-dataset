@@ -1,6 +1,8 @@
 #!/bin/bash
 
-INPUT_FILE="mat_list.txt"
+INPUT_FILE="mark_list.txt"
+OUT_PATH="../../../Mark_processed"
+
 LOG_DIR="logs"
 SUCCESS_LOG="$LOG_DIR/success.log"
 FAIL_LOG="$LOG_DIR/fail.log"
@@ -15,8 +17,9 @@ export SUCCESS_LOG FAIL_LOG
 run_job() {
     VIDEO_ID="$1"
     VIDEO_PATH="$2"
+    PROCCESSED_PATH="$3"
 
-    if python3 isl_gospel_processing.py "$VIDEO_ID" "$VIDEO_PATH"; then
+    if python3 isl_gospel_processing.py "$VIDEO_ID" "$VIDEO_PATH" "$PROCCESSED_PATH"; then
         echo -e "$VIDEO_ID\t$VIDEO_PATH" >> "$SUCCESS_LOG"
     else
         echo -e "$VIDEO_ID\t$VIDEO_PATH" >> "$FAIL_LOG"
@@ -26,7 +29,7 @@ run_job() {
 export -f run_job
 
 # Run in parallel
-parallel -j 4 --colsep '\t' run_job {1} {2} :::: "$INPUT_FILE"
+parallel -j 4 --colsep '\t' run_job {1} {2} "$OUT_PATH" :::: "$INPUT_FILE"
 
 
 if [ -s logs/fail.log ]; then
@@ -34,5 +37,5 @@ if [ -s logs/fail.log ]; then
     cp logs/fail.log retry.txt
     > logs/fail.log  # Clear old failures
 
-    parallel -j 4 --colsep '\t' run_job {1} {2} :::: retry.txt
+    parallel -j 4 --colsep '\t' run_job {1} {2} "$OUT_PATH" :::: retry.txt
 fi
