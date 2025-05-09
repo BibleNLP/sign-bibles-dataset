@@ -3,12 +3,10 @@ import tarfile
 from pathlib import Path
 
 # CONFIGURATION
-SOURCE_DIR = "/path/to/your/files"
-OUTPUT_DIR = "/path/to/output/tars"
-MAX_TAR_SIZE = 1 * 1024 * 1024 * 1024  # 1 GB
+# SOURCE_DIR = "/path/to/your/files"
+# OUTPUT_DIR = "/path/to/output/tars"
+# MAX_TAR_SIZE = 1 * 1024 * 1024 * 1024  # 1 GB
 
-# Ensure output directory exists
-os.makedirs(OUTPUT_DIR, exist_ok=True)
 
 def get_file_groups(source_dir):
     """Group files by base name before extension."""
@@ -56,9 +54,18 @@ def create_tarballs(chunks, output_dir):
 
 if __name__ == '__main__':
     # Main Execution
-    SOURCE_DIR = "/mnt/nextcloud/ISLGospels_processed"
-    OUTPUT_DIR = "/mnt/nextcloud/ISL_dataset_chunks"
+    # SOURCE_DIR = "/mnt/nextcloud/ISLGospels_processed"
+    # OUTPUT_DIR = "/mnt/nextcloud/ISL_dataset_chunks0"
+
+    SOURCE_DIR = "../../../ISLGospels_processed"
+    OUTPUT_DIR = "../../../ISLGospels_tar_chunks"
+    MAX_TAR_SIZE = 1 * 1024 * 1024 * 1024 # 1 GB
+
+    # Ensure output directory exists
+    os.makedirs(OUTPUT_DIR, exist_ok=True)
 
     grouped_files = get_file_groups(SOURCE_DIR)
+    print(f"Grouped files: {len(grouped_files)}")
     chunks = group_files_into_chunks(grouped_files, SOURCE_DIR, MAX_TAR_SIZE)
+    print(f"Created chunks: {len(chunks)}")
     create_tarballs(chunks, OUTPUT_DIR)
