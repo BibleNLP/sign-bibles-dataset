@@ -1,18 +1,20 @@
 #!/usr/bin/env python3
 import argparse
+import json
 import re
 from typing import Dict, List
 
+
 def load_vref_map(vref_path: str) -> Dict[str, int]:
-    """Build mapping from verse reference to index from vref.txt."""
-    with open(vref_path, encoding='utf-8') as f:
+    with open(vref_path, encoding="utf-8") as f:
         return {line.strip(): idx for idx, line in enumerate(f) if line.strip()}
+
 
 def parse_citation_string(citation: str, vref_map: Dict[str, int]) -> List[int]:
     all_indices = []
     current_book = None
     current_chapter = None
-    tokens = re.split(r';\s*', citation.strip())
+    tokens = re.split(r";\s*", citation.strip())
 
     for token in tokens:
         token = token.strip()
@@ -20,7 +22,7 @@ def parse_citation_string(citation: str, vref_map: Dict[str, int]) -> List[int]:
             continue
 
         # Match full chapter: "GEN 6"
-        m = re.fullmatch(r'([1-3]?[A-Z]+)\s+(\d+)', token)
+        m = re.fullmatch(r"([1-3]?[A-Z]+)\s+(\d+)", token)
         if m:
             book, chapter = m.groups()
             current_book = book
@@ -31,7 +33,7 @@ def parse_citation_string(citation: str, vref_map: Dict[str, int]) -> List[int]:
             continue
 
         # Match full book: "MRK"
-        m = re.fullmatch(r'([1-3]?[A-Z]+)', token)
+        m = re.fullmatch(r"([1-3]?[A-Z]+)", token)
         if m:
             book = m.group(1)
             current_book = book
@@ -41,8 +43,7 @@ def parse_citation_string(citation: str, vref_map: Dict[str, int]) -> List[int]:
 
         # Match cross-chapter range: "GEN 6:1 - 7:24"
         m = re.fullmatch(
-            r'([1-3]?[A-Z]+)?\s*(\d+:\d+)\s*-\s*([1-3]?[A-Z]+)?\s*(\d+:\d+)',
-            token
+            r"([1-3]?[A-Z]+)?\s*(\d+:\d+)\s*-\s*([1-3]?[A-Z]+)?\s*(\d+:\d+)", token
         )
         if m:
             book1, start, book2, end = m.groups()
@@ -64,7 +65,7 @@ def parse_citation_string(citation: str, vref_map: Dict[str, int]) -> List[int]:
         for part in parts:
             part = part.strip()
             # Match full "BOOK CH:VV-VV"
-            m = re.fullmatch(r'([1-3]?[A-Z]+)?\s*(\d+):(\d+(?:-\d+)?)', part)
+            m = re.fullmatch(r"([1-3]?[A-Z]+)?\s*(\d+):(\d+(?:-\d+)?)", part)
             if m:
                 maybe_book, ch, verse_range = m.groups()
                 if maybe_book:
@@ -73,8 +74,8 @@ def parse_citation_string(citation: str, vref_map: Dict[str, int]) -> List[int]:
                 if not current_book:
                     continue
 
-                if '-' in verse_range:
-                    start_v, end_v = map(int, verse_range.split('-'))
+                if "-" in verse_range:
+                    start_v, end_v = map(int, verse_range.split("-"))
                     verse_numbers = range(start_v, end_v + 1)
                 else:
                     verse_numbers = [int(verse_range)]
@@ -86,39 +87,47 @@ def parse_citation_string(citation: str, vref_map: Dict[str, int]) -> List[int]:
             else:
                 # Might be malformed or incomplete
                 continue
-
     return sorted(set(all_indices))
+
 
 def indices_to_verses(indices: list[int], vref_path: str) -> list[str]:
     """Given a list of indices, return the corresponding verse strings from vref.txt."""
-    with open(vref_path, encoding='utf-8') as f:
+    with open(vref_path, encoding="utf-8") as f:
         lines = [line.strip() for line in f if line.strip()]
     return [lines[i] for i in indices if 0 <= i < len(lines)]
 
 
-
 def main():
-    parser = argparse.ArgumentParser(description="Convert verse references to index list.")
+    parser = argparse.ArgumentParser(
+        description="Augment video JSON with eBible verse indices."
+    )
     parser.add_argument("vref_path", help="Path to vref.txt file")
-    parser.add_argument("input_path", help="Path to file with verse reference strings")
+    parser.add_argument("json_path", help="Path to input JSON file")
+    parser.add_argument("output_json", help="Path to write updated JSON")
     args = parser.parse_args()
 
     vref_map = load_vref_map(args.vref_path)
 
-    with open(args.input_path, encoding='utf-8') as f:
-        for line in f:
-            citation = line.strip()
+    with open(args.json_path, "r", encoding="utf-8") as f:
+        grouped_data = json.load(f)
+
+    updated_count = 0
+    for group in grouped_data:
+        for video in group.get("videos", []):
+            citation = video.get("bible_passage", "").strip()
             if citation:
                 indices = parse_citation_string(citation, vref_map)
-                verses = indices_to_verses(indices, args.vref_path)
-                print(f"{citation}\t: {len(indices)} indices, {len(verses)} verses")
-                # for index, verse in zip(indices, verses):
-                #     print(f"{index}, {verse}")
+                video["ebible_vref_indices"] = indices
+                updated_count += 1
+            else:
+                video["ebible_vref_indices"] = []
 
+    with open(args.output_json, "w", encoding="utf-8") as f:
+        json.dump(grouped_data, f, indent=2, ensure_ascii=False)
+
+    print(f"Updated {updated_count} video entries with verse indices.")
 
 
 if __name__ == "__main__":
     main()
-
-
-# python /opt/home/cleong/projects/semantic_and_visual_similarity/sign-bibles-dataset/dataprep/DBL-signbibles/DBL-sign/vref_lookup.py /opt/home/cleong/projects/semantic_and_visual_similarity/local_data/eBible/ebible/metadata/vref.txt /opt/home/cleong/projects/semantic_and_visual_similarity/sign-bibles-dataset/dataprep/DBL-signbibles/DBL-sign/bible_passages.txt
+# python /opt/home/cleong/projects/semantic_and_visual_similarity/sign-bibles-dataset/dataprep/DBL-signbibles/DBL-sign/vref_lookup.py /opt/home/cleong/projects/semantic_and_visual_similarity/local_data/eBible/ebible/metadata/vref.txt video_file_passages_grouped.json video_file_passages_grouped_with_ebible_vrefs.json
