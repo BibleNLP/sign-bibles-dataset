@@ -6,12 +6,15 @@ import json
 import sys
 import shutil
 from pathlib import Path
+import ffmpeg
 
 from nextcloud_connect import NextCloud_connection
 from ffmpeg_downsample import downsample_video_ondisk
 from mediapipe_trim import trim_off_storyboard
 from dwpose_processing import generate_mask_and_pose_video_files
 from bible_text_access import get_verses
+
+verse_john_pattern = re.compile(r"\d+(\-\d+)?\.MP4")
 
 def process_video(id, remote_path, nxt_cld_conn, output_path):
 	if output_path.endswith("/"):
@@ -32,33 +35,59 @@ def process_video(id, remote_path, nxt_cld_conn, output_path):
 		shutil.move(f"{id}_mask.mp4", f"{output_path}/{id}.mask.mp4")
 
 		parts = remote_path.split("/")
-		ref = f"{parts[1]} {parts[2].replace("Ch ", "")}"
-		verse = parts[-1].split(".")[0].split(" ")[1]
-		verse_parts = "-".join(verse.split("-")[:-1])
+
+		if remote_path.startswith("/John"):
+			ref = f"{parts[1]} {parts[2].replace("Ch-", "")}"
+			ver_match = re.search(verse_john_pattern, parts[-1])
+			if not ver_match:
+				raise Exception(f"Cant compose reference from:{parts}")
+			verse_parts = ver_match.group()
+		else:
+			ref = f"{parts[1]} {parts[2].replace("Ch ", "")}"
+			verse = parts[-1].split(".")[0].split(" ")[1]
+			verse_parts = "-".join(verse.split("-")[:-1])
+
 		ref = f"{ref}:{verse_parts}"
+
+		probe = ffmpeg.probe(main_path)
+		duration = float(probe['format']['duration'])
 
 		metadata = {"filename": f"{id}.mp4",
 					"pose":f"{id}.pose.mp4", 
 					"mask":f"{id}.pose.mp4",
 					"source": f"{ref} of https://www.youtube.com/@islv-holybible",
 					"license": "CC-BY-SA",
+					"language": {
+						"name": "Indian Sign Language",
+						"ISO639-3": "ins",
+						"BCP-47": "ins-IN"
+					},
 					"bible-ref": ref,
+					"duration": f"{duration} seconds",
+					"signer": "xxx",
 					"transcripts": [{
-								"text": get_verses(ref),
-								"language": "English",
-								"ISO 639-1": "en"
+								"text": get_verses(ref, "BSB"),
+								"language": {
+									"name": "English",
+									"ISO639-3": "eng",
+									"BCP-47": "eng-US"
+								},
+								"source": "Berean Standard Bible"
+								
 							}],
 					"glosses": [{
 								"text": [(0,0,"nil")],
-								"language": "English",
-								"ISO 639-1": "en"
+								"language": {
+									"name": "English",
+									"ISO639-3": "eng",
+									"BCP-47": "eng"
+								}
 
 								}]
 					}
-		# print(f"{metadata['bible-ref']} ---> {metadata['transcripts'][0]['text']}")
-		with open(f"{id}.json", "w") as f:
+		with open(f"{output_path}/{id}.json", "w") as f:
 			json.dump(metadata, f, indent=4)
-		shutil.move(f"{id}.json", f"{output_path}/{id}.json")
+		# shutil.move(f"{id}.json", f"{output_path}/{id}.json")
 		print(f'Processed {id}!!!!!!!!!!!!!!!!!!!!')
 	finally:
 		clear_space(f"{id}_large.mp4")
@@ -149,6 +178,7 @@ def main_nxtcld():
 	video_path = sys.argv[2]
 	output_path = sys.argv[3]
 
+	nxt_cld_conn = None
 	nxt_cld_conn = NextCloud_connection()
 	process_video(video_id, video_path, nxt_cld_conn, output_path)
 
