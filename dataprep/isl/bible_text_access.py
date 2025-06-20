@@ -2,20 +2,31 @@ import json
 import re
 
 
-bible_json = "./WEB_bible.json"
+bibles = { "ERV": "./ERV_bible.json", "BSB": "./BSB_bible.json", "WEB": "./WEB_bible.json"}
 
-with open(bible_json, "r", encoding='utf-8') as fp:
-	bible_dict = json.load(fp)
+def load_bible(bible_json):
+	with open(bible_json, "r", encoding='utf-8') as fp:
+		bible_dict = json.load(fp)
+	return bible_dict
+
+for bib in bibles:
+	path = bibles[bib]
+	bibles[bib] = load_bible(path)
+
 
 ref_pattern = re.compile(r"(\w+) (\d+):(.*)")
 verse_pattern1 = re.compile(r"(\d+)$")
 verse_pattern_range = re.compile(r"(\d+)-(\d+)")
 
-def get_verses(ref):
+def get_verses(ref, bible_name="WEB"):
+	bible_dict = bibles[bible_name]
 	match = re.match(ref_pattern, ref)
 	if match:
 		book = match.group(1)
-		buk = book_code_lookup[book]
+		if book in book_codes:
+			buk = book
+		else:
+			buk = book_code_lookup[book]
 		chap = match.group(2)
 		verses = match.group(3)
 		v_match = re.match(verse_pattern1, verses)
@@ -25,7 +36,7 @@ def get_verses(ref):
 		if v_match2:
 			start = v_match2.group(1)
 			end = v_match2.group(2)
-			v_list = range(int(start), int(end))
+			v_list = range(int(start), int(end)+1)
 			text = []
 			for v in v_list:
 				text.append(bible_dict[f"{buk} {chap}:{v}"])
@@ -41,5 +52,8 @@ book_code_lookup = {
 	"John" : "JHN"
 }
 
+book_codes = ["MAT", "MRK", "LUK", "JHN"]
+
 if __name__ == '__main__':
 	print(get_verses("Matthew 1:1-5"))
+	print(get_verses("LUK 3:16"))
