@@ -36,12 +36,14 @@ def process_video(id, remote_path, nxt_cld_conn, output_path):
 
 		parts = remote_path.split("/")
 
+		signer = "Signer_1"
 		if remote_path.startswith("/John"):
 			ref = f"{parts[1]} {parts[2].replace("Ch-", "")}"
 			ver_match = re.search(verse_john_pattern, parts[-1])
 			if not ver_match:
 				raise Exception(f"Cant compose reference from:{parts}")
 			verse_parts = ver_match.group()
+			signer = "Signer_2"
 		else:
 			ref = f"{parts[1]} {parts[2].replace("Ch ", "")}"
 			verse = parts[-1].split(".")[0].split(" ")[1]
@@ -54,8 +56,8 @@ def process_video(id, remote_path, nxt_cld_conn, output_path):
 
 		metadata = {"filename": f"{id}.mp4",
 					"pose":f"{id}.pose.mp4", 
-					"mask":f"{id}.pose.mp4",
-					"source": f"{ref} of https://www.youtube.com/@islv-holybible",
+					"mask":f"{id}.mask.mp4",
+					"source": "https://www.youtube.com/@islv-holybible",
 					"license": "CC-BY-SA",
 					"language": {
 						"name": "Indian Sign Language",
@@ -64,7 +66,7 @@ def process_video(id, remote_path, nxt_cld_conn, output_path):
 					},
 					"bible-ref": ref,
 					"duration": f"{duration} seconds",
-					"signer": "xxx",
+					"signer": signer,
 					"transcripts": [{
 								"text": get_verses(ref, "BSB"),
 								"language": {
@@ -87,14 +89,12 @@ def process_video(id, remote_path, nxt_cld_conn, output_path):
 					}
 		with open(f"{output_path}/{id}.json", "w") as f:
 			json.dump(metadata, f, indent=4)
-		# shutil.move(f"{id}.json", f"{output_path}/{id}.json")
 		print(f'Processed {id}!!!!!!!!!!!!!!!!!!!!')
 	finally:
 		clear_space(f"{id}_large.mp4")
 		clear_space(f"{id}.mp4")
 		clear_space(f"{id}_mask.mp4")
 		clear_space(f"{id}_pose.mp4")
-		clear_space(f"{id}.json")
 
 def clear_space(file_path):
 	if os.path.exists(file_path):
@@ -131,7 +131,7 @@ def process_video_onmount(id, orig_path, processed_path):
 
 		metadata = {"filename": f"{id}.mp4",
 					"pose":f"{id}.pose.mp4", 
-					"mask":f"{id}.pose.mp4",
+					"mask":f"{id}.mask.mp4",
 					"source": f"{ref} of https://www.youtube.com/@islv-holybible",
 					"license": "CC-BY-SA",
 					"bible-ref": ref,
@@ -179,7 +179,7 @@ def main_nxtcld():
 	output_path = sys.argv[3]
 
 	nxt_cld_conn = None
-	nxt_cld_conn = NextCloud_connection()
+	# nxt_cld_conn = NextCloud_connection()
 	process_video(video_id, video_path, nxt_cld_conn, output_path)
 
 
