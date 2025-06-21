@@ -95,6 +95,41 @@ def draw_roi_mask(mask, all_points, H, W):
     return mask
 
 
+def pose_estimate_v2(image):
+  oriImg = image.copy()
+  H, W, C = oriImg.shape
+  with torch.no_grad():
+      candidate, subset = pose_estimation(oriImg)
+      nums, keys, locs = candidate.shape
+      candidate[..., 0] /= float(W)
+      candidate[..., 1] /= float(H)
+      body = candidate[:,:18].copy()
+      body = body.reshape(nums*18, locs)
+      score = subset[:,:18]
+      for i in range(len(score)):
+          for j in range(len(score[i])):
+              if score[i][j] > 0.3:
+                  score[i][j] = int(18*i+j)
+              else:
+                  score[i][j] = -1
+
+      un_visible = subset<0.3
+      candidate[un_visible] = -1
+
+
+      foot = candidate[:,18:24]
+
+      faces = candidate[:,24:92]
+
+      hands = candidate[:,92:113]
+      hands = np.vstack([hands, candidate[:,113:]])
+
+      bodies = dict(candidate=body, subset=score)
+      pose = dict(bodies=bodies, hands=hands, faces=faces)
+
+      return draw_pose(pose, H, W, hands_scores=[subset[:,92:113], subset[:, 113:]]), candidate
+
+
 def pose_estimate(image):
   oriImg = image.copy()
   H, W, C = oriImg.shape
@@ -213,4 +248,39 @@ def generate_mask_and_pose_video_files(id):
       cap.release()
     except Exception as exce:
         raise Exception("Error in pose and mask generation using dwpose")
+
+def generate_pose_files_v2(id):
+    try:
+      temp_file_pose =f"./{id}_pose-animation.mp4"
+
+      cap = cv2.VideoCapture(f"./{id}.mp4")
+      width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+      height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+      fps = int(cap.get(cv2.CAP_PROP_FPS))
+      cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
+
+      # print(f"about to trim! Width: {width}, Height: {height}, FPS: {fps}")
+
+      fourcc="mp4v"
+      fourcc_code = cv2.VideoWriter_fourcc(*fourcc)  # Codec (e.g., 'mp4v', 'XVID')
+      video_writer2 = cv2.VideoWriter(temp_file_pose, fourcc_code, fps, (width, height))
+      poses = []
+
+      while True:
+          ret, frame = cap.read()
+          if not ret:
+              break
+          image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+          image.flags.writeable = False
+
+          skeleton, candidate = pose_estimate_v2(image)
+
+          poses.append(candidate)
+          # Write frame to video
+          video_writer2.write(skeleton)
+      video_writer2.release()
+      np.savez_compressed(f"./{id}_pose-dwpose.npz", frames=np.array(poses, dtype=object))
+      cap.release()
+    except Exception as exce:
+        raise Exception("Error in pose video and array generation using dwpose") from exce
 
