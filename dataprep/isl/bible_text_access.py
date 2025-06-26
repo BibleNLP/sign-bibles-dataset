@@ -39,7 +39,11 @@ def get_verses(ref, bible_name="WEB"):
 			v_list = range(int(start), int(end)+1)
 			text = []
 			for v in v_list:
-				text.append(bible_dict[f"{buk} {chap}:{v}"])
+				try:
+					text.append(bible_dict[f"{buk} {chap}:{v}"])
+				except Exception as exce:
+					if f"{buk} {chap}:{v}" not in known_missing_verses[bible_name]:
+						raise Exception(f"Cannot find: {buk} {chap}:{v}") from exce
 			return "\n".join(text)
 		raise Exception(f"Cannot process verse part of the input reference:{verses}")
 	raise Exception(f"Cannot process input reference pattern:{ref}")
@@ -53,6 +57,35 @@ book_code_lookup = {
 }
 
 book_codes = ["MAT", "MRK", "LUK", "JHN"]
+
+known_missing_verses = {
+	"BSB": [
+		"MAT 17:21",
+		"MAT 18:11",
+		"MAT 23:14",
+		"MRK 7:16",
+		"MRK 9:44",
+		"MRK 9:46",
+		"MRK 11:26",
+		"MRK 15:28",
+		"LUK 17:36",
+		"LUK 23:17",
+		"JHN 5:4"
+	],
+	"ERV": [
+		"MAT 17:21",
+		"MAT 18:11",
+		"MAT 23:14",
+		"MRK 7:16",
+		"MRK 9:44",
+		"MRK 9:46",
+		"MRK 11:26",
+		"MRK 15:28",
+		"LUK 17:36",
+		"LUK 23:17",
+		"JHN 5:4"
+	]
+}
 
 if __name__ == '__main__':
 	print(get_verses("Matthew 1:1-5"))
