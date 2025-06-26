@@ -23,14 +23,14 @@ def process_video(id, remote_path, nxt_cld_conn, output_path):
 		output_path = output_path[:-1]
 	main_path = f"{output_path}/{id}.mp4"
 	try:
-		# nxt_cld_conn.download_file(remote_path, f"{id}_large.mp4")
+		nxt_cld_conn.download_file(remote_path, f"{id}_large.mp4")
 
-		# downsample_video_ondisk(f"{id}_large.mp4", f"{id}.mp4")
+		downsample_video_ondisk(f"{id}_large.mp4", f"{id}.mp4")
 		shutil.copy(main_path, f"./{id}.mp4")  
 
-		# trimmed_stream = trim_off_storyboard(None, id)
-		# if not trimmed_stream:
-		# 	raise Exception("Processing with mediapipe failed")
+		trimmed_stream = trim_off_storyboard(None, id)
+		if not trimmed_stream:
+			raise Exception("Processing with mediapipe failed")
 		video2poseformat(id) #  .pose format using mediapipe
 		generate_pose_files_v2(id) # mp4, and npz usging dwpose
 
@@ -190,7 +190,7 @@ def main_nxtcld():
 	output_path = sys.argv[3]
 
 	nxt_cld_conn = None
-	# nxt_cld_conn = NextCloud_connection()
+	nxt_cld_conn = NextCloud_connection()
 	process_video(video_id, video_path, nxt_cld_conn, output_path)
 
 
@@ -199,6 +199,6 @@ if __name__ == "__main__":
 	# process_video("2", "/Matthew/Ch 1/10 17-0D5A1069.MP4", None, "../../../Matthew_processed")
 	# main()
 
-	main_nxtclpytd()
+	main_nxtcld()
 
 
