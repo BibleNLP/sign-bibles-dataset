@@ -274,12 +274,17 @@ def generate_pose_files_v2(id):
           image.flags.writeable = False
 
           skeleton, candidate = pose_estimate_v2(image)
-
+          if len(candidate) < 1:
+            candidate = [np.full(134, np.nan, dtype=np.float64)]
+          elif len(candidate > 1):
+            candidate = [candidate[0]]
+          assert len(candidate) == 1, f"{len(candidate)=}"
+          assert len(candidate[0]) == 134, f"{len(candidate[0])=}"
           poses.append(candidate)
           # Write frame to video
           video_writer2.write(skeleton)
       video_writer2.release()
-      np.savez_compressed(f"./{id}_pose-dwpose.npz", frames=np.array(poses, dtype=object))
+      np.savez_compressed(f"./{id}_pose-dwpose.npz", frames=np.array(poses, dtype=np.float64))
       cap.release()
     except Exception as exce:
         raise Exception("Error in pose video and array generation using dwpose") from exce
