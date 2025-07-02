@@ -79,7 +79,7 @@ def process_video_v2(id, input_path, output_path):
 								"language": {
 									"name": "English",
 									"ISO639-3": "eng",
-									"BCP-47": "eng-US"
+									"BCP-47": "en-US"
 								},
 								"source": "Berean Standard Bible",
 							}],
@@ -88,7 +88,7 @@ def process_video_v2(id, input_path, output_path):
 								"language": {
 									"name": "English",
 									"ISO639-3": "eng",
-									"BCP-47": "eng"
+									"BCP-47": "en"
 								}
 
 								}]

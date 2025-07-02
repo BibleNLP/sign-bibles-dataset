@@ -82,7 +82,7 @@ def process_video(id, remote_path, nxt_cld_conn, output_path):
 								"language": {
 									"name": "English",
 									"ISO639-3": "eng",
-									"BCP-47": "eng-US"
+									"BCP-47": "en-US"
 								},
 								"source": "Berean Standard Bible",
 							}],
@@ -91,7 +91,7 @@ def process_video(id, remote_path, nxt_cld_conn, output_path):
 								"language": {
 									"name": "English",
 									"ISO639-3": "eng",
-									"BCP-47": "eng"
+									"BCP-47": "en"
 								}
 
 								}]
