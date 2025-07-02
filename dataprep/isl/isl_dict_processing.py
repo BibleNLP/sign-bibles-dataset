@@ -150,34 +150,6 @@ def get_cloud_files(s3_conn):
 	return original_files
 
 
-def main():
-	s3_conn = S3_connection()
-
-	original_files = get_cloud_files(s3_conn)
-
-
-	# # Run with ThreadPoolExecutor
-	# with ThreadPoolExecutor(max_workers=10) as executor:
-	#     executor.map(process_video, original_files[1296:], range(1296, len(original_files), s3_conn))
-
-	for i in range(0,10):
-		file_key = original_files[i]
-		# if i < 650:
-		#   continue
-		print(i)
-		process_video(file_key, i, s3_conn)
-
-def main_v2():
-	if len(sys.argv) != 4:
-		print("Usage: python process_video_script.py <path> <id>")
-		sys.exit(1)
-
-	video_id = int(sys.argv[1])
-	video_path = sys.argv[2]
-	output_path = sys.argv[3]
-
-	process_video_v2(video_id, video_path, output_path)
-
 def main_seqential(input_list, output_path):
 	inp_args = []
 	with open(input_list, 'r', encoding='utf-8') as fp:
@@ -186,13 +158,11 @@ def main_seqential(input_list, output_path):
 						for line in inp_lines]
 
 	now = datetime.datetime.now()
-	success_log = open("logs/success.log", "w", encoding='utf-8')
-	success_log.write(f"-------------start{now:%Y-%m-%d %H:%M:%S}----------\n")
-	success_log.close()
+	with open("logs/success.log", "w", encoding='utf-8') as success_log:
+		success_log.write(f"-------------start {now:%Y-%m-%d %H:%M:%S}----------\n")
 
-	fail_log = open("logs/fail.log", "w", encoding='utf-8')
-	fail_log.write(f"-------------start{now:%Y-%m-%d %H:%M:%S}----------\n")
-	fail_log.close()
+	with open("logs/fail.log", "w", encoding='utf-8') as fail_log:
+		fail_log.write(f"-------------start {now:%Y-%m-%d %H:%M:%S}----------\n")
 
 	for args in inp_args:
 		try:
@@ -204,9 +174,11 @@ def main_seqential(input_list, output_path):
 			with open("logs/fail.log", "a", encoding='utf-8') as fail_log:
 				fail_log.write(f"{args[0]}\t{args[1]}")
 
-if __name__ == '__main__':
-	# main()
+	with open("logs/success.log", "a", encoding='utf-8') as success_log:
+		now = datetime.datetime.now()
+		success_log.write(f"-------------end {now:%Y-%m-%d %H:%M:%S}----------\n")
 
-	# main_v2()
+
+if __name__ == '__main__':
 
 	main_seqential("dict_retry.txt", "../../../Dictionary_processed2/")
