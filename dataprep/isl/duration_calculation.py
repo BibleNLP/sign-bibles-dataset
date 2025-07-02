@@ -32,7 +32,8 @@ def main():
 
     json_files = [
         json_file 
-        for directory in args.directories 
+        for directory in args.directories
+        for json_file in Path(directory).rglob("*.json") 
      ]
     print(f'Total number of videos : {len(json_files)}')
     total_seconds = get_total_duration(json_files)
