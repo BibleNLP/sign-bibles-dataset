@@ -1,17 +1,6 @@
-import os
 import json
 import argparse
 from pathlib import Path
-
-def find_json_files(directories):
-    """Recursively find all JSON files in the given directories."""
-    json_files = []
-    for directory in directories:
-        for root, _, files in os.walk(directory):
-            for file in files:
-                if file.endswith('.json'):
-                    json_files.append(os.path.join(root, file))
-    return json_files
 
 def get_total_duration(json_files):
     """Sum the duration field from all JSON files."""
@@ -41,8 +30,11 @@ def main():
     args = parser.parse_args()
     print(f"{args.directories=}")
 
-    json_files = find_json_files(args.directories)
-    # print(f'{json_files=}')
+    json_files = [
+        json_file 
+        for directory in args.directories 
+     ]
+    print(f'Total number of videos : {len(json_files)}')
     total_seconds = get_total_duration(json_files)
     print(f"{total_seconds=}")
     h, m, s = format_duration(total_seconds)
