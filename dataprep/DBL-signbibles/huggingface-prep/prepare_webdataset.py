@@ -7,63 +7,29 @@ This script:
 3. Packages everything into WebDataset format
 """
 
+from pathlib import Path
 import os
 import sys
 import json
 import argparse
-import subprocess
 import shutil
 import cv2
 import requests
 import time
 import importlib.util
-import threading
 import tarfile
+import random
 import io
-import glob
 from processing_logger import ProcessingLogger
 
 # Initialize the logger with the correct path
-logger = ProcessingLogger(log_file_path="../output/run_log.txt")
+logger = ProcessingLogger(log_file_path="./output/run_log.txt")
 # Clear the log at the start of the process
 logger.clear_log()
 
 # Add command line info to the log
 logger.log_info(f"Command: {' '.join(sys.argv)}")
 
-# Add gui import if available
-gui = False
-try:
-    from progress_gui import start_gui, update_gui
-
-    gui = True
-except ImportError:
-    # Fallback if progress_gui is not available
-    print("Warning: progress_gui module not found. Using console output instead.")
-
-    def start_gui(*args, **kwargs):
-        return None
-
-    def update_gui(*args, **kwargs):
-        pass
-
-
-try:
-    from gui_utils import update_progress
-
-    gui = True
-except ImportError:
-    # Fallback if gui_utils is not available
-    def update_progress(*args, **kwargs):
-        # Extract the message if available and print it
-        if len(args) > 1 and args[1]:
-            print(args[1])
-        elif kwargs.get("message"):
-            print(kwargs.get("message"))
-
-
-# Global GUI variables
-root = None
 
 # Add parent directory to path for importing from other modules
 parent_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -125,17 +91,6 @@ def import_module_from_file(module_name, file_path):
         return None
 
 
-# Try to import the refine_mask_v2 module
-refine_mask_v2_path = os.path.join(sign_seg_dir, "refine_mask_v2.py")
-refine_mask_v2 = import_module_from_file("refine_mask_v2", refine_mask_v2_path)
-if refine_mask_v2:
-    print("Successfully imported refine_mask_v2 module")
-else:
-    print(
-        "Warning: Failed to import refine_mask_v2 module. Advanced segmentation will not be available."
-    )
-
-
 class DBLSignDownloader:
     """Class to handle downloading videos from DBL-sign."""
 
@@ -152,12 +107,6 @@ class DBLSignDownloader:
     def generate_fresh_manifest(self):
         """Generate a fresh manifest using the imported manifest generator functions."""
         print("Generating fresh manifest...")
-
-        # Update GUI progress if available
-        if gui:
-            update_progress(
-                "Generating manifest", "Preparing to generate fresh manifest...", 10, 0
-            )
 
         # Response data containing the list of sign language projects (hardcoded in the original script)
         response_data = {
@@ -333,25 +282,11 @@ class DBLSignDownloader:
             ]
         }
 
-        # Update GUI progress if available
-        if gui:
-            update_progress(
-                "Generating manifest", "Creating manifest structure...", 10, 30
-            )
-
         # Create manifest using the imported function
         manifest = manifest_generator.create_manifest(response_data)
 
-        # Update GUI progress if available
-        if gui:
-            update_progress("Generating manifest", "Saving manifest to disk...", 10, 70)
-
         # Save manifest using the imported function
         manifest_generator.save_manifest(manifest, self.manifest_path)
-
-        # Update GUI progress if available
-        if gui:
-            update_progress("Generating manifest", "Loading manifest data...", 10, 90)
 
         print("Fresh manifest generated successfully.")
 
@@ -359,50 +294,24 @@ class DBLSignDownloader:
         with open(self.manifest_path, "r", encoding="utf-8") as f:
             self.manifest = json.load(f)
 
-        # Update GUI progress if available
-        if gui:
-            update_progress(
-                "Generating manifest", "Manifest generation complete", 10, 100
-            )
-
         return self.manifest
 
     def load_manifest(self):
         """Load the manifest file."""
         if not os.path.exists(self.manifest_path):
-            if gui:
-                update_progress(
-                    "Generating manifest",
-                    "Manifest file not found. Generating a fresh one...",
-                    10,
-                    0,
-                )
             print("Manifest file not found. Generating a fresh one...")
             return self.generate_fresh_manifest()
 
         # Check if manifest is older than 24 hours
         manifest_age = time.time() - os.path.getmtime(self.manifest_path)
         if manifest_age > 86400:  # 24 hours in seconds
-            if gui:
-                update_progress(
-                    "Generating manifest",
-                    "Manifest is older than 24 hours. Generating a fresh one...",
-                    10,
-                    0,
-                )
             print("Manifest is older than 24 hours. Generating a fresh one...")
             return self.generate_fresh_manifest()
 
-        if gui:
-            update_progress(
-                "Loading manifest", "Reading existing manifest file...", 10, 50
-            )
         print("Loading existing manifest...")
         with open(self.manifest_path, "r", encoding="utf-8") as f:
             self.manifest = json.load(f)
 
-        if gui:
-            update_progress("Loading manifest", "Manifest loaded successfully", 10, 100)
         return self.manifest
 
     def refresh_manifest(self):
@@ -427,26 +336,11 @@ class DBLSignDownloader:
         if "languages" not in self.manifest:
             raise ValueError("Invalid manifest structure: 'languages' key not found")
 
-        # Update GUI progress if available
-        if gui:
-            update_progress(
-                "Filtering projects", "Finding projects that match criteria...", 10, 0
-            )
-
         # Filter projects based on criteria
         filtered_projects = []
         total_languages = len(self.manifest["languages"])
+        print(f"Total Languages in Manifest: {total_languages}")
         for i, (lang_code, projects) in enumerate(self.manifest["languages"].items()):
-            # Update GUI progress during filtering
-            if gui:
-                progress = (i / total_languages) * 50
-                update_progress(
-                    "Filtering projects",
-                    f"Checking language: {lang_code}",
-                    10,
-                    progress,
-                )
-
             if language_code and lang_code != language_code:
                 continue
 
@@ -470,18 +364,8 @@ class DBLSignDownloader:
             if project_name:
                 filter_criteria += f", project_name={project_name}"
             error_msg = f"No projects found matching the criteria ({filter_criteria})"
-            if gui:
-                update_progress("Error", error_msg, 10, 100)
-            raise ValueError(error_msg)
 
-        # Update GUI progress if available
-        if gui:
-            update_progress(
-                "Projects found",
-                f"Found {len(filtered_projects)} projects matching the criteria",
-                10,
-                100,
-            )
+            raise ValueError(error_msg)
 
         # Download videos
         downloaded_videos = []
@@ -493,18 +377,8 @@ class DBLSignDownloader:
             if videos_downloaded >= num_videos:
                 break
 
-            # Update GUI progress for project preparation
-            if gui:
-                update_progress(
-                    "Preparing project",
-                    f"Setting up project {i + 1}/{len(filtered_projects)}: {proj_name}",
-                    20,
-                    (i / len(filtered_projects)) * 100,
-                )
-
-            project_dir = os.path.join(
-                self.output_dir, "downloads", lang_code, proj_name
-            )
+            project_dir = os.path.join(self.output_dir, lang_code, proj_name)
+            print(f"Project Dir: {project_dir}")
             os.makedirs(project_dir, exist_ok=True)
 
             # Get metadata for this project
@@ -534,23 +408,10 @@ class DBLSignDownloader:
                 filepath = os.path.join(project_dir, filename)
                 url = file_info["download_url"]
 
-                # Update GUI progress for file processing
-                if gui:
-                    file_progress = (j / len(mp4_files)) * 100
-                    update_progress(
-                        "Processing files",
-                        f"Processing file {j + 1}/{len(mp4_files)}: {filename}",
-                        20,
-                        file_progress,
-                    )
-
                 # Skip if file already exists
                 if os.path.exists(filepath) and os.path.getsize(filepath) > 0:
                     print(f"File already exists: {filepath}")
-                    if gui:
-                        update_progress(
-                            None, f"File already exists: {filename}", None, 100
-                        )
+
                     downloaded_videos.append({"path": filepath, "metadata": metadata})
                     videos_downloaded += 1
                     continue
@@ -559,17 +420,10 @@ class DBLSignDownloader:
                 print(f"Downloading {url} to {filepath}")
 
                 try:
-                    # Update progress if GUI is active
-                    if gui:
-                        update_progress(
-                            "Downloading video", f"Downloading {filename}", 30, 0
-                        )
-
                     response = requests.get(url, stream=True)
                     response.raise_for_status()
 
                     # Show progress bar
-                    file_size = int(response.headers.get("content-length", 0))
                     downloaded_size = 0
                     block_size = 8192
 
@@ -579,45 +433,21 @@ class DBLSignDownloader:
                                 f.write(chunk)
                                 downloaded_size += len(chunk)
 
-                                # Update download progress if GUI is active
-                                if gui and file_size > 0:
-                                    download_progress = (
-                                        downloaded_size / file_size
-                                    ) * 100
-                                    update_progress(
-                                        "Downloading video",
-                                        f"Downloading {filename}: {download_progress:.1f}%",
-                                        30,
-                                        download_progress,
-                                    )
-
                     # Validate MP4
-                    if gui:
-                        update_progress(
-                            "Validating video", f"Validating {filename}", 30, 0
-                        )
 
                     try:
                         cap = cv2.VideoCapture(filepath)
                         if not cap.isOpened():
                             error_msg = f"Warning: Could not open downloaded file as video: {filepath}"
                             print(error_msg)
-                            if gui:
-                                update_progress("Error", error_msg, 30, 100)
+
                             continue
                         cap.release()
-                        if gui:
-                            update_progress(
-                                "Validating video",
-                                f"Successfully validated {filename}",
-                                30,
-                                100,
-                            )
+
                     except Exception as e:
                         error_msg = f"Error validating video: {e}"
                         print(error_msg)
-                        if gui:
-                            update_progress("Error", error_msg, 30, 100)
+
                         continue
 
                     downloaded_videos.append({"path": filepath, "metadata": metadata})
@@ -626,14 +456,6 @@ class DBLSignDownloader:
                 except Exception as e:
                     error_msg = f"Error downloading {url}: {e}"
                     print(error_msg)
-                    # If GUI is active, log the error
-                    if gui:
-                        update_progress("Error", error_msg, 30, 100)
-
-        if gui:
-            update_progress(
-                "Download complete", f"Downloaded {videos_downloaded} videos", 30, 100
-            )
 
         print(f"Downloaded {videos_downloaded} videos")
         return downloaded_videos
@@ -670,8 +492,6 @@ class SignSegmentationProcessor:
         # Verify required script files exist
         required_scripts = {
             "segment_video.py": None,
-            "video_to_pose_mask.py": None,
-            "refine_mask_v2.py": None,
         }
 
         for script in required_scripts:
@@ -692,20 +512,6 @@ class SignSegmentationProcessor:
         except Exception as e:
             print(f"Error importing segment_video module: {str(e)}")
             self.segment_video = None
-
-        try:
-            self.video_to_pose_mask = import_module_from_file(
-                "video_to_pose_mask",
-                required_scripts["video_to_pose_mask.py"]
-                or os.path.join(self.sign_seg_dir, "video_to_pose_mask.py"),
-            )
-            print("Successfully imported video_to_pose_mask module")
-        except Exception as e:
-            print(f"Error importing video_to_pose_mask module: {str(e)}")
-            self.video_to_pose_mask = None
-
-        # Store reference to the refine_mask_v2 module
-        self.refine_mask_v2 = refine_mask_v2
 
     def process_video(self, video_path, metadata):
         """
@@ -777,89 +583,69 @@ class SignSegmentationProcessor:
             os.path.dirname(video_path), "..", "segments"
         )
         os.makedirs(segments_output_dir, exist_ok=True)
-        print(f"Created segments directory: {segments_output_dir}")
+        print(f"Created segments directory: {Path(segments_output_dir).resolve()}")
 
         # Verify segments directory exists
         if not os.path.exists(segments_output_dir):
             print(f"Error: Failed to create segments directory: {segments_output_dir}")
-            # Try an alternative path
-            alt_segments_dir = os.path.join(os.path.dirname(video_path), "segments")
-            os.makedirs(alt_segments_dir, exist_ok=True)
-            if os.path.exists(alt_segments_dir):
-                print(f"Using alternative segments directory: {alt_segments_dir}")
-                segments_output_dir = alt_segments_dir
-            else:
-                print(
-                    f"Error: Failed to create alternative segments directory: {alt_segments_dir}"
-                )
-                return []
 
         print(f"Segments will be stored in: {segments_output_dir}")
 
         # Process the video with sign-segmentation
-        if gui:
-            update_progress("Processing video", f"Segmenting video {video_path}", 30, 0)
-        else:
-            print(f"Segmenting video {video_path}")
 
+        print(f"Segmenting video {video_path}")
+
+        # Call the process_video function from segment_video module
+        print(f"Calling segment_video.process_video with {video_path}")
+        result = self.segment_video.process_video(video_path)
+        print(f"Segmentation result: {result}")
+        exit()
+
+        # Check if any segments were created
         try:
-            # Call the process_video function from segment_video module
-            print(f"Calling segment_video.process_video with {video_path}")
-            result = self.segment_video.process_video(video_path)
-            print(f"Segmentation result: {result}")
+            segment_files = [
+                f
+                for f in os.listdir(segments_output_dir)
+                if f.endswith(".mp4") and video_name in f
+            ]
+            print(f"Found {len(segment_files)} segments in {segments_output_dir}")
 
-            # Check if any segments were created
-            try:
-                segment_files = [
-                    f
-                    for f in os.listdir(segments_output_dir)
-                    if f.endswith(".mp4") and video_name in f
-                ]
-                print(f"Found {len(segment_files)} segments in {segments_output_dir}")
-
-                # Try alternative locations if no segments found
-                if not segment_files:
-                    alt_dirs = [
-                        os.path.join(os.path.dirname(video_path), "segments"),
-                        os.path.join(self.output_dir, "segments"),
-                        video_output_dir,
-                    ]
-                    for alt_dir in alt_dirs:
-                        if os.path.exists(alt_dir):
-                            try:
-                                alt_segment_files = [
-                                    f
-                                    for f in os.listdir(alt_dir)
-                                    if f.endswith(".mp4") and video_name in f
-                                ]
-                                if alt_segment_files:
-                                    print(
-                                        f"Found {len(alt_segment_files)} segments in alternative directory: {alt_dir}"
-                                    )
-                                    segments_output_dir = alt_dir
-                                    segment_files = alt_segment_files
-                                    break
-                            except Exception as e:
-                                print(
-                                    f"Error checking for segments in {alt_dir}: {str(e)}"
-                                )
-            except Exception as e:
-                print(f"Error checking for segments after processing: {str(e)}")
-                segment_files = []
-
+            # Try alternative locations if no segments found
             if not segment_files:
-                print(f"Warning: No segments were created for {video_path}")
-                return []
-
-            # Process the segments
-            return self._process_existing_segments(
-                segments_output_dir, segment_files, video_name, metadata
-            )
+                alt_dirs = [
+                    os.path.join(os.path.dirname(video_path), "segments"),
+                    os.path.join(self.output_dir, "segments"),
+                    video_output_dir,
+                ]
+                for alt_dir in alt_dirs:
+                    if os.path.exists(alt_dir):
+                        try:
+                            alt_segment_files = [
+                                f
+                                for f in os.listdir(alt_dir)
+                                if f.endswith(".mp4") and video_name in f
+                            ]
+                            if alt_segment_files:
+                                print(
+                                    f"Found {len(alt_segment_files)} segments in alternative directory: {alt_dir}"
+                                )
+                                segments_output_dir = alt_dir
+                                segment_files = alt_segment_files
+                                break
+                        except Exception as e:
+                            print(f"Error checking for segments in {alt_dir}: {str(e)}")
         except Exception as e:
-            print(f"Error segmenting video {video_path}: {str(e)}")
-            if gui:
-                update_progress(None, f"Error segmenting video: {str(e)}", None, 100)
+            print(f"Error checking for segments after processing: {str(e)}")
+            segment_files = []
+
+        if not segment_files:
+            print(f"Warning: No segments were created for {video_path}")
             return []
+
+        # Process the segments
+        return self._process_existing_segments(
+            segments_output_dir, segment_files, video_name, metadata
+        )
 
     def _process_existing_segments(
         self, segments_dir, segment_files, video_name, metadata
@@ -906,12 +692,6 @@ class SignSegmentationProcessor:
                 )
                 continue
 
-            # Create paths for pose, mask, and segmentation files
-            pose_path = os.path.join(segments_dir, f"{segment_name}.pose.mp4")
-            mask_path = os.path.join(segments_dir, f"{segment_name}.mask.mp4")
-            segmentation_path = os.path.join(
-                segments_dir, f"{segment_name}.segmentation.mp4"
-            )
             original_path = os.path.join(segments_dir, f"{segment_name}.original.mp4")
 
             # Create a copy of the original segment file if it doesn't exist
@@ -922,138 +702,8 @@ class SignSegmentationProcessor:
                     segment_name,
                 )
 
-            # Generate pose visualization if it doesn't exist
-            if not os.path.exists(pose_path):
-                try:
-                    self._generate_pose_visualization(original_path, pose_path)
-                    logger.log_info(
-                        f"Generated pose visualization: {pose_path}", segment_name
-                    )
-                except Exception as e:
-                    logger.log_error(
-                        "Failed to generate pose visualization", segment_name, e
-                    )
-                    # Don't continue if pose generation fails
-                    continue
-
-            # Generate mask if it doesn't exist
-            if not os.path.exists(mask_path):
-                try:
-                    self._generate_mask(original_path, mask_path)
-                    logger.log_info(f"Generated mask: {mask_path}", segment_name)
-                except Exception as e:
-                    logger.log_error("Failed to generate mask", segment_name, e)
-                    # Don't continue if mask generation fails
-                    continue
-
-            # Generate segmentation if it doesn't exist
-            segmentation_created = False
-            if not os.path.exists(segmentation_path):
-                # Use refine_mask_v2 if available, otherwise fall back to simple overlay
-                if self.refine_mask_v2:
-                    try:
-                        print(
-                            f"Using advanced segmentation with YOLOv11 for segment {segment_name}"
-                        )
-                        logger.log_info(
-                            "Attempting advanced segmentation with YOLOv11",
-                            segment_name,
-                        )
-
-                        # Create a temporary directory for the output
-                        temp_output_dir = os.path.join(segments_dir, "temp_seg")
-                        os.makedirs(temp_output_dir, exist_ok=True)
-
-                        try:
-                            # Process the video using refine_mask_v2
-                            success = refine_mask_v2.process_video(
-                                original_path, temp_output_dir
-                            )
-                        except OSError as ose:
-                            # Handle the specific OSError: Invalid argument error that occurs with ffmpeg
-                            if "[Errno 22] Invalid argument" in str(ose):
-                                logger.log_ffmpeg_error(
-                                    segment_name,
-                                    "FFmpeg pipe write error when processing mask",
-                                    ose,
-                                )
-                                success = False
-                            else:
-                                # Re-raise other OSErrors
-                                raise
-                        except Exception as e:
-                            # Handle any other exceptions that might occur during processing
-                            logger.log_error(
-                                f"Advanced segmentation failed with error: {str(e)}",
-                                segment_name,
-                                e,
-                            )
-                            success = False
-
-                        if success:
-                            # Find the output file
-                            output_files = glob.glob(
-                                os.path.join(temp_output_dir, "*.mp4")
-                            )
-                            if output_files:
-                                # Move the first output file to the segmentation path
-                                shutil.move(output_files[0], segmentation_path)
-                                # Clean up temporary directory
-                                shutil.rmtree(temp_output_dir, ignore_errors=True)
-                                segmentation_created = True
-                                logger.log_segmentation_success(
-                                    segment_name, "YOLOv11", segmentation_path
-                                )
-                            else:
-                                logger.log_error(
-                                    "No output files found in temporary directory",
-                                    segment_name,
-                                )
-                        else:
-                            logger.log_error(
-                                "Advanced segmentation failed", segment_name
-                            )
-                    except Exception as e:
-                        logger.log_segmentation_error(
-                            segment_name, "YOLOv11", "Advanced segmentation failed", e
-                        )
-                        # Clean up temporary directory if it exists
-                        if os.path.exists(temp_output_dir):
-                            shutil.rmtree(temp_output_dir, ignore_errors=True)
-
-                # Fall back to simple overlay if advanced segmentation failed or is not available
-                if not segmentation_created:
-                    try:
-                        logger.log_info(
-                            "Falling back to simple overlay segmentation", segment_name
-                        )
-                        self._generate_simple_segmentation(
-                            original_path, mask_path, segmentation_path
-                        )
-                        segmentation_created = True
-                        logger.log_segmentation_success(
-                            segment_name, "simple overlay", segmentation_path
-                        )
-                    except Exception as e:
-                        logger.log_segmentation_error(
-                            segment_name,
-                            "simple overlay",
-                            "Simple segmentation failed",
-                            e,
-                        )
-            else:
-                segmentation_created = True
-                logger.log_info(
-                    f"Segmentation file already exists: {segmentation_path}",
-                    segment_name,
-                )
-
             # Only add to segment_info if all files were created successfully
-            if (
-                os.path.exists(pose_path)
-                and os.path.exists(mask_path)
-                and segmentation_created
-            ):
+            if True:
                 segment_info = {
                     "segment_name": segment_name,
                     "original": original_path,
@@ -1064,42 +714,12 @@ class SignSegmentationProcessor:
                         "segment_count": len(filtered_segment_files),
                         "segment_name": segment_name,
                         "video_name": video_name,
-                        "has_pose": os.path.exists(pose_path),
-                        "has_mask": os.path.exists(mask_path),
-                        "has_segmentation": os.path.exists(segmentation_path)
-                        if segmentation_path
-                        else False,
                     },
                 }
-
-                # Add pose, mask, and segmentation paths if they exist
-                if os.path.exists(pose_path):
-                    segment_info["pose"] = pose_path
-                    segment_info["segment_metadata"]["pose"] = os.path.basename(
-                        pose_path
-                    )
-
-                if os.path.exists(mask_path):
-                    segment_info["mask"] = mask_path
-                    segment_info["segment_metadata"]["mask"] = os.path.basename(
-                        mask_path
-                    )
-
-                if segmentation_path and os.path.exists(segmentation_path):
-                    segment_info["segmentation"] = segmentation_path
-                    segment_info["segment_metadata"]["segmentation"] = os.path.basename(
-                        segmentation_path
-                    )
 
                 segments_info.append(segment_info)
             else:
                 missing_files = []
-                if not os.path.exists(pose_path):
-                    missing_files.append("pose")
-                if not os.path.exists(mask_path):
-                    missing_files.append("mask")
-                if not segmentation_created:
-                    missing_files.append("segmentation")
 
                 logger.log_warning(
                     f"Skipping segment due to missing files: {', '.join(missing_files)}",
@@ -1108,132 +728,6 @@ class SignSegmentationProcessor:
 
         print(f"Successfully processed {len(segments_info)} pre-existing segments")
         return segments_info
-
-    def _generate_pose_visualization(self, input_path, output_path):
-        """Generate pose visualization for a video segment.
-
-        Args:
-            input_path (str): Path to the input video
-            output_path (str): Path to save the pose visualization
-
-        Returns:
-            bool: True if successful, False otherwise
-        """
-        if not self.video_to_pose_mask:
-            raise ImportError("video_to_pose_mask module not available")
-
-        try:
-            # Get the directory and base name
-            output_dir = os.path.dirname(output_path)
-            input_base = os.path.splitext(os.path.basename(input_path))[0]
-
-            # Process the video
-            self.video_to_pose_mask.process_video(input_path, output_dir)
-
-            # Find the pose file
-            pose_file = os.path.join(output_dir, f"{input_base}_pose.mp4")
-
-            # Move to the desired output path
-            if os.path.exists(pose_file):
-                shutil.move(pose_file, output_path)
-                return True
-            else:
-                raise FileNotFoundError(f"Pose file not found: {pose_file}")
-        except Exception as e:
-            logger.log_error(
-                f"Failed to generate pose visualization: {str(e)}",
-                os.path.basename(input_path),
-                e,
-            )
-            return False
-
-    def _generate_mask(self, input_path, output_path):
-        """Generate mask for a video segment.
-
-        Args:
-            input_path (str): Path to the input video
-            output_path (str): Path to save the mask
-
-        Returns:
-            bool: True if successful, False otherwise
-        """
-        if not self.video_to_pose_mask:
-            raise ImportError("video_to_pose_mask module not available")
-
-        try:
-            # Get the directory and base name
-            output_dir = os.path.dirname(output_path)
-            input_base = os.path.splitext(os.path.basename(input_path))[0]
-
-            # Process the video (if not already processed for pose)
-            if not os.path.exists(os.path.join(output_dir, f"{input_base}_mask.mp4")):
-                self.video_to_pose_mask.process_video(input_path, output_dir)
-
-            # Find the mask file
-            mask_file = os.path.join(output_dir, f"{input_base}_mask.mp4")
-
-            # Move to the desired output path
-            if os.path.exists(mask_file):
-                shutil.move(mask_file, output_path)
-                return True
-            else:
-                raise FileNotFoundError(f"Mask file not found: {mask_file}")
-        except Exception as e:
-            logger.log_error(
-                f"Failed to generate mask: {str(e)}", os.path.basename(input_path), e
-            )
-            return False
-
-    def _generate_simple_segmentation(self, original_path, mask_path, output_path):
-        """Generate a simple segmentation by overlaying the mask on the original video.
-
-        Args:
-            original_path (str): Path to the original video
-            mask_path (str): Path to the mask video
-            output_path (str): Path to save the segmentation
-
-        Returns:
-            bool: True if successful, False otherwise
-        """
-        try:
-            # Check if input files exist
-            if not os.path.exists(original_path):
-                raise FileNotFoundError(f"Original video not found: {original_path}")
-            if not os.path.exists(mask_path):
-                raise FileNotFoundError(f"Mask video not found: {mask_path}")
-
-            # Create the overlay using ffmpeg
-            overlay_cmd = [
-                "ffmpeg",
-                "-y",
-                "-i",
-                original_path,
-                "-i",
-                mask_path,
-                "-filter_complex",
-                "[0:v][1:v]overlay=format=auto:alpha=0.5",
-                "-c:v",
-                "libx264",
-                output_path,
-            ]
-
-            # Run the command
-            process = subprocess.run(
-                overlay_cmd, check=True, capture_output=True, text=True
-            )
-
-            # Check if the output file was created
-            if os.path.exists(output_path) and os.path.getsize(output_path) > 0:
-                return True
-            else:
-                raise RuntimeError(f"Failed to create segmentation: {process.stderr}")
-        except Exception as e:
-            logger.log_error(
-                f"Failed to generate simple segmentation: {str(e)}",
-                os.path.basename(original_path),
-                e,
-            )
-            return False
 
 
 class WebDatasetCreator:
@@ -1406,175 +900,6 @@ class WebDatasetCreator:
         return shard_paths
 
 
-def update_segments_info(segments_info):
-    """Update segments_info with the actual paths to the processed files."""
-    for segment in segments_info:
-        segment_name = segment["segment_name"]
-        original_path = segment["original"]
-
-        # Get the directory containing the segment files
-        segments_dir = os.path.dirname(original_path)
-
-        # Check for pose, mask, and segmentation files
-        pose_path = os.path.join(segments_dir, f"{segment_name}.pose.mp4")
-        mask_path = os.path.join(segments_dir, f"{segment_name}.mask.mp4")
-        segmentation_path = os.path.join(
-            segments_dir, f"{segment_name}.segmentation.mp4"
-        )
-
-        # Update segment info with actual paths
-        if os.path.exists(pose_path):
-            segment["pose"] = pose_path
-            segment["segment_metadata"]["has_pose"] = True
-
-        if os.path.exists(mask_path):
-            segment["mask"] = mask_path
-            segment["segment_metadata"]["has_mask"] = True
-
-        if os.path.exists(segmentation_path):
-            segment["segmentation"] = segmentation_path
-            segment["segment_metadata"]["has_segmentation"] = True
-
-    return segments_info
-
-
-def update_progress(operation, message, overall_progress=None, op_progress=None):
-    """Update the GUI progress if it's running."""
-    global gui
-    if gui:
-        if message:
-            update_gui(gui, {"type": "log", "text": message})
-        if operation:
-            update_gui(gui, {"type": "operation", "text": operation})
-        if overall_progress is not None:
-            update_gui(gui, {"type": "overall_progress", "value": overall_progress})
-        if op_progress is not None:
-            update_gui(gui, {"type": "op_progress", "value": op_progress})
-
-        # Check if the process has been cancelled
-        if hasattr(gui, "cancelled") and gui.cancelled:
-            update_gui(gui, {"type": "log", "text": "Processing cancelled by user."})
-            return True
-    return False
-
-
-def process_with_gui(args):
-    """Process videos with GUI progress updates."""
-    try:
-        # Initialize directories
-        os.makedirs(args.output_dir, exist_ok=True)
-        downloads_dir = os.path.join(args.output_dir, "downloads")
-        os.makedirs(downloads_dir, exist_ok=True)
-        processed_dir = os.path.join(args.output_dir, "processed")
-        os.makedirs(processed_dir, exist_ok=True)
-
-        update_progress("Initializing", "Starting video processing pipeline...", 0, 0)
-
-        # Step 1: Download videos
-        update_progress(
-            "Downloading videos",
-            "=== Step 1: Downloading videos from DBL-sign ===",
-            10,
-            0,
-        )
-        downloader = DBLSignDownloader(downloads_dir)
-        video_info_list = downloader.download_videos(
-            args.num_videos, args.language_code, args.project_name
-        )
-
-        # Check for cancellation
-        if update_progress(None, f"Downloaded {len(video_info_list)} videos", 20, 100):
-            return
-
-        # Step 2: Process videos with sign-segmentation
-        update_progress(
-            "Processing videos",
-            "=== Step 2: Processing videos with sign-segmentation ===",
-            30,
-            0,
-        )
-        processor = SignSegmentationProcessor(processed_dir)
-
-        all_segments = []
-        for i, video_info in enumerate(video_info_list):
-            # Extract video path and metadata from the dictionary
-            video_path = video_info["path"]
-            metadata = video_info["metadata"]
-
-            # Check for cancellation
-            if update_progress(
-                None,
-                f"Processing video {i + 1}/{len(video_info_list)}: {os.path.basename(video_path)}",
-                30 + (i / len(video_info_list)) * 40,
-                0,
-            ):
-                return
-
-            video_progress = (i / len(video_info_list)) * 100
-            update_progress(
-                None,
-                f"Processing video {i + 1}/{len(video_info_list)}: {os.path.basename(video_path)}",
-                30 + (i / len(video_info_list)) * 40,
-                video_progress,
-            )
-
-            segments = processor.process_video(video_path, metadata)
-            all_segments.extend(segments)
-
-            # Check for cancellation after each video
-            if update_progress(
-                None,
-                f"Completed processing video {i + 1}/{len(video_info_list)}",
-                30 + ((i + 1) / len(video_info_list)) * 40,
-                100,
-            ):
-                return
-
-        # Step 3: Create WebDataset
-        update_progress(
-            "Creating WebDataset", "=== Step 3: Creating WebDataset ===", 70, 0
-        )
-        webdataset_dir = os.path.join(args.output_dir, "webdataset")
-        os.makedirs(webdataset_dir, exist_ok=True)
-
-        # Check for cancellation
-        if update_progress(None, "Creating WebDataset...", 70, 50):
-            return
-
-        # Create WebDataset
-        creator = WebDatasetCreator(webdataset_dir)
-        creator.create_webdataset(all_segments, shard_size=args.shard_size)
-
-        # Check for cancellation
-        if update_progress(None, "WebDataset created", 80, 100):
-            return
-
-        # Step 4: Create manifest
-        update_progress("Creating manifest", "=== Step 4: Creating manifest ===", 90, 0)
-        manifest_path = os.path.join(args.output_dir, "manifest.json")
-
-        # Update segments_info with actual paths to processed files
-        all_segments = update_segments_info(all_segments)
-
-        # Check for cancellation
-        if update_progress(None, "Creating manifest file...", 90, 50):
-            return
-
-        # Create manifest
-        with open(manifest_path, "w", encoding="utf-8") as f:
-            json.dump({"segments": all_segments}, f, indent=2)
-
-        update_progress(
-            "Complete",
-            f"Processing complete! Manifest saved to {manifest_path}",
-            100,
-            100,
-        )
-    except Exception as e:
-        update_progress("Error", f"Error during processing: {str(e)}", 100, 100)
-        raise e
-
-
 def process_without_gui(args):
     """Process videos without GUI updates."""
     # Initialize directories
@@ -1590,12 +915,15 @@ def process_without_gui(args):
     video_info_list = downloader.download_videos(
         args.num_videos, args.language_code, args.project_name
     )
+    print(video_info_list)
+    print(json.dumps(video_info_list, indent=4))
 
     # Step 2: Process videos with sign-segmentation
     print("=== Step 2: Processing videos with sign-segmentation ===")
     processor = SignSegmentationProcessor(processed_dir)
 
     all_segments = []
+    random.shuffle(video_info_list)
     for i, video_info in enumerate(video_info_list):
         # Extract video path and metadata from the dictionary
         video_path = video_info["path"]
@@ -1608,7 +936,8 @@ def process_without_gui(args):
 
         segments = processor.process_video(video_path, metadata)
         all_segments.extend(segments)
-
+    print(all_segments)
+    exit()
     # Step 3: Create WebDataset
     print("=== Step 3: Creating WebDataset ===")
     webdataset_dir = os.path.join(args.output_dir, "webdataset")
@@ -1621,9 +950,6 @@ def process_without_gui(args):
     # Step 4: Create manifest
     print("=== Step 4: Creating manifest ===")
     manifest_path = os.path.join(args.output_dir, "manifest.json")
-
-    # Update segments_info with actual paths to processed files
-    all_segments = update_segments_info(all_segments)
 
     # Create manifest
     with open(manifest_path, "w", encoding="utf-8") as f:
@@ -1642,6 +968,7 @@ def main():
     )
     parser.add_argument("--language-code", type=str, help="Filter by language code")
     parser.add_argument("--project-name", type=str, help="Filter by project name")
+
     parser.add_argument(
         "--output-dir", type=str, default="output", help="Output directory"
     )
@@ -1651,20 +978,11 @@ def main():
         default=1000,
         help="Number of segments per WebDataset shard",
     )
-    parser.add_argument("--with-gui", action="store_true", help="Show progress GUI")
     args = parser.parse_args()
 
-    # Start GUI if requested
-    global gui, root
-    if args.with_gui:
-        root, gui = start_gui()
-        # Start processing in a separate thread
-        threading.Thread(target=process_with_gui, args=(args,), daemon=True).start()
-        root.mainloop()
-    else:
-        # Run processing directly
-        process_without_gui(args)
+    process_without_gui(args)
 
 
 if __name__ == "__main__":
     main()
+# python /opt/home/cleong/projects/semantic_and_visual_similarity/sign-bibles-dataset/dataprep/DBL-signbibles/huggingface-prep/prepare_webdataset.py --output-dir . --language-code esl
