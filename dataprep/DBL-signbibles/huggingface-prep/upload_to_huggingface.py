@@ -137,9 +137,6 @@ dataset = load_dataset("bible-nlp/sign-bibles")
 for sample in dataset["train"]:
     # Access components
     original_video = sample["original.mp4"]
-    pose_video = sample["pose.mp4"]
-    mask_video = sample["mask.mp4"]
-    segmentation_video = sample["segmentation.mp4"]
     metadata = sample["segment_metadata"]
 ```
 

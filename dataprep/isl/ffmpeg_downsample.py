@@ -6,10 +6,18 @@ import ffmpeg
 def downsample_video(video_stream):
     output_stream = io.BytesIO()
     process = (
-        ffmpeg
-        .input('pipe:', format='mp4')  # Ensure input format is correct
-        .output('pipe:', format='mpegts', vf='scale=640:-2', vcodec='libx264', preset='ultrafast', crf=28)
-        .run_async(pipe_stdin=True, pipe_stdout=True, pipe_stderr=True, overwrite_output=True)
+        ffmpeg.input("pipe:", format="mp4")  # Ensure input format is correct
+        .output(
+            "pipe:",
+            format="mpegts",
+            vf="scale=640:-2",
+            vcodec="libx264",
+            preset="ultrafast",
+            crf=28,
+        )
+        .run_async(
+            pipe_stdin=True, pipe_stdout=True, pipe_stderr=True, overwrite_output=True
+        )
     )
     out, _ = process.communicate(input=video_stream.read())
 
@@ -21,7 +29,7 @@ def downsample_video(video_stream):
         # print(f"Downsampling successful! File size: {size} bytes")
         pass
     else:
-        raise ValueError(f"Downsampling failed! File is empty.")
+        raise ValueError("Downsampling failed! File is empty.")
     return output_stream
 
 
@@ -35,15 +43,14 @@ def downsample_video_ondisk(input_path, output_path):
     """
     try:
         process = (
-            ffmpeg
-            .input(input_path)
+            ffmpeg.input(input_path)
             .output(
                 output_path,
-                format='mp4',                   # output as MP4
-                vf='scale=640:-2',              # resize width to 640, preserve aspect ratio
-                vcodec='libx264',
-                preset='ultrafast',
-                crf=28
+                format="mp4",  # output as MP4
+                vf="scale=640:-2",  # resize width to 640, preserve aspect ratio
+                vcodec="libx264",
+                preset="ultrafast",
+                crf=28,
             )
             .overwrite_output()
             .run_async(pipe_stdin=True, pipe_stdout=True, pipe_stderr=True)

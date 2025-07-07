@@ -1,11 +1,9 @@
 import json
-import os
 import requests
 from pathlib import Path
 import argparse
-import threading
 import time
-from dbl_utils import DownloadLog, DownloadProgressWindow, S3Storage, validate_mp4
+from dbl_utils import DownloadLog, S3Storage, validate_mp4
 
 
 class HeadlessProgress:
@@ -393,5 +391,5 @@ if __name__ == "__main__":
     download_manifest_files(args.manifest, args.output, auth, args.limit, s3_storage)
 
 
-# 
+#
 # cd /opt/home/cleong/projects/semantic_and_visual_similarity/sign-bibles-dataset/dataprep/DBL-signbibles && source /opt/conda/bin/activate /opt/home/cleong/envs/sign-bibles-dataset/ && python DBL-manifest-generator.py && python DBL-manifest-downloader.py --output /opt/home/cleong/projects/semantic_and_visual_similarity/sign-bibles-dataset/downloads

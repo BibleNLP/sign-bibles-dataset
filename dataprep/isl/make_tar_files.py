@@ -1,6 +1,5 @@
 import os
 import tarfile
-from pathlib import Path
 
 # CONFIGURATION
 # SOURCE_DIR = "/path/to/your/files"
@@ -18,6 +17,7 @@ def get_file_groups(source_dir):
             base = parts[0]
             grouped.setdefault(base, []).append(file)
     return grouped
+
 
 def group_files_into_chunks(grouped, base_path, max_size):
     """Group the file sets into chunks of total size < max_size."""
@@ -42,9 +42,10 @@ def group_files_into_chunks(grouped, base_path, max_size):
 
     return chunks
 
+
 def create_tarballs(chunks, output_dir, count_start):
     for idx, chunk in enumerate(chunks, 1):
-        num = count_start+idx
+        num = count_start + idx
         tar_name = os.path.join(output_dir, f"chunk_{num:05d}.tar")
         with tarfile.open(tar_name, "w") as tar:
             for base, filepaths in chunk:
@@ -53,7 +54,8 @@ def create_tarballs(chunks, output_dir, count_start):
                     tar.add(filepath, arcname=arcname)
         print(f"Created {tar_name}")
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     # Main Execution
     # SOURCE_DIR = "/mnt/nextcloud/ISLGospels_processed"
     # OUTPUT_DIR = "/mnt/nextcloud/ISL_dataset_chunks0"
@@ -61,7 +63,7 @@ if __name__ == '__main__':
     SOURCE_DIR = "../../../ISLGospels_processed"
     OUTPUT_DIR = "../../../ISLGospels_tar_chunks"
     COUNT_START = 14
-    MAX_TAR_SIZE = 1 * 1024 * 1024 * 1024 # 1 GB
+    MAX_TAR_SIZE = 1 * 1024 * 1024 * 1024  # 1 GB
 
     # Ensure output directory exists
     os.makedirs(OUTPUT_DIR, exist_ok=True)

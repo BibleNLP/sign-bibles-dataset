@@ -1,17 +1,18 @@
 import os
-import io
 from webdav3.client import Client
 from dotenv import load_dotenv
 
 # Load environment variables from .env
 load_dotenv()
 
+
 class NextCloud_connection:
-    def __init__(self,
-                nxt_cld_webdav_url=None,
-                nxt_cld_username=None,
-                nxt_cld_password=None,
-                ):
+    def __init__(
+        self,
+        nxt_cld_webdav_url=None,
+        nxt_cld_username=None,
+        nxt_cld_password=None,
+    ):
         if nxt_cld_username is None:
             nxt_cld_username = os.getenv("NXT_CLD_USERNAME")
         if nxt_cld_password is None:
@@ -25,22 +26,21 @@ class NextCloud_connection:
 
         options = options = {
             # 'webdav_hostname': "https://nextcloud.bridgeconn.com/remote.php/dav/files/E4735FDA-E1D1-426B-8AE6-B0B986C55AF2",
-            "webdav_hostname" : nxt_cld_webdav_url,
-            'webdav_login':    nxt_cld_username,
-            'webdav_password': nxt_cld_password
+            "webdav_hostname": nxt_cld_webdav_url,
+            "webdav_login": nxt_cld_username,
+            "webdav_password": nxt_cld_password,
         }
         # Create an S3 client
         self.client = Client(options)
 
-
-
     def download_file(self, remote_path, local_path):
-        with open(local_path, 'wb') as f:
-            response = self.client.session.request('GET',
-                                                self.client.get_url(remote_path),
-                                                stream=True,
-                                                auth=(self.user, self.password)
-                                                )
+        with open(local_path, "wb") as f:
+            response = self.client.session.request(
+                "GET",
+                self.client.get_url(remote_path),
+                stream=True,
+                auth=(self.user, self.password),
+            )
             if response.status_code == 200:
                 for chunk in response.iter_content(chunk_size=1024):
                     if chunk:
@@ -48,7 +48,6 @@ class NextCloud_connection:
             else:
                 print("Error:", response.status_code, response.text)
 
-    
     def upload_file(self, local_path, remote_path):
         # kwargs = {
         #  'remote_path': remote_path,
@@ -57,7 +56,6 @@ class NextCloud_connection:
         # }
         # self.client.upload_async(**kwargs)
         self.client.upload_file(remote_path=remote_path, local_path=local_path)
-
 
     def get_files(self, path="/"):
         return self.client.list(path)
