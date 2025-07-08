@@ -6,8 +6,9 @@ import tempfile
 from pathlib import Path
 
 import cv2
-import pytesseract
+import easyocr
 from tqdm import tqdm
+import torch
 
 
 def extract_frames(
@@ -57,11 +58,22 @@ def extract_frames(
 
 
 def run_ocr_on_frames(frame_paths: list[Path]):
+    reader = easyocr.Reader(["en"], gpu=True)
+    print(f"Reader Device: {reader.device}")
+
     for frame in tqdm(sorted(frame_paths), desc="Running OCR"):
-        ocr_text = pytesseract.image_to_string(str(frame)).strip()
-        # Get numeric frame index from filename like 'frame_03000.png'
+        result = reader.readtext(str(frame))  # ← use str(frame), not hardcoded string
+
+        # Concatenate just the recognized text portions
+        ocr_text = " ".join([r[1] for r in result]).strip()
+
         frame_index = int(frame.stem.split("_")[1])
-        yield {"frame_index": frame_index, "frame_name": frame.name, "text": ocr_text}
+        yield {
+            "frame_index": frame_index,
+            # "frame_name": frame.name,
+            "text": ocr_text,
+            # "lines": [{"text": r[1], "confidence": r[2], "box": r[0]} for r in result],
+        }
 
 
 def process_video(
@@ -84,7 +96,7 @@ def main():
     parser.add_argument(
         "--frame-skip",
         type=int,
-        default=1,
+        default=9,
         help="Skip every N frames (default: 1 = every other frame)",
     )
     parser.add_argument(
@@ -100,6 +112,13 @@ def main():
     )
 
     args = parser.parse_args()
+
+    print(torch.cuda.is_available())
+    print(
+        torch.cuda.get_device_name(0)
+        if torch.cuda.is_available()
+        else "No GPU detected"
+    )
 
     if not args.video.exists():
         parser.error(f"Video file not found: {args.video}")
@@ -121,12 +140,18 @@ def main():
 
         out_path = args.out
         if out_path is None:
-            out_path = video.with_name(video.stem + "_ocrtext.json")
+            out_path = video.with_name(
+                video.stem
+                + f"_frameskip{args.frame_skip}_minframe{args.min_frame}_maxframe{args.max_frame}_ocrtext.json"
+            )
 
-        print(f"Writing OCR results to {out_path}")
-        out_path.write_text(
-            json.dumps(ocr_data, indent=2, ensure_ascii=False), encoding="utf-8"
-        )
+        if out_path.is_file():
+            print(f"[WARNING]: {out_path} exists: skipping!")
+        else:
+            print(f"Writing OCR results to {out_path}")
+            out_path.write_text(
+                json.dumps(ocr_data, indent=2, ensure_ascii=False), encoding="utf-8"
+            )
 
 
 if __name__ == "__main__":
