@@ -3,19 +3,19 @@
 Upload WebDataset to HuggingFace datasets.
 """
 
-import os
-import json
 import argparse
+import json
+import os
 import shutil
 import tempfile
+
 from huggingface_hub import HfApi, upload_folder
-import webdataset as wds
 from tqdm import tqdm
 
+import webdataset as wds
 
-def create_dataset_card(
-    webdataset_path, output_path, dataset_name, language_codes=None
-):
+
+def create_dataset_card(webdataset_path, output_path, dataset_name, language_codes=None):
     """
     Create a dataset card for HuggingFace.
 
@@ -24,14 +24,11 @@ def create_dataset_card(
         output_path: Path to save dataset card
         dataset_name: Name of the dataset
         language_codes: List of language codes in the dataset
+
     """
     # If path is a directory, find all .tar files
     if os.path.isdir(webdataset_path):
-        shards = [
-            os.path.join(webdataset_path, f)
-            for f in os.listdir(webdataset_path)
-            if f.endswith(".tar")
-        ]
+        shards = [os.path.join(webdataset_path, f) for f in os.listdir(webdataset_path) if f.endswith(".tar")]
         shards.sort()
     else:
         shards = [webdataset_path]
@@ -47,52 +44,26 @@ def create_dataset_card(
     # Examine first shard to get metadata
     print(f"Reading metadata from shard: {shards[0]}")
 
-    try:
-        # Use a direct file path approach instead of URL-like path
-        dataset = wds.WebDataset(shards[0], shardshuffle=False).decode()
+    # Use a direct file path approach instead of URL-like path
+    dataset = wds.WebDataset(shards[0], shardshuffle=False).decode()
 
-        for sample in dataset:
-            sample_count += 1
+    for sample in dataset:
+        sample_count += 1
 
-            # Parse metadata if available
-            if "json" in sample:
-                try:
-                    metadata = json.loads(sample["json"])
-                    if "language_code" in metadata:
-                        languages.add(metadata["language_code"])
-                    if "project_name" in metadata:
-                        projects.add(metadata["project_name"])
-                except:
-                    pass
-    except Exception as e:
-        print(f"Warning: Error reading shard metadata: {e}")
-        print("Attempting to read metadata from manifest.json instead...")
-
-        # Try to get metadata from manifest.json
-        project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-        manifest_path = os.path.join(project_root, "output", "manifest.json")
-        if os.path.exists(manifest_path):
-            try:
-                with open(manifest_path, "r") as f:
-                    manifest = json.load(f)
-
-                for segment in manifest.get("segments", []):
-                    metadata = segment.get("segment_metadata", {})
-                    if "language_code" in metadata:
-                        languages.add(metadata["language_code"])
-                    if "project_name" in metadata:
-                        projects.add(metadata["project_name"])
-
-                # Estimate sample count based on manifest
-                sample_count = len(manifest.get("segments", []))
-                print(f"Found {sample_count} samples in manifest.json")
-            except Exception as e:
-                print(f"Warning: Error reading manifest.json: {e}")
+        # Parse metadata if available
+        if "json" in sample:
+            # metadata = json.loads(sample["json"])
+            metadata = sample["json"]["metadata"]
+            print(json.dumps(metadata, indent=2))
+            if "language_code" in metadata:
+                print(metadata["language_code"])
+                languages.add(metadata["language_code"])
+            if "project_name" in metadata:
+                projects.add(metadata["project_name"])
 
     # Add language codes if provided
     if language_codes:
         languages.update(language_codes)
-
     # Create dataset card
     card = f"""---
 language:
@@ -171,6 +142,7 @@ def upload_to_huggingface(webdataset_path, dataset_name, token=None):
         webdataset_path: Path to WebDataset shards
         dataset_name: Name of the dataset on HuggingFace
         token: HuggingFace API token
+
     """
     print(f"Uploading WebDataset from {webdataset_path} to {dataset_name}")
 
@@ -180,11 +152,7 @@ def upload_to_huggingface(webdataset_path, dataset_name, token=None):
         if os.path.isdir(webdataset_path):
             # Get absolute path to avoid path issues
             webdataset_path = os.path.abspath(webdataset_path)
-            shards = [
-                os.path.join(webdataset_path, f)
-                for f in os.listdir(webdataset_path)
-                if f.endswith(".tar")
-            ]
+            shards = [os.path.join(webdataset_path, f) for f in os.listdir(webdataset_path) if f.endswith(".tar")]
             shards.sort()
         else:
             # Get absolute path to avoid path issues
@@ -230,12 +198,8 @@ def upload_to_huggingface(webdataset_path, dataset_name, token=None):
             print(f"Error uploading to HuggingFace: {e}")
             print("\nTroubleshooting tips:")
             print("1. Check if your token has write access to the repository")
-            print(
-                "2. Verify that you have the correct organization name in the dataset_name"
-            )
-            print(
-                "3. Try logging in with 'huggingface-cli login' before running this script"
-            )
+            print("2. Verify that you have the correct organization name in the dataset_name")
+            print("3. Try logging in with 'huggingface-cli login' before running this script")
             print("4. Check your internet connection")
             raise
 
@@ -280,9 +244,7 @@ def main():
                 print(f"Warning: Error accessing user environment variables: {e}")
 
     if not token:
-        print(
-            "Warning: No HuggingFace API token provided. You may need to login interactively."
-        )
+        print("Warning: No HuggingFace API token provided. You may need to login interactively.")
 
     # Upload to HuggingFace
     upload_to_huggingface(args.webdataset_path, args.dataset_name, token)
@@ -290,3 +252,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+# python dataprep/DBL-signbibles/huggingface-prep/upload_to_huggingface.py webdataset bible-nlp/sign-bibles
