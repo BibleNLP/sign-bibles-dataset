@@ -7,13 +7,22 @@ This script:
 3. Packages everything into WebDataset format
 """
 
+import os
+import io
+import json
+import tarfile
+from typing import List, Dict, Any
+from typing import Optional
+import pandas as pd
+import argparse
+import json
+import re
 from pathlib import Path
 import os
 import sys
-import json
-import argparse
 import shutil
 import cv2
+import langcodes
 import requests
 import time
 import importlib.util
@@ -21,6 +30,7 @@ import tarfile
 import random
 import io
 from processing_logger import ProcessingLogger
+import xml.etree.ElementTree as ET
 
 # Initialize the logger with the correct path
 logger = ProcessingLogger(log_file_path="./output/run_log.txt")
@@ -529,6 +539,8 @@ class SignSegmentationProcessor:
             print(f"Error: Video file not found: {video_path}")
             return []
 
+        segments_dir = video_path.parent / "segments"
+
         print(f"Processing video: {video_path}")
         print(f"Video exists: {os.path.exists(video_path)}")
         print(f"Video size: {os.path.getsize(video_path)} bytes")
@@ -540,34 +552,19 @@ class SignSegmentationProcessor:
             print(f"Looking for pre-existing segments for {video_path}...")
             video_name = os.path.splitext(os.path.basename(video_path))[0]
 
-            # Check possible segment locations
-            possible_segment_dirs = [
-                os.path.join(os.path.dirname(video_path), "..", "segments"),
-                os.path.join(os.path.dirname(video_path), "segments"),
-                os.path.join(self.output_dir, "segments"),
-                self.output_dir,
+            segment_files = [
+                f
+                for f in os.listdir(segments_dir)
+                if f.endswith(".mp4") and video_name in f
             ]
-
-            for segments_dir in possible_segment_dirs:
-                if os.path.exists(segments_dir):
-                    try:
-                        segment_files = [
-                            f
-                            for f in os.listdir(segments_dir)
-                            if f.endswith(".mp4") and video_name in f
-                        ]
-                        if segment_files:
-                            print(
-                                f"Found {len(segment_files)} pre-existing segments in {segments_dir}"
-                            )
-                            # Process these segments
-                            return self._process_existing_segments(
-                                segments_dir, segment_files, video_name, metadata
-                            )
-                    except Exception as e:
-                        print(
-                            f"Error checking for segments in {segments_dir}: {str(e)}"
-                        )
+            if segment_files:
+                print(
+                    f"Found {len(segment_files)} pre-existing segments in {segments_dir}"
+                )
+                # Process these segments
+                return self._process_existing_segments(
+                    segments_dir, segment_files, video_name, metadata
+                )
 
             print(f"No pre-existing segments found for {video_path}")
             return []
@@ -579,17 +576,14 @@ class SignSegmentationProcessor:
         print(f"Created video output directory: {video_output_dir}")
 
         # Create segments directory
-        segments_output_dir = os.path.join(
-            os.path.dirname(video_path), "..", "segments"
-        )
-        os.makedirs(segments_output_dir, exist_ok=True)
-        print(f"Created segments directory: {Path(segments_output_dir).resolve()}")
+        os.makedirs(segments_dir, exist_ok=True)
+        print(f"Created segments directory: {Path(segments_dir).resolve()}")
 
         # Verify segments directory exists
-        if not os.path.exists(segments_output_dir):
-            print(f"Error: Failed to create segments directory: {segments_output_dir}")
+        if not os.path.exists(segments_dir):
+            print(f"Error: Failed to create segments directory: {segments_dir}")
 
-        print(f"Segments will be stored in: {segments_output_dir}")
+        print(f"Segments will be stored in: {segments_dir}")
 
         # Process the video with sign-segmentation
 
@@ -597,46 +591,16 @@ class SignSegmentationProcessor:
 
         # Call the process_video function from segment_video module
         print(f"Calling segment_video.process_video with {video_path}")
-        result = self.segment_video.process_video(video_path)
-        print(f"Segmentation result: {result}")
-        exit()
+        self.segment_video.process_video(video_path)
 
         # Check if any segments were created
-        try:
-            segment_files = [
-                f
-                for f in os.listdir(segments_output_dir)
-                if f.endswith(".mp4") and video_name in f
-            ]
-            print(f"Found {len(segment_files)} segments in {segments_output_dir}")
 
-            # Try alternative locations if no segments found
-            if not segment_files:
-                alt_dirs = [
-                    os.path.join(os.path.dirname(video_path), "segments"),
-                    os.path.join(self.output_dir, "segments"),
-                    video_output_dir,
-                ]
-                for alt_dir in alt_dirs:
-                    if os.path.exists(alt_dir):
-                        try:
-                            alt_segment_files = [
-                                f
-                                for f in os.listdir(alt_dir)
-                                if f.endswith(".mp4") and video_name in f
-                            ]
-                            if alt_segment_files:
-                                print(
-                                    f"Found {len(alt_segment_files)} segments in alternative directory: {alt_dir}"
-                                )
-                                segments_output_dir = alt_dir
-                                segment_files = alt_segment_files
-                                break
-                        except Exception as e:
-                            print(f"Error checking for segments in {alt_dir}: {str(e)}")
-        except Exception as e:
-            print(f"Error checking for segments after processing: {str(e)}")
-            segment_files = []
+        segment_files = [
+            f
+            for f in os.listdir(segments_dir)
+            if f.endswith(".mp4") and video_name in f
+        ]
+        print(f"Found {len(segment_files)} segments in {segments_dir}")
 
         if not segment_files:
             print(f"Warning: No segments were created for {video_path}")
@@ -644,7 +608,7 @@ class SignSegmentationProcessor:
 
         # Process the segments
         return self._process_existing_segments(
-            segments_output_dir, segment_files, video_name, metadata
+            segments_dir, segment_files, video_name, metadata
         )
 
     def _process_existing_segments(
@@ -733,181 +697,264 @@ class SignSegmentationProcessor:
 class WebDatasetCreator:
     """Class to handle creating WebDataset format."""
 
-    def __init__(self, output_dir="webdataset"):
-        """Initialize the creator with output directory."""
-        self.output_dir = output_dir
-        os.makedirs(self.output_dir, exist_ok=True)
+    def __init__(self, output_dir: str = "webdataset"):
+        self.output_dir = Path(output_dir)
+        self.output_dir.mkdir(parents=True, exist_ok=True)
 
-    def create_webdataset(self, segments_info, shard_size=1000):
-        """
-        Create WebDataset from segments.
+    def create_webdataset(
+        self, segments_info: List[Dict[str, Any]], shard_size: int = 1000
+    ) -> List[str]:
+        shards = self._split_into_shards(segments_info, shard_size)
+        return self._write_shards(shards)
 
-        Args:
-            segments_info: List of dictionaries with segment information
-            shard_size: Number of segments per WebDataset shard
+    def _split_into_shards(
+        self, segments_info: List[Dict[str, Any]], shard_size: int
+    ) -> List[List[Dict[str, Any]]]:
+        return [
+            segments_info[i : i + shard_size]
+            for i in range(0, len(segments_info), shard_size)
+        ]
 
-        Returns:
-            List of created WebDataset shard paths
-        """
-        # Create shards
+    def _write_shards(self, shards: List[List[Dict[str, Any]]]) -> List[str]:
         shard_paths = []
-        os.makedirs(self.output_dir, exist_ok=True)
 
-        # Group segments by shard
-        shards = []
-        current_shard = []
-
-        for segment_info in segments_info:
-            current_shard.append(segment_info)
-            if len(current_shard) >= shard_size:
-                shards.append(current_shard)
-                current_shard = []
-
-        if current_shard:
-            shards.append(current_shard)
-
-        # Create each shard
-        for i, shard in enumerate(shards):
-            shard_path = os.path.join(self.output_dir, f"shard_{i:05d}.tar")
+        for shard_index, shard in enumerate(shards):
+            shard_path = self.output_dir / f"shard_{shard_index:05d}.tar"
             with tarfile.open(shard_path, "w") as tar:
                 for segment_info in shard:
-                    segment_name = segment_info["segment_name"]
-
-                    # Check if segment_path exists, if not, use original key
-                    if (
-                        "segment_path" not in segment_info
-                        and "original" in segment_info
-                    ):
-                        segment_path = segment_info["original"]
-                    elif "segment_path" in segment_info:
-                        segment_path = segment_info["segment_path"]
-                    else:
-                        print(
-                            f"Warning: No path found for segment {segment_name}. Skipping."
-                        )
+                    sample = self._build_sample(segment_info, shard_index)
+                    if not sample:
                         continue
-
-                    # Get the base segment name without any extensions
-                    base_segment_name = os.path.splitext(
-                        os.path.basename(segment_path)
-                    )[0]
-
-                    # Remove any existing subcategory suffixes
-                    for suffix in [".original", ".pose", ".mask", ".segmentation"]:
-                        if base_segment_name.endswith(suffix):
-                            base_segment_name = base_segment_name[: -len(suffix)]
-
-                    # Define the paths for all file types
-                    original_path = os.path.join(
-                        os.path.dirname(segment_path),
-                        f"{base_segment_name}.original.mp4",
-                    )
-                    pose_path = os.path.join(
-                        os.path.dirname(segment_path), f"{base_segment_name}.pose.mp4"
-                    )
-                    mask_path = os.path.join(
-                        os.path.dirname(segment_path), f"{base_segment_name}.mask.mp4"
-                    )
-                    segmentation_path = os.path.join(
-                        os.path.dirname(segment_path),
-                        f"{base_segment_name}.segmentation.mp4",
-                    )
-
-                    # Create a sample with all available files
-                    sample = {}
-
-                    # Add the original video
-                    if (
-                        os.path.exists(original_path)
-                        and os.path.getsize(original_path) > 0
-                    ):
-                        sample["mp4"] = original_path
-                    elif (
-                        os.path.exists(segment_path)
-                        and os.path.getsize(segment_path) > 0
-                    ):
-                        sample["mp4"] = segment_path
-                    else:
-                        print(
-                            f"Warning: Original video file not found for {segment_name}. Skipping."
-                        )
-                        continue
-
-                    # Add the pose video if available
-                    if os.path.exists(pose_path) and os.path.getsize(pose_path) > 0:
-                        sample["pose.mp4"] = pose_path
-                        segment_info["segment_metadata"]["pose"] = (
-                            f"{base_segment_name}.pose.mp4"
-                        )
-                    else:
-                        segment_info["segment_metadata"]["pose"] = None
-
-                    # Add the mask video if available
-                    if os.path.exists(mask_path) and os.path.getsize(mask_path) > 0:
-                        sample["mask.mp4"] = mask_path
-                        segment_info["segment_metadata"]["mask"] = (
-                            f"{base_segment_name}.mask.mp4"
-                        )
-                    else:
-                        segment_info["segment_metadata"]["mask"] = None
-
-                    # Add the segmentation video if available
-                    if (
-                        os.path.exists(segmentation_path)
-                        and os.path.getsize(segmentation_path) > 0
-                    ):
-                        sample["segmentation.mp4"] = segmentation_path
-                        segment_info["segment_metadata"]["segmentation"] = (
-                            f"{base_segment_name}.segmentation.mp4"
-                        )
-                    else:
-                        segment_info["segment_metadata"]["segmentation"] = None
-
-                    # Add the metadata
-                    sample["json"] = json.dumps(segment_info["segment_metadata"])
-
-                    # Add the sample to the shard
-                    for key, path in sample.items():
-                        if key == "json":
-                            # Add the JSON metadata directly
-                            info = tarfile.TarInfo(f"{segment_name}_{i}.{key}")
-                            json_bytes = path.encode("utf-8")
-                            info.size = len(json_bytes)
-                            tar.addfile(info, io.BytesIO(json_bytes))
-                        else:
-                            # Add the file using a binary read to avoid encoding issues
-                            try:
-                                # Get file info
-                                file_size = os.path.getsize(path)
-                                if file_size == 0:
-                                    print(
-                                        f"Warning: File {path} has zero size. Skipping."
-                                    )
-                                    continue
-
-                                # Create tar info
-                                info = tarfile.TarInfo(f"{segment_name}_{i}.{key}")
-                                info.size = file_size
-
-                                # Add file with binary mode to avoid encoding issues
-                                with open(path, "rb") as file_data:
-                                    tar.addfile(info, file_data)
-                            except Exception as e:
-                                print(f"Error adding file {path} to tar: {e}")
-
-            shard_paths.append(shard_path)
+                    self._add_sample_to_tar(tar, sample, segment_info["segment_name"])
+            shard_paths.append(str(shard_path))
 
         return shard_paths
 
+    def _build_sample(
+        self, segment_info: Dict[str, Any], shard_index: int
+    ) -> Dict[str, str | Path]:
+        print(json.dumps(segment_info, indent=2))
+        sample = {}
+
+        sample["json"] = json.dumps(segment_info["segment_metadata"])
+        sample["mp4"] = segment_info["segment_path"]
+        print(segment_info)
+        for ext, path in segment_info["files_to_add"]:
+            sample[ext] = path
+
+        # sample["pose-animation.mp4"] = segment_info["segment_metadata"]["pose"]["animation"]
+        # sample["pose-dwpose.npz"] = segment_info["segment_metadata"]["pose"]["dwpose"]
+        # sample["pose"] = segment_info["segment_metadata"]["pose"]["mediapipe"]
+        # sample["segment_name"] = segment_info["segment_name"]
+
+        return sample
+
+    def _add_sample_to_tar(
+        self,
+        tar: tarfile.TarFile,
+        sample: Dict[str, str | Path],
+        segment_name: str,
+    ):
+        for ext, content in sample.items():
+            filename = f"{segment_name}.{ext}"
+            try:
+                if ext == "json":
+                    encoded = content.encode("utf-8")  # type: ignore
+                    info = tarfile.TarInfo(filename)
+                    info.size = len(encoded)
+                    tar.addfile(info, io.BytesIO(encoded))
+                else:
+                    content = Path(content)  # type: ignore
+                    size = content.stat().st_size
+                    if size == 0:
+                        print(f"Warning: File {content} has zero size. Skipping.")
+                        continue
+                    info = tarfile.TarInfo(filename)
+                    info.size = size
+                    with content.open("rb") as f:
+                        tar.addfile(info, f)
+            except Exception as e:
+                print(f"Error adding {filename} to tar: {e}")
+
+
+def parse_metadata_to_bible_ref(xml_path: Path, filename):
+    """
+    Parse a metadata.xml and return bible ref associated, or empty string
+    e.g. "CBT-001-esl-3_Bible_God Creates Everything.mp4" -> "GEN 1:1-31,2:1-3"
+    """
+    try:
+        tree = ET.parse(xml_path)
+        root = tree.getroot()
+
+        # dbl_id = root.attrib.get("id", None)
+        file_to_passage = {}
+
+        for pub in root.findall("./publications/publication"):
+            for division in pub.findall("./structure/division"):
+                passage = division.attrib.get("role", "").strip()
+                for content in division.findall("content"):
+                    src = content.attrib.get("src", "").strip()
+                    filename = Path(src).name
+                    file_to_passage[filename] = passage
+
+        return file_to_passage.get(filename, "")
+
+    except ET.ParseError as e:
+        print(f"[ERROR] Could not parse {xml_path}: {e}")
+        return None, {}
+
+
+def search_ebible_translations(
+    language_code: str, translation_id: str, ebible_translations_df: pd.DataFrame
+) -> Optional[dict]:
+    result = ebible_translations_df[
+        (ebible_translations_df["languageCode"] == language_code)
+        & (ebible_translations_df["translationId"] == translation_id)
+    ]
+    if result.empty:
+        print(f"No results found for ({language_code}, {translation_id})")
+        return None
+    elif len(result) > 1:
+        print(
+            f"Warning: Multiple results found for ({language_code}, {translation_id}), returning the first."
+        )
+
+    return result.iloc[0].to_dict()
+
+
+def load_vref_map(vref_path: str) -> dict[str, int]:
+    with open(vref_path, encoding="utf-8") as f:
+        return {line.strip(): idx for idx, line in enumerate(f) if line.strip()}
+
+
+def load_bible_lines(bible_path: str) -> list[str]:
+    with open(bible_path, encoding="utf-8") as f:
+        return [line.strip() for line in f]
+
+
+def parse_citation_string(citation: str, vref_map: dict[str, int]) -> list[int]:
+    all_indices = []
+    current_book = None
+    current_chapter = None
+    tokens = re.split(r";\s*", citation.strip())
+
+    for token in tokens:
+        token = token.strip()
+        if not token:
+            continue
+
+        m = re.fullmatch(r"([1-3]?[A-Z]+)\s+(\d+)", token)
+        if m:
+            book, chapter = m.groups()
+            current_book = book
+            current_chapter = chapter
+            prefix = f"{book} {chapter}:"
+            matches = [i for ref, i in vref_map.items() if ref.startswith(prefix)]
+            all_indices.extend(matches)
+            continue
+
+        m = re.fullmatch(r"([1-3]?[A-Z]+)", token)
+        if m:
+            book = m.group(1)
+            current_book = book
+            matches = [i for ref, i in vref_map.items() if ref.startswith(f"{book} ")]
+            all_indices.extend(matches)
+            continue
+
+        m = re.fullmatch(
+            r"([1-3]?[A-Z]+)?\s*(\d+:\d+)\s*-\s*([1-3]?[A-Z]+)?\s*(\d+:\d+)", token
+        )
+        if m:
+            book1, start, book2, end = m.groups()
+            if book1:
+                current_book = book1
+            book2 = book2 or current_book
+            if not (current_book and book2):
+                continue
+            start_ref = f"{current_book} {start}"
+            end_ref = f"{book2} {end}"
+            if start_ref in vref_map and end_ref in vref_map:
+                i1, i2 = vref_map[start_ref], vref_map[end_ref]
+                if i1 <= i2:
+                    all_indices.extend(range(i1, i2 + 1))
+            continue
+
+        parts = token.split(",")
+        for part in parts:
+            part = part.strip()
+            m = re.fullmatch(r"([1-3]?[A-Z]+)?\s*(\d+):(\d+(?:-\d+)?)", part)
+            if m:
+                maybe_book, ch, verse_range = m.groups()
+                if maybe_book:
+                    current_book = maybe_book
+                current_chapter = ch
+                if not current_book:
+                    continue
+
+                if "-" in verse_range:
+                    start_v, end_v = map(int, verse_range.split("-"))
+                    verse_numbers = range(start_v, end_v + 1)
+                else:
+                    verse_numbers = [int(verse_range)]
+
+                for v in verse_numbers:
+                    ref = f"{current_book} {current_chapter}:{v}"
+                    if ref in vref_map:
+                        all_indices.append(vref_map[ref])
+    return sorted(set(all_indices))
+
+
+def citation_to_text_and_vrefs(citation: str, vref_map, bible_verses):
+    vrefs = parse_citation_string(citation, vref_map)
+
+    verses = [bible_verses[i] for i in vrefs if 0 <= i < len(bible_verses)]
+
+    bible_text = "".join(verses)
+    return bible_text, vrefs
+
 
 def process_without_gui(args):
-    """Process videos without GUI updates."""
-    # Initialize directories
-    os.makedirs(args.output_dir, exist_ok=True)
-    downloads_dir = os.path.join(args.output_dir, "downloads")
-    os.makedirs(downloads_dir, exist_ok=True)
-    processed_dir = os.path.join(args.output_dir, "processed")
-    os.makedirs(processed_dir, exist_ok=True)
+    """Process videos without GUI updates using pathlib for filesystem operations."""
+    # Initialize paths
+    output_dir = Path(args.output_dir)
+    downloads_dir = output_dir / "downloads"
+    processed_dir = output_dir / "processed"
+    webdataset_dir = output_dir / "webdataset"
+    manifest_path = output_dir / "manifest.json"
+
+    # eBible Corpus
+    ebible_corpus_path = args.ebible_corpus_path
+    vref_text_path = ebible_corpus_path / "metadata" / "vref.txt"
+    ebible_translations_csv_path = ebible_corpus_path / "metadata" / "translations.csv"
+    ebible_text_path = ebible_corpus_path / "corpus" / f"{args.ebible_version}.txt"
+    if not ebible_corpus_path.is_dir():
+        raise ValueError(
+            f"eBible Corpus is not at {ebible_corpus_path}. Please clone it there or pass --ebible-corpus-path"
+        )
+
+    vref_map = load_vref_map(vref_text_path)
+    bible_verses = load_bible_lines(ebible_text_path)
+    print(f"Loading vref-to-index map from {vref_text_path}: {len(vref_map)} keys")
+    print(
+        f"Loading {args.ebible_version} verses from {ebible_text_path}: {len(bible_verses)} loaded"
+    )
+    ebible_translations_df = pd.read_csv(ebible_translations_csv_path)
+    print(
+        f"Loading translations info from {ebible_translations_csv_path}: {len(ebible_translations_df)} translations"
+    )
+
+    # Assert uniqueness of (languageCode, translationId)
+    # duplicates = ebible_translations_df.duplicated(subset=["languageCode", "translationId"], keep=False)
+    # assert not duplicates.any(), f"Duplicate rows found:\n{ebible_translations_df[duplicates]}"
+    language_code, translation_id = args.ebible_version.split("-")
+    ebible_version_metadata = search_ebible_translations(
+        language_code, translation_id, ebible_translations_df
+    )
+    print(f"Metadata for {args.ebible_version}: {ebible_version_metadata}")
+
+    # Create directories
+    downloads_dir.mkdir(parents=True, exist_ok=True)
+    processed_dir.mkdir(parents=True, exist_ok=True)
 
     # Step 1: Download videos
     print("=== Step 1: Downloading videos from DBL-sign ===")
@@ -918,41 +965,136 @@ def process_without_gui(args):
     print(video_info_list)
     print(json.dumps(video_info_list, indent=4))
 
+    # ---------------------------------------
+    # Parse verse data from metadata.xml
+    video_info_list_with_bible_refs = []
+    for video_info in video_info_list:
+        video_info["filename"] = Path(video_info["path"]).name
+        meta_xml = Path(video_info["path"]).parent / "metadata.xml"
+        print(f"Metadata for {video_info['path']}: {meta_xml}")
+
+        video_info["transcripts"] = []
+
+        video_info["bible-ref"] = parse_metadata_to_bible_ref(meta_xml, video_info)
+        # print(file_to_passage)
+        transcript = {}
+        bible_text, vrefs = citation_to_text_and_vrefs(
+            video_info["bible-ref"], vref_map=vref_map, bible_verses=bible_verses
+        )
+        video_info["biblenlp-vref"] = vrefs
+        transcript["bible_text"] = bible_text
+        # print(ebible_version_metadata)
+        # {'languageCode': 'eng', 'translationId': 'engbsb', 'languageName': 'English', 'languageNameInEnglish': 'English', 'dialect': nan, 'homeDomain': 'ebible.org', 'title': 'Berean Standard Bible', 'description': 'The Holy Bible in English: Berean Standard Bible', 'Redistributable': True, 'Copyright': 'public domain', 'UpdateDate': '2024-07-13', 'publicationURL': 'http://ebible.org/engbsb/', 'OTbooks': 39, 'OTchapters': 929, 'OTverses': 23145, 'NTbooks': 27, 'NTchapters': 260, 'NTverses': 7941, 'DCbooks': 0, 'DCchapters': 0, 'DCverses': 0, 'FCBHID': 'ENGBSB', 'Certified': True, 'inScript': 'http://eBible.org/study/?v1=GN1_1&w1=bible&t1=local%3A', 'swordName': 'engbsb2020eb', 'rodCode': nan, 'textDirection': 'ltr', 'downloadable': True, 'font': 'DejaVu Serif', 'shortTitle': 'English Berean Standard Bible', 'PODISBN': nan, 'script': 'Latin', 'sourceDate': '2024-07-13'}
+        transcript["language"] = {
+            "name": ebible_version_metadata["languageName"],
+            "ISO639-3": ebible_version_metadata["languageCode"],
+            "BCP-47": langcodes.standardize_tag(
+                ebible_version_metadata["languageCode"]
+            ),
+            "license": ebible_version_metadata["Copyright"],
+            "source": ebible_version_metadata["publicationURL"],
+            # "BCP-47": "en-US",
+        }
+        # transcript["source"] = "Berean Standard Bible"
+        transcript["source"] = ebible_version_metadata["title"]
+        video_info["transcripts"].append(transcript)
+        print(video_info)
+        # ebible_version_metadata
+
+        video_info_list_with_bible_refs.append(video_info)
+
+    video_info_list = video_info_list_with_bible_refs
+
     # Step 2: Process videos with sign-segmentation
     print("=== Step 2: Processing videos with sign-segmentation ===")
-    processor = SignSegmentationProcessor(processed_dir)
+    if args.auto_segment:
+        processor = SignSegmentationProcessor(processed_dir)
 
-    all_segments = []
-    random.shuffle(video_info_list)
-    for i, video_info in enumerate(video_info_list):
-        # Extract video path and metadata from the dictionary
-        video_path = video_info["path"]
-        metadata = video_info["metadata"]
+        # only keep the "Bible" or "Passage" videos
+        # won't work for eso
+        print("Filtering for 'Bible' or 'Passage' videos")
+        filtered_video_info_list = [
+            video_info
+            for video_info in video_info_list
+            if "Passage" in video_info["path"] or "Bible" in video_info["path"]
+        ]
+        print(f"{len(filtered_video_info_list)} videos left")
+        if len(filtered_video_info_list) == 0:
+            print(
+                "Project has no matching videos with those keywords keeping the whole list"
+            )
+        else:
+            video_info_list = filtered_video_info_list
 
-        # Verify video path is valid
-        if not video_path or not os.path.exists(video_path):
-            print(f"Skipping invalid video path: {video_path}")
-            continue
+        all_segments = []
+        for i, video_info in enumerate(video_info_list[:2]):
+            video_path = Path(video_info["path"])
+            metadata = video_info["metadata"]
 
-        segments = processor.process_video(video_path, metadata)
-        all_segments.extend(segments)
-    print(all_segments)
-    exit()
-    # Step 3: Create WebDataset
+            if not video_path.exists():
+                print(f"Skipping invalid video path {i}: {video_path}")
+                continue
+
+            segments = processor.process_video(video_path, metadata)
+            all_segments.extend(segments)
+
+        print(f"{len(all_segments)} segments")
+    else:
+        print("--auto-segment not set, returning original files")
+        all_segments = []
+        for video_info in video_info_list:
+            video_path = Path(video_info["path"])
+            del video_info["path"]
+            video_info["pose"] = {}
+
+            files_to_add = []
+            pose_animation_path = video_path.with_suffix(".pose-animation.mp4")
+            if pose_animation_path.is_file():
+                video_info["pose"]["animation"] = str(pose_animation_path.name)
+                files_to_add.append(("pose-animation.mp4", str(pose_animation_path)))
+
+            dw_pose_path = video_path.with_suffix(".pose-dwpose.npz")
+            if dw_pose_path.is_file():
+                video_info["pose"]["dwpose"] = str(dw_pose_path.name)
+                files_to_add.append(("pose-dwpose.npz", str(dw_pose_path)))
+
+            mediapipe_path = video_path.with_suffix(".pose")
+            if mediapipe_path.is_file():
+                video_info["pose"]["mediapipe"] = str(mediapipe_path.name)
+                files_to_add.append(("pose", str(mediapipe_path)))
+
+            print(video_info)
+
+            segment_info = {
+                "segment_name": video_path.stem,
+                "original": str(video_path),
+                "segment_path": str(
+                    video_path
+                ),  # Use original path as the main segment path
+                "segment_metadata": {
+                    **video_info,
+                    "segment_index": 0,
+                    "segment_count": 1,
+                    "segment_name": video_path.stem,
+                    "video_name": video_path.stem,
+                },
+                "files_to_add": files_to_add,
+            }
+
+            print(segment_info)
+            all_segments.append(segment_info)
+
+    # Step #: Create WebDatasetF
     print("=== Step 3: Creating WebDataset ===")
-    webdataset_dir = os.path.join(args.output_dir, "webdataset")
-    os.makedirs(webdataset_dir, exist_ok=True)
+    webdataset_dir.mkdir(parents=True, exist_ok=True)
+    print(webdataset_dir.resolve())
 
-    # Create WebDataset
     creator = WebDatasetCreator(webdataset_dir)
     creator.create_webdataset(all_segments, shard_size=args.shard_size)
 
     # Step 4: Create manifest
     print("=== Step 4: Creating manifest ===")
-    manifest_path = os.path.join(args.output_dir, "manifest.json")
-
-    # Create manifest
-    with open(manifest_path, "w", encoding="utf-8") as f:
+    with manifest_path.open("w", encoding="utf-8") as f:
         json.dump({"segments": all_segments}, f, indent=2)
 
     print(f"Processing complete! Manifest saved to {manifest_path}")
@@ -968,6 +1110,23 @@ def main():
     )
     parser.add_argument("--language-code", type=str, help="Filter by language code")
     parser.add_argument("--project-name", type=str, help="Filter by project name")
+    parser.add_argument(
+        "--auto-segment",
+        type=str,
+        help="Use autosegmentation from sign-language-processing",
+    )
+    parser.add_argument(
+        "--ebible-corpus-path",
+        type=Path,
+        help="Root directory of the eBible corpus. https://github.com/BibleNLP/ebible",
+        default=Path(parent_dir) / "ebible/",
+    )
+    parser.add_argument(
+        "--ebible-version",
+        type=str,
+        help="Which Bible from the eBible corpus to use for verse texts",
+        default="eng-engbsb",
+    )
 
     parser.add_argument(
         "--output-dir", type=str, default="output", help="Output directory"
