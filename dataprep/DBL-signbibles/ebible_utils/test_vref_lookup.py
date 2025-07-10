@@ -1,14 +1,13 @@
-import pytest
 from pathlib import Path
+
+import pytest
 from vref_lookup import (
-    load_vref_map,
+    citation_to_text_and_vrefs,
     load_bible_lines,
     load_usfm_book_map,
-    citation_to_text_and_vrefs,
+    load_vref_map,
+    normalize_book_names,
 )
-
-
-from vref_lookup import normalize_book_names
 
 
 @pytest.fixture(scope="session")
@@ -40,9 +39,7 @@ def test_normalize_book_names(original, expected, book_map):
 def resources():
     base_dir = Path(__file__).parent / "data"
     vref_path = base_dir / "vref.txt"
-    bible_path = (
-        base_dir / "eng-engbsb.txt"
-    )  # eBible-style, 1 verse per line, order matching vref.txt
+    bible_path = base_dir / "eng-engbsb.txt"  # eBible-style, 1 verse per line, order matching vref.txt
     usfm_csv_path = base_dir / "usfm_book_identifiers.csv"
 
     assert vref_path.exists(), f"Missing: {vref_path}"
@@ -135,9 +132,7 @@ def test_citation_to_text_and_vrefs(citation, expected_refs, resources):
 
     missing_refs = [ref for ref in expected_refs if ref not in vref_map]
     if missing_refs:
-        pytest.skip(
-            f"Skipping test because these refs are missing from vref_map: {missing_refs}"
-        )
+        pytest.skip(f"Skipping test because these refs are missing from vref_map: {missing_refs}")
 
     expected_indices = sorted(vref_map[ref] for ref in expected_refs)
     assert matched_indices == expected_indices, (

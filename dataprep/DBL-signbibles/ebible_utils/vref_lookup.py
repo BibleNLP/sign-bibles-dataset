@@ -1,15 +1,14 @@
 # vref_lookup.py
-import re
-from typing import List, Dict
 import csv
+import re
 
 
-def load_vref_map(vref_path: str) -> Dict[str, int]:
+def load_vref_map(vref_path: str) -> dict[str, int]:
     with open(vref_path, encoding="utf-8") as f:
         return {line.strip(): idx for idx, line in enumerate(f) if line.strip()}
 
 
-def load_bible_lines(bible_path: str) -> List[str]:
+def load_bible_lines(bible_path: str) -> list[str]:
     with open(bible_path, encoding="utf-8") as f:
         return [line.strip() for line in f]
 
@@ -60,7 +59,7 @@ def expand_compound_citations(citation: str) -> str:
     return "; ".join(expanded)
 
 
-def parse_citation_string(citation: str, vref_map: Dict[str, int]) -> List[int]:
+def parse_citation_string(citation: str, vref_map: dict[str, int]) -> list[int]:
     all_indices = []
     current_book = None
     current_chapter = None
@@ -77,23 +76,17 @@ def parse_citation_string(citation: str, vref_map: Dict[str, int]) -> List[int]:
             current_book = book
             current_chapter = chapter
             prefix = f"{book} {chapter}:"
-            all_indices.extend(
-                i for ref, i in vref_map.items() if ref.startswith(prefix)
-            )
+            all_indices.extend(i for ref, i in vref_map.items() if ref.startswith(prefix))
             continue
 
         m = re.fullmatch(r"([1-3]?[A-Z]+)", token)
         if m:
             book = m.group(1)
             current_book = book
-            all_indices.extend(
-                i for ref, i in vref_map.items() if ref.startswith(f"{book} ")
-            )
+            all_indices.extend(i for ref, i in vref_map.items() if ref.startswith(f"{book} "))
             continue
 
-        m = re.fullmatch(
-            r"([1-3]?[A-Z]+)?\s*(\d+:\d+)\s*-\s*([1-3]?[A-Z]+)?\s*(\d+:\d+)", token
-        )
+        m = re.fullmatch(r"([1-3]?[A-Z]+)?\s*(\d+:\d+)\s*-\s*([1-3]?[A-Z]+)?\s*(\d+:\d+)", token)
         if m:
             book1, start, book2, end = m.groups()
             if book1:
@@ -155,7 +148,7 @@ def citation_to_text_and_vrefs(
     return "".join(verses), vrefs
 
 
-def load_usfm_book_map(csv_path: str) -> Dict[str, str]:
+def load_usfm_book_map(csv_path: str) -> dict[str, str]:
     """
     Load a mapping from English book names (like 'Genesis') to USFM codes (like 'GEN').
     Also handles books with numeric prefixes like '1 Samuel' -> '1SA'.
@@ -182,7 +175,7 @@ def load_usfm_book_map(csv_path: str) -> Dict[str, str]:
     return book_map
 
 
-def normalize_book_names(citation: str, book_map: Dict[str, str]) -> str:
+def normalize_book_names(citation: str, book_map: dict[str, str]) -> str:
     """
     Replace human-readable book names with USFM codes (e.g., 'Genesis' -> 'GEN')
     so that we can match against vref.txt properly.

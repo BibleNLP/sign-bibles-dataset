@@ -28,21 +28,18 @@ def process_first_ocr_textchanges_csv(directory: Path) -> None:
         pd.errors.EmptyDataError: If the selected CSV file is empty.
         pd.errors.ParserError: If pandas encounters an error parsing the CSV file.
         Exception: For any other unexpected errors during the process.
+
     """
     # Validate that the provided path is indeed an existing directory
     if not directory.is_dir():
-        logging.error(
-            f"Error: Directory '{directory}' does not exist or is not a directory."
-        )
+        logging.error(f"Error: Directory '{directory}' does not exist or is not a directory.")
         return
 
-    logging.info(
-        f"Starting search for '*.ocr.textchanges.csv' files in '{directory}'..."
-    )
+    logging.info(f"Starting search for '*.ocr.textchanges.csv' files in '{directory}'...")
     try:
         # Recursively find all files matching the pattern and sort them alphabetically.
         # This ensures consistent selection order.
-        ocr_files = sorted(list(directory.rglob("*.ocr.textchanges.csv")))
+        ocr_files = sorted(directory.rglob("*.ocr.textchanges.csv"))
         logging.info(f"Found {len(ocr_files)} files")
 
         # Check if any files were found at all
@@ -64,13 +61,9 @@ def process_first_ocr_textchanges_csv(directory: Path) -> None:
             # Check if the output file already exists
             if not output_path.exists():
                 logging.info(f"Selected file: '{current_file.relative_to(directory)}'")
-                logging.info(
-                    f"Output file '{output_path.relative_to(directory)}' does not exist. Processing..."
-                )
+                logging.info(f"Output file '{output_path.relative_to(directory)}' does not exist. Processing...")
 
-                logging.info(
-                    f"Loading data from '{current_file.relative_to(directory)}'..."
-                )
+                logging.info(f"Loading data from '{current_file.relative_to(directory)}'...")
                 # Read the CSV file into a pandas DataFrame
                 df = pd.read_csv(current_file)
 
@@ -85,21 +78,15 @@ def process_first_ocr_textchanges_csv(directory: Path) -> None:
 
                 # ✅ Edit 4: Strip trailing 'oooo' or similar patterns (case-insensitive, 3+ 'o's) and anything after
                 # e.g. Doooo, oooo
-                df["text"] = (
-                    df["text"].str.replace(r"[Oo]{3,}.*$", "", regex=True).str.strip()
-                )
+                df["text"] = df["text"].str.replace(r"[Oo]{3,}.*$", "", regex=True).str.strip()
 
-                logging.info(
-                    f"Saving data to '{output_path.relative_to(directory)}'..."
-                )
+                logging.info(f"Saving data to '{output_path.relative_to(directory)}'...")
                 # Save the DataFrame to the new CSV file.
                 # `index=False` prevents pandas from writing the DataFrame index as a column.
                 df.to_csv(output_path, index=False)
 
                 # Print the full, absolute path of the newly created file
-                logging.info(
-                    f"Successfully created and saved: \n{output_path.resolve()}"
-                )
+                logging.info(f"Successfully created and saved: \n{output_path.resolve()}")
                 logging.info(
                     f"Original file should be at \n{str(output_path.resolve()).replace('.ocr.manualedit.csv', '.mp4')}"
                 )
@@ -124,13 +111,10 @@ def process_first_ocr_textchanges_csv(directory: Path) -> None:
             "This might indicate an issue with file access or a race condition."
         )
     except pd.errors.EmptyDataError:
-        logging.error(
-            f"Error: The selected file '{current_file.relative_to(directory)}' is empty."
-        )
+        logging.error(f"Error: The selected file '{current_file.relative_to(directory)}' is empty.")
     except pd.errors.ParserError:
         logging.error(
-            f"Error: Could not parse '{current_file.relative_to(directory)}'. "
-            f"Please check if it is a valid CSV file."
+            f"Error: Could not parse '{current_file.relative_to(directory)}'. Please check if it is a valid CSV file."
         )
     except Exception as e:
         # Catch any other unexpected errors and log them
