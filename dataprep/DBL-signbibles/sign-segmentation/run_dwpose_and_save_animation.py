@@ -9,6 +9,7 @@ import matplotlib
 from dotenv import load_dotenv
 import argparse
 
+
 # Load environment variables from .env
 load_dotenv()
 
@@ -106,16 +107,20 @@ def pose_estimate_with_candidates(image: np.ndarray):
     H, W, _ = oriImg.shape
 
     with torch.no_grad():
-        candidate, subset = pose_estimator(oriImg)
+        keypoints, scores = pose_estimator(oriImg)
+        candidate_keypoints = keypoints.copy()
+        subset_scores = scores.copy()
 
         # Normalize coordinates to [0, 1]
-        candidate[..., 0] /= float(W)
-        candidate[..., 1] /= float(H)
+        candidate_keypoints[..., 0] /= float(W)
+        candidate_keypoints[..., 1] /= float(H)
 
-        body = candidate[:, :18].copy()
-        body = body.reshape(candidate.shape[0] * 18, candidate.shape[2])
+        body = candidate_keypoints[:, :18].copy()
+        body = body.reshape(
+            candidate_keypoints.shape[0] * 18, candidate_keypoints.shape[2]
+        )
 
-        score = subset[:, :18]
+        score = subset_scores[:, :18]
         for i in range(len(score)):
             for j in range(len(score[i])):
                 if score[i][j] > 0.3:
@@ -123,12 +128,14 @@ def pose_estimate_with_candidates(image: np.ndarray):
                 else:
                     score[i][j] = -1
 
-        un_visible = subset < 0.3
-        candidate[un_visible] = -1
+        un_visible = subset_scores < 0.3
+        candidate_keypoints[un_visible] = -1
 
-        foot = candidate[:, 18:24]
-        faces = candidate[:, 24:92]
-        hands = np.vstack([candidate[:, 92:113], candidate[:, 113:]])
+        foot = candidate_keypoints[:, 18:24]
+        faces = candidate_keypoints[:, 24:92]
+        hands = np.vstack(
+            [candidate_keypoints[:, 92:113], candidate_keypoints[:, 113:]]
+        )
 
         bodies = dict(candidate=body, subset=score)
         pose = dict(bodies=bodies, hands=hands, faces=faces)
@@ -137,13 +144,11 @@ def pose_estimate_with_candidates(image: np.ndarray):
         # canvas = util.draw_bodypose(np.zeros((H, W, 3), dtype=np.uint8), body, score)
         # canvas = util.draw_facepose(canvas, faces)
         # canvas = canvas  # (skip hand drawing for now if you want)
-        canvas = draw_pose(pose, H, W, hand_scores=[subset[:, 92:113], subset[:, 113:]])
+        canvas = draw_pose(
+            pose, H, W, hand_scores=[subset_scores[:, 92:113], subset_scores[:, 113:]]
+        )
 
-        return canvas, candidate
-
-
-from pathlib import Path
-import numpy as np
+        return canvas, keypoints, scores
 
 
 def run_pose_and_save(video_path: Path, output_dir: Path, overwrite=False) -> None:
@@ -167,6 +172,7 @@ def run_pose_and_save(video_path: Path, output_dir: Path, overwrite=False) -> No
     writer = cv2.VideoWriter(str(animation_path), fourcc, fps, (width, height))
 
     poses = []
+    confidences = []
     iterator = range(total_frames)
     if total_frames > 1000:
         iterator = tqdm(iterator, desc=f"Processing {video_stem}", unit="frame")
@@ -177,23 +183,35 @@ def run_pose_and_save(video_path: Path, output_dir: Path, overwrite=False) -> No
             break
 
         rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-        skeleton_frame, candidate = pose_estimate_with_candidates(rgb_frame)
+        skeleton_frame, candidate, confidence = pose_estimate_with_candidates(rgb_frame)
 
         if candidate.shape[0] < 1:
             candidate = np.full((1, 134, 2), np.nan)
         elif candidate.shape[0] > 1:
             candidate = candidate[:1]
 
+        if confidence.shape[0] < 1:
+            confidence = np.full((1, 134), np.nan)
+        elif confidence.shape[0] > 1:
+            confidence = confidence[:1]
+
         assert candidate.shape == (1, 134, 2), f"Unexpected shape: {candidate.shape}"
         poses.append(candidate)
+
+        assert confidence.shape == (1, 134), confidence.shape
+        confidences.append(confidence)
 
         writer.write(skeleton_frame)
 
     writer.release()
     cap.release()
 
+    # Convert lists to arrays with appropriate dtype
     frames_array = np.array(poses, dtype=np.float64)  # Shape: (N, 1, 134, 2)
-    np.savez_compressed(pose_npz_path, frames=frames_array)
+    conf_array = np.array(confidences, dtype=np.float64)  # Shape: (N, 1, 134)
+
+    # Save both arrays into a compressed .npz file
+    np.savez_compressed(pose_npz_path, frames=frames_array, confidences=conf_array)
     print(f"Saved pose animation to {animation_path}")
     print(f"Saved pose data to {pose_npz_path}")
 
