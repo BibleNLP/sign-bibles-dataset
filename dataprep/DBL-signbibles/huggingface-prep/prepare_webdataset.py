@@ -7,30 +7,25 @@ This script:
 3. Packages everything into WebDataset format
 """
 
-import os
+import argparse
+import importlib.util
 import io
 import json
-import tarfile
-from typing import List, Dict, Any
-from typing import Optional
-import pandas as pd
-import argparse
-import json
-import re
-from pathlib import Path
 import os
-import sys
+import re
 import shutil
+import sys
+import tarfile
+import time
+import xml.etree.ElementTree as ET
+from pathlib import Path
+from typing import Any
+
 import cv2
 import langcodes
+import pandas as pd
 import requests
-import time
-import importlib.util
-import tarfile
-import random
-import io
 from processing_logger import ProcessingLogger
-import xml.etree.ElementTree as ET
 
 # Initialize the logger with the correct path
 logger = ProcessingLogger(log_file_path="./output/run_log.txt")
@@ -53,9 +48,7 @@ sys.path.append(sign_seg_dir)
 # Import manifest generator functions - using a different import approach
 # since the file has a dash in the name
 manifest_generator_path = os.path.join(dbl_sign_dir, "DBL-manifest-generator.py")
-manifest_generator_spec = importlib.util.spec_from_file_location(
-    "DBL_manifest_generator", manifest_generator_path
-)
+manifest_generator_spec = importlib.util.spec_from_file_location("DBL_manifest_generator", manifest_generator_path)
 manifest_generator = importlib.util.module_from_spec(manifest_generator_spec)
 manifest_generator_spec.loader.exec_module(manifest_generator)
 
@@ -71,6 +64,7 @@ def import_module_from_file(module_name, file_path):
 
     Returns:
         Imported module
+
     """
     try:
         if not os.path.exists(file_path):
@@ -92,12 +86,12 @@ def import_module_from_file(module_name, file_path):
         try:
             spec.loader.exec_module(module)
         except Exception as e:
-            print(f"Error executing module {module_name} from {file_path}: {str(e)}")
+            print(f"Error executing module {module_name} from {file_path}: {e!s}")
             return None
 
         return module
     except Exception as e:
-        print(f"Error importing module {module_name} from {file_path}: {str(e)}")
+        print(f"Error importing module {module_name} from {file_path}: {e!s}")
         return None
 
 
@@ -301,7 +295,7 @@ class DBLSignDownloader:
         print("Fresh manifest generated successfully.")
 
         # Load the newly generated manifest
-        with open(self.manifest_path, "r", encoding="utf-8") as f:
+        with open(self.manifest_path, encoding="utf-8") as f:
             self.manifest = json.load(f)
 
         return self.manifest
@@ -319,7 +313,7 @@ class DBLSignDownloader:
             return self.generate_fresh_manifest()
 
         print("Loading existing manifest...")
-        with open(self.manifest_path, "r", encoding="utf-8") as f:
+        with open(self.manifest_path, encoding="utf-8") as f:
             self.manifest = json.load(f)
 
         return self.manifest
@@ -342,6 +336,7 @@ class DBLSignDownloader:
 
         Returns:
             List of dictionaries with video information
+
         """
         if "languages" not in self.manifest:
             raise ValueError("Invalid manifest structure: 'languages' key not found")
@@ -360,11 +355,7 @@ class DBLSignDownloader:
                     continue
 
                 # Count MP4 files in this project
-                mp4_count = sum(
-                    1
-                    for file_info in proj_info["files"]
-                    if file_info["filename"].lower().endswith(".mp4")
-                )
+                mp4_count = sum(1 for file_info in proj_info["files"] if file_info["filename"].lower().endswith(".mp4"))
 
                 if mp4_count > 0:
                     filtered_projects.append((lang_code, proj_name, proj_info))
@@ -401,15 +392,11 @@ class DBLSignDownloader:
             }
 
             # Save metadata
-            with open(
-                os.path.join(project_dir, "metadata.json"), "w", encoding="utf-8"
-            ) as f:
+            with open(os.path.join(project_dir, "metadata.json"), "w", encoding="utf-8") as f:
                 json.dump(metadata, f, indent=2)
 
             # Download MP4 files
-            mp4_files = [
-                f for f in proj_info["files"] if f["filename"].lower().endswith(".mp4")
-            ]
+            mp4_files = [f for f in proj_info["files"] if f["filename"].lower().endswith(".mp4")]
             for j, file_info in enumerate(mp4_files):
                 if videos_downloaded >= num_videos:
                     break
@@ -486,17 +473,11 @@ class SignSegmentationProcessor:
 
         # Verify sign-segmentation directory exists
         if not os.path.exists(self.sign_seg_dir):
-            print(
-                f"Warning: sign-segmentation directory not found at {self.sign_seg_dir}"
-            )
+            print(f"Warning: sign-segmentation directory not found at {self.sign_seg_dir}")
             # Try to find it in the current directory
-            alt_path = os.path.join(
-                os.path.dirname(os.path.abspath(__file__)), "sign-segmentation"
-            )
+            alt_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "sign-segmentation")
             if os.path.exists(alt_path):
-                print(
-                    f"Found sign-segmentation directory at alternate location: {alt_path}"
-                )
+                print(f"Found sign-segmentation directory at alternate location: {alt_path}")
                 self.sign_seg_dir = alt_path
 
         # Verify required script files exist
@@ -515,12 +496,11 @@ class SignSegmentationProcessor:
         try:
             self.segment_video = import_module_from_file(
                 "segment_video",
-                required_scripts["segment_video.py"]
-                or os.path.join(self.sign_seg_dir, "segment_video.py"),
+                required_scripts["segment_video.py"] or os.path.join(self.sign_seg_dir, "segment_video.py"),
             )
             print("Successfully imported segment_video module")
         except Exception as e:
-            print(f"Error importing segment_video module: {str(e)}")
+            print(f"Error importing segment_video module: {e!s}")
             self.segment_video = None
 
     def process_video(self, video_path, metadata):
@@ -533,6 +513,7 @@ class SignSegmentationProcessor:
 
         Returns:
             List of dictionaries with segment information
+
         """
         # Verify that the video file exists
         if not video_path or video_path == "path" or not os.path.exists(video_path):
@@ -552,19 +533,11 @@ class SignSegmentationProcessor:
             print(f"Looking for pre-existing segments for {video_path}...")
             video_name = os.path.splitext(os.path.basename(video_path))[0]
 
-            segment_files = [
-                f
-                for f in os.listdir(segments_dir)
-                if f.endswith(".mp4") and video_name in f
-            ]
+            segment_files = [f for f in os.listdir(segments_dir) if f.endswith(".mp4") and video_name in f]
             if segment_files:
-                print(
-                    f"Found {len(segment_files)} pre-existing segments in {segments_dir}"
-                )
+                print(f"Found {len(segment_files)} pre-existing segments in {segments_dir}")
                 # Process these segments
-                return self._process_existing_segments(
-                    segments_dir, segment_files, video_name, metadata
-                )
+                return self._process_existing_segments(segments_dir, segment_files, video_name, metadata)
 
             print(f"No pre-existing segments found for {video_path}")
             return []
@@ -595,11 +568,7 @@ class SignSegmentationProcessor:
 
         # Check if any segments were created
 
-        segment_files = [
-            f
-            for f in os.listdir(segments_dir)
-            if f.endswith(".mp4") and video_name in f
-        ]
+        segment_files = [f for f in os.listdir(segments_dir) if f.endswith(".mp4") and video_name in f]
         print(f"Found {len(segment_files)} segments in {segments_dir}")
 
         if not segment_files:
@@ -607,13 +576,9 @@ class SignSegmentationProcessor:
             return []
 
         # Process the segments
-        return self._process_existing_segments(
-            segments_dir, segment_files, video_name, metadata
-        )
+        return self._process_existing_segments(segments_dir, segment_files, video_name, metadata)
 
-    def _process_existing_segments(
-        self, segments_dir, segment_files, video_name, metadata
-    ):
+    def _process_existing_segments(self, segments_dir, segment_files, video_name, metadata):
         """
         Process existing segment files without running segmentation.
 
@@ -625,6 +590,7 @@ class SignSegmentationProcessor:
 
         Returns:
             List of dictionaries with segment information
+
         """
         print(f"Processing {len(segment_files)} pre-existing segments")
         segments_info = []
@@ -634,16 +600,11 @@ class SignSegmentationProcessor:
         for segment_file in segment_files:
             base_name = os.path.basename(segment_file)
             # Skip files that already have processing suffixes
-            if any(
-                suffix in base_name
-                for suffix in [".original.", ".pose.", ".mask.", ".segmentation."]
-            ):
+            if any(suffix in base_name for suffix in [".original.", ".pose.", ".mask.", ".segmentation."]):
                 continue
             filtered_segment_files.append(segment_file)
 
-        print(
-            f"Found {len(filtered_segment_files)} segments to process after filtering"
-        )
+        print(f"Found {len(filtered_segment_files)} segments to process after filtering")
 
         for i, segment_file in enumerate(filtered_segment_files):
             segment_name = os.path.basename(segment_file).replace(".mp4", "")
@@ -651,9 +612,7 @@ class SignSegmentationProcessor:
 
             # Skip if the segment file doesn't exist
             if not os.path.exists(segment_path):
-                logger.log_warning(
-                    f"Segment file does not exist: {segment_path}", segment_name
-                )
+                logger.log_warning(f"Segment file does not exist: {segment_path}", segment_name)
                 continue
 
             original_path = os.path.join(segments_dir, f"{segment_name}.original.mp4")
@@ -701,21 +660,14 @@ class WebDatasetCreator:
         self.output_dir = Path(output_dir)
         self.output_dir.mkdir(parents=True, exist_ok=True)
 
-    def create_webdataset(
-        self, segments_info: List[Dict[str, Any]], shard_size: int = 1000
-    ) -> List[str]:
+    def create_webdataset(self, segments_info: list[dict[str, Any]], shard_size: int = 1000) -> list[str]:
         shards = self._split_into_shards(segments_info, shard_size)
         return self._write_shards(shards)
 
-    def _split_into_shards(
-        self, segments_info: List[Dict[str, Any]], shard_size: int
-    ) -> List[List[Dict[str, Any]]]:
-        return [
-            segments_info[i : i + shard_size]
-            for i in range(0, len(segments_info), shard_size)
-        ]
+    def _split_into_shards(self, segments_info: list[dict[str, Any]], shard_size: int) -> list[list[dict[str, Any]]]:
+        return [segments_info[i : i + shard_size] for i in range(0, len(segments_info), shard_size)]
 
-    def _write_shards(self, shards: List[List[Dict[str, Any]]]) -> List[str]:
+    def _write_shards(self, shards: list[list[dict[str, Any]]]) -> list[str]:
         shard_paths = []
 
         for shard_index, shard in enumerate(shards):
@@ -730,9 +682,7 @@ class WebDatasetCreator:
 
         return shard_paths
 
-    def _build_sample(
-        self, segment_info: Dict[str, Any], shard_index: int
-    ) -> Dict[str, str | Path]:
+    def _build_sample(self, segment_info: dict[str, Any], shard_index: int) -> dict[str, str | Path]:
         print(json.dumps(segment_info, indent=2))
         sample = {}
 
@@ -752,7 +702,7 @@ class WebDatasetCreator:
     def _add_sample_to_tar(
         self,
         tar: tarfile.TarFile,
-        sample: Dict[str, str | Path],
+        sample: dict[str, str | Path],
         segment_name: str,
     ):
         for ext, content in sample.items():
@@ -806,7 +756,7 @@ def parse_metadata_to_bible_ref(xml_path: Path, filename):
 
 def search_ebible_translations(
     language_code: str, translation_id: str, ebible_translations_df: pd.DataFrame
-) -> Optional[dict]:
+) -> dict | None:
     result = ebible_translations_df[
         (ebible_translations_df["languageCode"] == language_code)
         & (ebible_translations_df["translationId"] == translation_id)
@@ -815,9 +765,7 @@ def search_ebible_translations(
         print(f"No results found for ({language_code}, {translation_id})")
         return None
     elif len(result) > 1:
-        print(
-            f"Warning: Multiple results found for ({language_code}, {translation_id}), returning the first."
-        )
+        print(f"Warning: Multiple results found for ({language_code}, {translation_id}), returning the first.")
 
     return result.iloc[0].to_dict()
 
@@ -861,9 +809,7 @@ def parse_citation_string(citation: str, vref_map: dict[str, int]) -> list[int]:
             all_indices.extend(matches)
             continue
 
-        m = re.fullmatch(
-            r"([1-3]?[A-Z]+)?\s*(\d+:\d+)\s*-\s*([1-3]?[A-Z]+)?\s*(\d+:\d+)", token
-        )
+        m = re.fullmatch(r"([1-3]?[A-Z]+)?\s*(\d+:\d+)\s*-\s*([1-3]?[A-Z]+)?\s*(\d+:\d+)", token)
         if m:
             book1, start, book2, end = m.groups()
             if book1:
@@ -935,21 +881,15 @@ def process_without_gui(args):
     vref_map = load_vref_map(vref_text_path)
     bible_verses = load_bible_lines(ebible_text_path)
     print(f"Loading vref-to-index map from {vref_text_path}: {len(vref_map)} keys")
-    print(
-        f"Loading {args.ebible_version} verses from {ebible_text_path}: {len(bible_verses)} loaded"
-    )
+    print(f"Loading {args.ebible_version} verses from {ebible_text_path}: {len(bible_verses)} loaded")
     ebible_translations_df = pd.read_csv(ebible_translations_csv_path)
-    print(
-        f"Loading translations info from {ebible_translations_csv_path}: {len(ebible_translations_df)} translations"
-    )
+    print(f"Loading translations info from {ebible_translations_csv_path}: {len(ebible_translations_df)} translations")
 
     # Assert uniqueness of (languageCode, translationId)
     # duplicates = ebible_translations_df.duplicated(subset=["languageCode", "translationId"], keep=False)
     # assert not duplicates.any(), f"Duplicate rows found:\n{ebible_translations_df[duplicates]}"
     language_code, translation_id = args.ebible_version.split("-")
-    ebible_version_metadata = search_ebible_translations(
-        language_code, translation_id, ebible_translations_df
-    )
+    ebible_version_metadata = search_ebible_translations(language_code, translation_id, ebible_translations_df)
     print(f"Metadata for {args.ebible_version}: {ebible_version_metadata}")
 
     # Create directories
@@ -959,9 +899,7 @@ def process_without_gui(args):
     # Step 1: Download videos
     print("=== Step 1: Downloading videos from DBL-sign ===")
     downloader = DBLSignDownloader(downloads_dir)
-    video_info_list = downloader.download_videos(
-        args.num_videos, args.language_code, args.project_name
-    )
+    video_info_list = downloader.download_videos(args.num_videos, args.language_code, args.project_name)
     print(video_info_list)
     print(json.dumps(video_info_list, indent=4))
 
@@ -988,9 +926,7 @@ def process_without_gui(args):
         transcript["language"] = {
             "name": ebible_version_metadata["languageName"],
             "ISO639-3": ebible_version_metadata["languageCode"],
-            "BCP-47": langcodes.standardize_tag(
-                ebible_version_metadata["languageCode"]
-            ),
+            "BCP-47": langcodes.standardize_tag(ebible_version_metadata["languageCode"]),
             "license": ebible_version_metadata["Copyright"],
             "source": ebible_version_metadata["publicationURL"],
             # "BCP-47": "en-US",
@@ -1020,9 +956,7 @@ def process_without_gui(args):
         ]
         print(f"{len(filtered_video_info_list)} videos left")
         if len(filtered_video_info_list) == 0:
-            print(
-                "Project has no matching videos with those keywords keeping the whole list"
-            )
+            print("Project has no matching videos with those keywords keeping the whole list")
         else:
             video_info_list = filtered_video_info_list
 
@@ -1068,9 +1002,7 @@ def process_without_gui(args):
             segment_info = {
                 "segment_name": video_path.stem,
                 "original": str(video_path),
-                "segment_path": str(
-                    video_path
-                ),  # Use original path as the main segment path
+                "segment_path": str(video_path),  # Use original path as the main segment path
                 "segment_metadata": {
                     **video_info,
                     "segment_index": 0,
@@ -1102,12 +1034,8 @@ def process_without_gui(args):
 
 def main():
     """Main function to run the entire process."""
-    parser = argparse.ArgumentParser(
-        description="Prepare sign language videos for HuggingFace datasets"
-    )
-    parser.add_argument(
-        "--num-videos", type=int, default=10, help="Number of videos to download"
-    )
+    parser = argparse.ArgumentParser(description="Prepare sign language videos for HuggingFace datasets")
+    parser.add_argument("--num-videos", type=int, default=10, help="Number of videos to download")
     parser.add_argument("--language-code", type=str, help="Filter by language code")
     parser.add_argument("--project-name", type=str, help="Filter by project name")
     parser.add_argument(
@@ -1128,9 +1056,7 @@ def main():
         default="eng-engbsb",
     )
 
-    parser.add_argument(
-        "--output-dir", type=str, default="output", help="Output directory"
-    )
+    parser.add_argument("--output-dir", type=str, default="output", help="Output directory")
     parser.add_argument(
         "--shard-size",
         type=int,
