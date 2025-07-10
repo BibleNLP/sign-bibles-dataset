@@ -73,9 +73,6 @@ def collect_grouped_metadata(base_dir: Path):
     return grouped
 
 
-
-
-
 def main():
     parser = argparse.ArgumentParser(
         description="Associate sign Bible videos with their scripture passages."

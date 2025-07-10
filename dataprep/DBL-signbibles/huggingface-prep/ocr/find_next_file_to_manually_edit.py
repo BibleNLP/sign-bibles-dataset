@@ -74,6 +74,21 @@ def process_first_ocr_textchanges_csv(directory: Path) -> None:
                 # Read the CSV file into a pandas DataFrame
                 df = pd.read_csv(current_file)
 
+                # ✅ Edit 1: Read CSV with specific dtypes
+                df = pd.read_csv(current_file, dtype={"frame_index": int, "text": str})
+
+                # ✅ Edit 2: Sort by frame_index ascending
+                df = df.sort_values("frame_index", ascending=True)
+
+                # Replace periods with colons in the 'text' column
+                df["text"] = df["text"].str.replace(".", ":", regex=False)
+
+                # ✅ Edit 4: Strip trailing 'oooo' or similar patterns (case-insensitive, 3+ 'o's) and anything after
+                # e.g. Doooo, oooo
+                df["text"] = (
+                    df["text"].str.replace(r"[Oo]{3,}.*$", "", regex=True).str.strip()
+                )
+
                 logging.info(
                     f"Saving data to '{output_path.relative_to(directory)}'..."
                 )

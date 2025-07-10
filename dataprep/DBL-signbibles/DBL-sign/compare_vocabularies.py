@@ -96,5 +96,10 @@ if __name__ == "__main__":
 
 # PopSign Vocab Overlap
 # find /opt/home/cleong/projects/semantic_and_visual_similarity/local_data/PopSignASL/test -mindepth 1 -maxdepth 1  -type d|cut -d "/" -f10 > /opt/home/cleong/projects/semantic_and_visual_similarity/local_data/PopSignASL/foldernames.csv
-# then manually add "NAME" at the top of the file... 
-# 
+# then manually add "NAME" at the top of the file...
+#
+
+
+# key terms list
+# find /opt/home/cleong/projects/semantic_and_visual_similarity/local_data/eBible/ebible/corpus/ -name "*eng-*.txt"|parallel -j4 python compare_vocabularies.py /opt/home/cleong/projects/semantic_and_visual_similarity/sign-bibles-dataset/dataprep/DBL-signbibles/unfolding_word_key_terms.csv TRANSLATION_WORD "{}" --out "{/.}_vs_unfoldingwordkeyterms_vocab_overlap.txt"
+# conda activate /opt/home/cleong/envs/sign-bibles-dataset/ && cd /opt/home/cleong/projects/semantic_and_visual_similarity/sign-bibles-dataset/dataprep/DBL-signbibles/DBL-sign && find /opt/home/cleong/projects/semantic_and_visual_similarity/local_data/eBible/ebible/corpus/ -name "*eng-*.txt"|parallel -j4 python compare_vocabularies.py /opt/home/cleong/projects/semantic_and_visual_similarity/sign-bibles-dataset/dataprep/DBL-signbibles/unfolding_word_key_terms.csv TRANSLATION_WORD "{}" --out "{/.}_vs_unfoldingwordkeyterms_vocab_overlap.txt"

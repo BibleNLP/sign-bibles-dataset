@@ -86,55 +86,73 @@ def parse_citation_string(citation: str, vref_map: dict[str, int]) -> list[int]:
     return sorted(set(all_indices))
 
 
-def citation_to_text_and_vrefs(citation:str, vref_map, bible_lines):
-        vrefs = parse_citation_string(citation, vref_map)
-        
-        verses = [bible_lines[i] for i in vrefs if 0 <= i < len(bible_lines)]
+# TODO: test "Genesis 7:11,7:17-20; 8:2; 7:22-23"
+# TODO: Genesis 6:3,5-7
+# "Genesis 7:5-10,13-16"
+# "Genesis 7:24; 8:1, 3-4"
+# Genesis 5:13;6:1
+# "1 Samuel 17:12-15,17-19"
+# "Matthew 27:51,54;Luke 23:46;John 19:28,30"
+# Exodus 12:37-38,40; 13:19
+# "1 Samuel 17:54,57-58"
+# Daniel 5:31-6:3
+# "Matthew 27:51,54;Luke 23:46;John 19:28,30"
+def citation_to_text_and_vrefs(citation: str, vref_map, bible_lines):
+    vrefs = parse_citation_string(citation, vref_map)
 
-        bible_text = "".join(verses)
-        return bible_text, vrefs
+    verses = [bible_lines[i] for i in vrefs if 0 <= i < len(bible_lines)]
 
+    bible_text = "".join(verses)
+    return bible_text, vrefs
 
-
-        
 
 def main():
     parser = argparse.ArgumentParser(
         description="Augment video JSON with eBible verse indices and text."
     )
     parser.add_argument("vref_path", help="Path to vref.txt file")
-    parser.add_argument("json_path", help="Path to input JSON file")
-    parser.add_argument("output_json", help="Path to write updated JSON")
     parser.add_argument(
-        "--bible-path", help="Path to eBible .txt file (one verse per line)"
+        "json_path", help="Path to input JSON file, or dir of json files"
     )
+
+    parser.add_argument(
+        "bible_path", help="Path to eBible .txt file (one verse per line)"
+    )
+    parser.add_argument("--iso_code", help="ISO 639-3 for the Bible")
+    parser.add_argument("--bcp_code", help="BCP-47 for the Bible")
+    parser.add_argument("--output_json", help="Path to write updated JSON")
     args = parser.parse_args()
 
     vref_map = load_vref_map(args.vref_path)
     bible_lines = load_bible_lines(args.bible_path)
 
     with open(args.json_path, encoding="utf-8") as f:
-        grouped_data = json.load(f)
+        video_metadata = json.load(f)
+        video_metadata["transcripts"] = []
 
-    updated_count = 0
-    for group in grouped_data:
-        for video in group.get("videos", []):
-            citation = video.get("bible_passage", "").strip()
-            if citation:
-                indices = parse_citation_string(citation, vref_map)
-                video["ebible_vref_indices"] = indices
-                video["bible_text"] = [
-                    bible_lines[i] for i in indices if 0 <= i < len(bible_lines)
-                ]
-                updated_count += 1
-            else:
-                video["ebible_vref_indices"] = []
-                video["bible_text"] = []
+        citation = video_metadata.get("bible-ref", "").strip()
+        if citation:
+            transcript = {}
+            indices = parse_citation_string(citation, vref_map)
+            video_metadata["biblenlp-vref"] = indices
+            transcript["bible_text"] = "".join(
+                [bible_lines[i] for i in indices if 0 <= i < len(bible_lines)]
+            )
+            transcript["language"] = {
+                "name": "English",
+                "ISO639-3": "eng",
+                "BCP-47": "en-US",
+            }
+            transcript["source"] = "Berean Standard Bible"
+            video_metadata["transcripts"].append(transcript)
 
-    with open(args.output_json, "w", encoding="utf-8") as f:
-        json.dump(grouped_data, f, indent=2, ensure_ascii=False)
-
-    print(f"Updated {updated_count} video entries with verse indices and Bible text.")
+    if args.output_json:
+        output_json = args.output_json
+    else:
+        output_json = args.json_path
+    with open(output_json, "w", encoding="utf-8") as f:
+        json.dump(video_metadata, f, indent=2, ensure_ascii=False)
+        print(f"Wrote output to {output_json}")
 
 
 if __name__ == "__main__":

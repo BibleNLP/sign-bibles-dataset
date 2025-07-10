@@ -68,22 +68,20 @@ def collect_video_metadata(base_dir: Path):
 
             for filename, passage in file_to_passage.items():
                 if filename in video_files:
-                    file_metadata =  {
-                            "language_code": language_code,
-                            "project_name": version_name,
-                            # "dbl_id": dbl_id,
-                            "source": f"https://app.thedigitalbiblelibrary.org/entry?id={dbl_id}",
-                            "filename": filename,
-                            "mp4_path": str(video_files[filename]),
-                            "bible-ref": passage,
-                        }
+                    file_metadata = {
+                        "language_code": language_code,
+                        "project_name": version_name,
+                        # "dbl_id": dbl_id,
+                        "source": f"https://app.thedigitalbiblelibrary.org/entry?id={dbl_id}",
+                        "filename": filename,
+                        "mp4_path": str(video_files[filename]),
+                        "bible-ref": passage,
+                    }
                     out_path = Path(video_files[filename]).with_suffix(".json")
-                    
+
                     # print(out_path)
-                    
-                    results.append(
-                        file_metadata
-                    )
+
+                    results.append(file_metadata)
                     with open(out_path, "w") as out_f:
                         del file_metadata["mp4_path"]
                         json.dump(file_metadata, out_f)
