@@ -160,7 +160,13 @@ def run_pose_and_save(video_path: Path, output_dir: Path, overwrite=False) -> No
     animation_path = output_dir / f"{video_stem}.pose-animation.mp4"
     pose_npz_path = output_dir / f"{video_stem}.pose-dwpose.npz"
     if animation_path.is_file() and pose_npz_path.is_file() and not overwrite:
-        return
+        try:
+            with np.load(pose_npz_path) as data:
+                if "frames" in data and "confidences" in data:
+                    return  # Everything exists and is complete, skip
+        except (OSError, ValueError) as e:
+            print(f"Warning: Could not load {pose_npz_path}: {e}")
+            # fall through to rerun
 
     cap = cv2.VideoCapture(str(video_path))
     total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
