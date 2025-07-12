@@ -2,8 +2,8 @@ import argparse
 import logging
 from pathlib import Path
 
-import pandas as pd
 import cv2
+import pandas as pd
 
 logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
 
@@ -19,6 +19,7 @@ def extract_frame(video_path: Path, frame_index: int, output_path: Path) -> bool
 
     Returns:
         True if the frame was successfully extracted and saved, False otherwise.
+
     """
     cap = cv2.VideoCapture(str(video_path))
     if not cap.isOpened():
@@ -27,9 +28,7 @@ def extract_frame(video_path: Path, frame_index: int, output_path: Path) -> bool
 
     total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
     if frame_index < 0 or frame_index >= total_frames:
-        logging.warning(
-            f"Frame index {frame_index} out of range for {video_path.name} (total: {total_frames})"
-        )
+        logging.warning(f"Frame index {frame_index} out of range for {video_path.name} (total: {total_frames})")
         cap.release()
         return False
 
@@ -54,6 +53,7 @@ def process_manualedit_csv(csv_path: Path) -> None:
 
     Args:
         csv_path: Path to the .ocr.manualedit.csv file.
+
     """
     base = csv_path.stem.replace(".ocr.manualedit", "")
     video_path = csv_path.with_name(f"{base}.mp4")
@@ -69,11 +69,13 @@ def process_manualedit_csv(csv_path: Path) -> None:
         return
 
     output_dir = csv_path.parent
-    frame_indices = df["frame_index"].dropna().astype(int).unique()
+    try:
+        frame_indices = df["frame_index"].dropna().astype(int).unique()
+    except ValueError as e:
+        print(f"{type(e)} {e}\n on path \n{csv_path}")
+        exit(-1)
 
-    logging.info(
-        f"Processing {csv_path.name}: extracting {len(frame_indices)} frames from {video_path.name}"
-    )
+    logging.info(f"Processing {csv_path.name}: extracting {len(frame_indices)} frames from {video_path.name}")
 
     for idx in frame_indices:
         output_path = output_dir / f"{base}.frame{idx}.png"
