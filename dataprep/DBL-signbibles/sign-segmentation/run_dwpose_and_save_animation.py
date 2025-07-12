@@ -1,14 +1,14 @@
+import argparse
+import os
+import sys
 from pathlib import Path
-from tqdm import tqdm
+
 import cv2
+import matplotlib
 import numpy as np
 import torch
-import sys
-import os
-import matplotlib
 from dotenv import load_dotenv
-import argparse
-
+from tqdm import tqdm
 
 # Load environment variables from .env
 load_dotenv()
@@ -18,8 +18,8 @@ print(f"DWPOSE PATH: {local_folder}")
 if local_folder not in sys.path:
     sys.path.append(local_folder)
 
-from annotator.dwpose import util
-from annotator.dwpose.wholebody import Wholebody
+from annotator.dwpose import util  # noqa: E402
+from annotator.dwpose.wholebody import Wholebody  # noqa: E402
 
 pose_estimator = Wholebody(
     onnx_det=Path(local_folder) / "annotator/ckpts/yolox_l.onnx",
@@ -55,7 +55,7 @@ def draw_handpose(canvas, all_hand_peaks, hands_scores, eps=0.01):
         [19, 20],
     ]
 
-    for peaks, scores in zip(all_hand_peaks, hands_scores):
+    for peaks, scores in zip(all_hand_peaks, hands_scores, strict=False):
         peaks = np.array(peaks)
         for ie, e in enumerate(edges):
             x1, y1 = peaks[e[0]]
@@ -69,8 +69,7 @@ def draw_handpose(canvas, all_hand_peaks, hands_scores, eps=0.01):
                     canvas,
                     (x1, y1),
                     (x2, y2),
-                    matplotlib.colors.hsv_to_rgb([ie / float(len(edges)), 1.0, 1.0])
-                    * 255,
+                    matplotlib.colors.hsv_to_rgb([ie / float(len(edges)), 1.0, 1.0]) * 255,
                     thickness=2,
                 )
 
@@ -90,13 +89,9 @@ def draw_handpose(canvas, all_hand_peaks, hands_scores, eps=0.01):
     return canvas
 
 
-def draw_pose(
-    pose: dict, height: int, width: int, hand_scores: list[np.ndarray]
-) -> np.ndarray:
+def draw_pose(pose: dict, height: int, width: int, hand_scores: list[np.ndarray]) -> np.ndarray:
     canvas = np.zeros((height, width, 3), dtype=np.uint8)
-    canvas = util.draw_bodypose(
-        canvas, pose["bodies"]["candidate"], pose["bodies"]["subset"]
-    )
+    canvas = util.draw_bodypose(canvas, pose["bodies"]["candidate"], pose["bodies"]["subset"])
     canvas = draw_handpose(canvas, pose["hands"], hand_scores)
     canvas = util.draw_facepose(canvas, pose["faces"])
     return canvas
@@ -116,9 +111,7 @@ def pose_estimate_with_candidates(image: np.ndarray):
         candidate_keypoints[..., 1] /= float(H)
 
         body = candidate_keypoints[:, :18].copy()
-        body = body.reshape(
-            candidate_keypoints.shape[0] * 18, candidate_keypoints.shape[2]
-        )
+        body = body.reshape(candidate_keypoints.shape[0] * 18, candidate_keypoints.shape[2])
 
         score = subset_scores[:, :18]
         for i in range(len(score)):
@@ -133,9 +126,7 @@ def pose_estimate_with_candidates(image: np.ndarray):
 
         foot = candidate_keypoints[:, 18:24]
         faces = candidate_keypoints[:, 24:92]
-        hands = np.vstack(
-            [candidate_keypoints[:, 92:113], candidate_keypoints[:, 113:]]
-        )
+        hands = np.vstack([candidate_keypoints[:, 92:113], candidate_keypoints[:, 113:]])
 
         bodies = dict(candidate=body, subset=score)
         pose = dict(bodies=bodies, hands=hands, faces=faces)
@@ -144,9 +135,7 @@ def pose_estimate_with_candidates(image: np.ndarray):
         # canvas = util.draw_bodypose(np.zeros((H, W, 3), dtype=np.uint8), body, score)
         # canvas = util.draw_facepose(canvas, faces)
         # canvas = canvas  # (skip hand drawing for now if you want)
-        canvas = draw_pose(
-            pose, H, W, hand_scores=[subset_scores[:, 92:113], subset_scores[:, 113:]]
-        )
+        canvas = draw_pose(pose, H, W, hand_scores=[subset_scores[:, 92:113], subset_scores[:, 113:]])
 
         return canvas, keypoints, scores
 
@@ -160,10 +149,14 @@ def run_pose_and_save(video_path: Path, output_dir: Path, overwrite=False) -> No
     animation_path = output_dir / f"{video_stem}.pose-animation.mp4"
     pose_npz_path = output_dir / f"{video_stem}.pose-dwpose.npz"
     if animation_path.is_file() and pose_npz_path.is_file() and not overwrite:
+        # print(f"Already done with {pose_npz_path} and {animation_path}")
+        return
         try:
             with np.load(pose_npz_path) as data:
                 if "frames" in data and "confidences" in data:
                     return  # Everything exists and is complete, skip
+                else:
+                    print(f"No confidence values in {pose_npz_path}!")
         except (OSError, ValueError) as e:
             print(f"Warning: Could not load {pose_npz_path}: {e}")
             # fall through to rerun
@@ -181,7 +174,7 @@ def run_pose_and_save(video_path: Path, output_dir: Path, overwrite=False) -> No
     confidences = []
     iterator = range(total_frames)
     if total_frames > 1000:
-        iterator = tqdm(iterator, desc=f"Processing {video_stem}", unit="frame")
+        iterator = tqdm(iterator, desc=f"Processing {video_stem}.", unit="frame")
 
     for _ in iterator:
         ret, frame = cap.read()
@@ -242,7 +235,7 @@ if __name__ == "__main__":
     else:
         video_paths = [args.video_path]
     print(f"{len(video_paths)} videos to process")
-    for video_path in tqdm(video_paths, desc="Processing videos"):
+    for video_path in tqdm(video_paths, desc="Processing videos with DWPose"):
         if args.output_dir is None:
             output_dir = video_path.parent
         else:
