@@ -5,8 +5,10 @@ This script:
 * Downloads videos from DBL-sign
 * Packages everything into WebDataset format
 
-# TODO: clean out all segmentation code. Add autosegmenter .eaf file instead.
-# TODO: add in duration, frame count and fps of video
+# TODO: clean out all segmentation code.
+# TODO: Add autosegmenter .eaf file instead.
+# TODO: move the classes to their own files.
+# TODO: import citation_to_text_and_vrefs from the actual module instead of copying it in here
 # TODO: Load in .ocr.manualedit.withvrefs.csv if available,
 #   * if available add in transcripts with frame indices, biblenlp-vref, text.
 #   * if not available add in one for the whole video
@@ -15,7 +17,7 @@ This script:
 
 # TODO: read more of the information directly from project metadata.xml, e.g. rights holders
 # TODO: rename mediapipe ".pose" files to ".pose-mediapipe.pose" as they are added.
-
+# TODO: don't add pose animations, they are big and easily generated.
 # TODO: add in "glosses" to match https://huggingface.co/datasets/bridgeconn/sign-bibles-isl,
 # example:
 "glosses": [
@@ -43,7 +45,6 @@ import io
 import json
 import os
 import re
-import shutil
 import sys
 import tarfile
 import time
@@ -71,9 +72,7 @@ logger.log_info(f"Command: {' '.join(sys.argv)}")
 parent_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(parent_dir)
 dbl_sign_dir = os.path.join(parent_dir, "DBL-sign")
-sign_seg_dir = os.path.join(parent_dir, "sign-segmentation")
 sys.path.append(dbl_sign_dir)
-sys.path.append(sign_seg_dir)
 
 # Import DBL-sign utilities
 # Import manifest generator functions - using a different import approach
@@ -84,7 +83,6 @@ manifest_generator = importlib.util.module_from_spec(manifest_generator_spec)
 manifest_generator_spec.loader.exec_module(manifest_generator)
 
 
-# Import sign-segmentation modules dynamically
 def import_module_from_file(module_name, file_path):
     """
     Import a module from a file path.
@@ -522,201 +520,6 @@ class DBLSignDownloader:
         return all_downloaded_videos
 
 
-class SignSegmentationProcessor:
-    """Process videos with sign-segmentation tools."""
-
-    def __init__(self, output_dir, parent_dir=None):
-        """Initialize the processor with output directory."""
-        self.output_dir = output_dir
-        os.makedirs(self.output_dir, exist_ok=True)
-
-        # Paths to sign-segmentation scripts
-        if parent_dir is None:
-            parent_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-        self.sign_seg_dir = os.path.join(parent_dir, "sign-segmentation")
-
-        # Verify sign-segmentation directory exists
-        if not os.path.exists(self.sign_seg_dir):
-            print(f"Warning: sign-segmentation directory not found at {self.sign_seg_dir}")
-            # Try to find it in the current directory
-            alt_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "sign-segmentation")
-            if os.path.exists(alt_path):
-                print(f"Found sign-segmentation directory at alternate location: {alt_path}")
-                self.sign_seg_dir = alt_path
-
-        # Verify required script files exist
-        required_scripts = {
-            "segment_video.py": None,
-        }
-
-        for script in required_scripts:
-            script_path = os.path.join(self.sign_seg_dir, script)
-            if not os.path.exists(script_path):
-                print(f"Warning: Required script {script} not found at {script_path}")
-            else:
-                required_scripts[script] = script_path
-
-        # Import the modules
-        try:
-            self.segment_video = import_module_from_file(
-                "segment_video",
-                required_scripts["segment_video.py"] or os.path.join(self.sign_seg_dir, "segment_video.py"),
-            )
-            print("Successfully imported segment_video module")
-        except Exception as e:
-            print(f"Error importing segment_video module: {e!s}")
-            self.segment_video = None
-
-    def process_video(self, video_path, metadata):
-        """
-        Process a video with sign-segmentation.
-
-        Args:
-            video_path: Path to the video file
-            metadata: Metadata dictionary for the video
-
-        Returns:
-            List of dictionaries with segment information
-
-        """
-        # Verify that the video file exists
-        if not video_path or video_path == "path" or not os.path.exists(video_path):
-            print(f"Error: Video file not found: {video_path}")
-            return []
-
-        segments_dir = video_path.parent / "segments"
-
-        print(f"Processing video: {video_path}")
-        print(f"Video exists: {os.path.exists(video_path)}")
-        print(f"Video size: {os.path.getsize(video_path)} bytes")
-
-        # Verify that the required modules were imported successfully
-        if not self.segment_video:
-            print("Error: segment_video module not available. Cannot process video.")
-            # Try to find segments that might have been created previously
-            print(f"Looking for pre-existing segments for {video_path}...")
-            video_name = os.path.splitext(os.path.basename(video_path))[0]
-
-            segment_files = [f for f in os.listdir(segments_dir) if f.endswith(".mp4") and video_name in f]
-            if segment_files:
-                print(f"Found {len(segment_files)} pre-existing segments in {segments_dir}")
-                # Process these segments
-                return self._process_existing_segments(segments_dir, segment_files, video_name, metadata)
-
-            print(f"No pre-existing segments found for {video_path}")
-            return []
-
-        # Create a unique output directory for this video
-        video_name = os.path.splitext(os.path.basename(video_path))[0]
-        video_output_dir = os.path.join(self.output_dir, video_name)
-        os.makedirs(video_output_dir, exist_ok=True)
-        print(f"Created video output directory: {video_output_dir}")
-
-        # Create segments directory
-        os.makedirs(segments_dir, exist_ok=True)
-        print(f"Created segments directory: {Path(segments_dir).resolve()}")
-
-        # Verify segments directory exists
-        if not os.path.exists(segments_dir):
-            print(f"Error: Failed to create segments directory: {segments_dir}")
-
-        print(f"Segments will be stored in: {segments_dir}")
-
-        # Process the video with sign-segmentation
-
-        print(f"Segmenting video {video_path}")
-
-        # Call the process_video function from segment_video module
-        print(f"Calling segment_video.process_video with {video_path}")
-        self.segment_video.process_video(video_path)
-
-        # Check if any segments were created
-
-        segment_files = [f for f in os.listdir(segments_dir) if f.endswith(".mp4") and video_name in f]
-        print(f"Found {len(segment_files)} segments in {segments_dir}")
-
-        if not segment_files:
-            print(f"Warning: No segments were created for {video_path}")
-            return []
-
-        # Process the segments
-        return self._process_existing_segments(segments_dir, segment_files, video_name, metadata)
-
-    def _process_existing_segments(self, segments_dir, segment_files, video_name, metadata):
-        """
-        Process existing segment files without running segmentation.
-
-        Args:
-            segments_dir: Directory containing segment files
-            segment_files: List of segment filenames
-            video_name: Name of the original video
-            metadata: Metadata dictionary for the video
-
-        Returns:
-            List of dictionaries with segment information
-
-        """
-        print(f"Processing {len(segment_files)} pre-existing segments")
-        segments_info = []
-
-        # Filter out files that already have processing suffixes to avoid duplicate processing
-        filtered_segment_files = []
-        for segment_file in segment_files:
-            base_name = os.path.basename(segment_file)
-            # Skip files that already have processing suffixes
-            if any(suffix in base_name for suffix in [".original.", ".pose.", ".mask.", ".segmentation."]):
-                continue
-            filtered_segment_files.append(segment_file)
-
-        print(f"Found {len(filtered_segment_files)} segments to process after filtering")
-
-        for i, segment_file in enumerate(filtered_segment_files):
-            segment_name = os.path.basename(segment_file).replace(".mp4", "")
-            segment_path = os.path.join(segments_dir, f"{segment_name}.mp4")
-
-            # Skip if the segment file doesn't exist
-            if not os.path.exists(segment_path):
-                logger.log_warning(f"Segment file does not exist: {segment_path}", segment_name)
-                continue
-
-            original_path = os.path.join(segments_dir, f"{segment_name}.original.mp4")
-
-            # Create a copy of the original segment file if it doesn't exist
-            if not os.path.exists(original_path):
-                shutil.copy(segment_path, original_path)
-                logger.log_info(
-                    f"Created copy of original segment file: {original_path}",
-                    segment_name,
-                )
-
-            # Only add to segment_info if all files were created successfully
-            if True:
-                segment_info = {
-                    "segment_name": segment_name,
-                    "original": original_path,
-                    "segment_path": original_path,  # Use original path as the main segment path
-                    "segment_metadata": {
-                        **metadata,
-                        # "segment_index": i,
-                        # "segment_count": len(filtered_segment_files),
-                        # "segment_name": segment_name,
-                        # "video_name": video_name,
-                    },
-                }
-
-                segments_info.append(segment_info)
-            else:
-                missing_files = []
-
-                logger.log_warning(
-                    f"Skipping segment due to missing files: {', '.join(missing_files)}",
-                    segment_name,
-                )
-
-        print(f"Successfully processed {len(segments_info)} pre-existing segments")
-        return segments_info
-
-
 class WebDatasetCreator:
     """Class to handle creating WebDataset format."""
 
@@ -724,14 +527,14 @@ class WebDatasetCreator:
         self.output_dir = Path(output_dir)
         self.output_dir.mkdir(parents=True, exist_ok=True)
 
-    def create_webdataset(self, segments_info: list[dict[str, Any]], shard_size: int = 1000) -> list[str]:
-        shards = self._split_into_shards(segments_info, shard_size)
+    def create_webdataset(self, samples_info: list[dict[str, Any]], shard_size: int = 1000) -> list[str]:
+        shards = self._split_into_shards(samples_info, shard_size)
         return self._write_shards(shards)
 
-    def _split_into_shards(self, segments_info: list[dict[str, Any]], shard_size: int) -> list[list[dict[str, Any]]]:
+    def _split_into_shards(self, samples_info: list[dict[str, Any]], shard_size: int) -> list[list[dict[str, Any]]]:
         shards = []
-        for i in tqdm(range(0, len(segments_info), shard_size), desc="Sharding segments"):
-            shards.append(segments_info[i : i + shard_size])
+        for i in tqdm(range(0, len(samples_info), shard_size), desc="Sharding samples"):
+            shards.append(samples_info[i : i + shard_size])
         return shards
 
     def _write_shards(self, shards: list[list[dict[str, Any]]]) -> list[str]:
@@ -740,27 +543,22 @@ class WebDatasetCreator:
         for shard_index, shard in enumerate(tqdm(shards, desc="Writing Shards")):
             shard_path = self.output_dir / f"shard_{shard_index:05d}.tar"
             with tarfile.open(shard_path, "w") as tar:
-                for segment_info in shard:
-                    sample = self._build_sample(segment_info, shard_index)
+                for sample_info in shard:
+                    sample = self._build_sample(sample_info, shard_index)
                     if not sample:
                         continue
-                    self._add_sample_to_tar(tar, sample, segment_info["segment_name"])
+                    self._add_sample_to_tar(tar, sample, sample_info["sample_name"])
             shard_paths.append(str(shard_path))
 
         return shard_paths
 
-    def _build_sample(self, segment_info: dict[str, Any], shard_index: int) -> dict[str, str | Path]:
+    def _build_sample(self, sample_info: dict[str, Any], shard_index: int) -> dict[str, str | Path]:
         sample = {}
 
-        sample["json"] = json.dumps(segment_info["segment_metadata"])
-        sample["mp4"] = segment_info["segment_path"]
-        for ext, path in segment_info["files_to_add"]:
+        sample["json"] = json.dumps(sample_info["sample_metadata"])
+        sample["mp4"] = sample_info["sample_path"]
+        for ext, path in sample_info["files_to_add"]:
             sample[ext] = path
-
-        # sample["pose-animation.mp4"] = segment_info["segment_metadata"]["pose"]["animation"]
-        # sample["pose-dwpose.npz"] = segment_info["segment_metadata"]["pose"]["dwpose"]
-        # sample["pose"] = segment_info["segment_metadata"]["pose"]["mediapipe"]
-        # sample["segment_name"] = segment_info["segment_name"]
 
         return sample
 
@@ -768,10 +566,10 @@ class WebDatasetCreator:
         self,
         tar: tarfile.TarFile,
         sample: dict[str, str | Path],
-        segment_name: str,
+        sample_name: str,
     ):
         for ext, content in sample.items():
-            filename = f"{segment_name}.{ext}"
+            filename = f"{sample_name}.{ext}"
             try:
                 if ext == "json":
                     encoded = content.encode("utf-8")
@@ -797,6 +595,7 @@ def parse_metadata_to_bible_ref(xml_path: Path, filename):
     Parse a metadata.xml and return bible ref associated, or empty string
     e.g. "CBT-001-esl-3_Bible_God Creates Everything.mp4" -> "GEN 1:1-31,2:1-3"
     """
+    print(f"Parsing metadata to find bible refs for {filename}")
     try:
         tree = ET.parse(xml_path)
         root = tree.getroot()
@@ -809,10 +608,12 @@ def parse_metadata_to_bible_ref(xml_path: Path, filename):
                 passage = division.attrib.get("role", "").strip()
                 for content in division.findall("content"):
                     src = content.attrib.get("src", "").strip()
-                    filename = Path(src).name
-                    file_to_passage[filename] = passage
-
-        return file_to_passage.get(filename, "")
+                    xml_filename = Path(src).name
+                    file_to_passage[xml_filename] = passage
+        # print(json.dumps(file_to_passage, indent=2))
+        passage_found = file_to_passage.get(filename, "")
+        print(f"Found Passage {passage_found} for filename {filename}")
+        return passage_found
 
     except ET.ParseError as e:
         print(f"[ERROR] Could not parse {xml_path}: {e}")
@@ -924,6 +725,25 @@ def citation_to_text_and_vrefs(citation: str, vref_map, bible_verses):
     return bible_text, vrefs
 
 
+def get_video_info_with_opencv(video_path: Path) -> dict:
+    cap = cv2.VideoCapture(str(video_path))
+    if not cap.isOpened():
+        raise ValueError(f"Cannot open video: {video_path}")
+
+    video_opencv_info = {
+        "total_frames": int(cap.get(cv2.CAP_PROP_FRAME_COUNT)),
+        "fps": cap.get(cv2.CAP_PROP_FPS),
+        "width": int(cap.get(cv2.CAP_PROP_FRAME_WIDTH)),
+        "height": int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT)),
+        "duration_sec": cap.get(cv2.CAP_PROP_FRAME_COUNT) / cap.get(cv2.CAP_PROP_FPS)
+        if cap.get(cv2.CAP_PROP_FPS) > 0
+        else None,
+    }
+
+    cap.release()
+    return video_opencv_info
+
+
 def process_without_gui(args):
     """Process videos without GUI updates using pathlib for filesystem operations."""
     # Initialize paths
@@ -986,11 +806,15 @@ def process_without_gui(args):
     video_info_list_with_bible_refs = []
     for video_info in video_info_list:
         video_info["filename"] = Path(video_info["path"]).name
+
+        video_opencv_info = get_video_info_with_opencv(video_info["path"])
+        video_info.update(video_opencv_info)
+
         meta_xml = Path(video_info["path"]).parent / "metadata.xml"
 
         video_info["transcripts"] = []
 
-        video_info["bible-ref"] = parse_metadata_to_bible_ref(meta_xml, video_info)
+        video_info["bible-ref"] = parse_metadata_to_bible_ref(meta_xml, Path(video_info["path"]).name)
 
         transcript = {}
         bible_text, vrefs = citation_to_text_and_vrefs(
@@ -1015,77 +839,39 @@ def process_without_gui(args):
 
     video_info_list = video_info_list_with_bible_refs
 
-    # Step 2: Process videos with sign-segmentation
-    print("=== Step 2: Processing videos with sign-segmentation ===")
-    if args.auto_segment:
-        processor = SignSegmentationProcessor(processed_dir)
+    print("=== Step 2: Processing videos to samples ===")
+    all_samples = []
+    for video_info in video_info_list:
+        video_path = Path(video_info["path"])
+        del video_info["path"]
+        video_info["pose"] = {}
 
-        # only keep the "Bible" or "Passage" videos
-        # won't work for eso
-        print("Filtering for 'Bible' or 'Passage' videos")
-        filtered_video_info_list = [
-            video_info
-            for video_info in video_info_list
-            if "Passage" in video_info["path"] or "Bible" in video_info["path"]
-        ]
-        print(f"{len(filtered_video_info_list)} videos left")
-        if len(filtered_video_info_list) == 0:
-            print("Project has no matching videos with those keywords keeping the whole list")
-        else:
-            video_info_list = filtered_video_info_list
+        files_to_add = []
+        pose_animation_path = video_path.with_suffix(".pose-animation.mp4")
+        if pose_animation_path.is_file():
+            video_info["pose"]["animation"] = str(pose_animation_path.name)
+            files_to_add.append(("pose-animation.mp4", str(pose_animation_path)))
 
-        all_segments = []
-        for i, video_info in enumerate(video_info_list[:2]):
-            video_path = Path(video_info["path"])
-            metadata = video_info["metadata"]
+        dw_pose_path = video_path.with_suffix(".pose-dwpose.npz")
+        if dw_pose_path.is_file():
+            video_info["pose"]["dwpose"] = str(dw_pose_path.name)
+            files_to_add.append(("pose-dwpose.npz", str(dw_pose_path)))
 
-            if not video_path.exists():
-                print(f"Skipping invalid video path {i}: {video_path}")
-                continue
+        mediapipe_path = video_path.with_suffix(".pose")
+        if mediapipe_path.is_file():
+            video_info["pose"]["mediapipe"] = str(mediapipe_path.name)
+            files_to_add.append(("pose", str(mediapipe_path)))
 
-            segments = processor.process_video(video_path, metadata)
-            all_segments.extend(segments)
+        sample_info = {
+            "sample_name": video_path.stem,
+            "sample_path": str(video_path),
+            "sample_metadata": {
+                **video_info,
+            },
+            "files_to_add": files_to_add,
+        }
 
-        print(f"{len(all_segments)} segments")
-    else:
-        print("--auto-segment not set, returning original files")
-        all_segments = []
-        for video_info in video_info_list:
-            video_path = Path(video_info["path"])
-            del video_info["path"]
-            video_info["pose"] = {}
-
-            files_to_add = []
-            pose_animation_path = video_path.with_suffix(".pose-animation.mp4")
-            if pose_animation_path.is_file():
-                video_info["pose"]["animation"] = str(pose_animation_path.name)
-                files_to_add.append(("pose-animation.mp4", str(pose_animation_path)))
-
-            dw_pose_path = video_path.with_suffix(".pose-dwpose.npz")
-            if dw_pose_path.is_file():
-                video_info["pose"]["dwpose"] = str(dw_pose_path.name)
-                files_to_add.append(("pose-dwpose.npz", str(dw_pose_path)))
-
-            mediapipe_path = video_path.with_suffix(".pose")
-            if mediapipe_path.is_file():
-                video_info["pose"]["mediapipe"] = str(mediapipe_path.name)
-                files_to_add.append(("pose", str(mediapipe_path)))
-
-            segment_info = {
-                "segment_name": video_path.stem,
-                "original": str(video_path),
-                "segment_path": str(video_path),  # Use original path as the main segment path
-                "segment_metadata": {
-                    **video_info,
-                    # "segment_index": 0,
-                    # "segment_count": 1,
-                    # "segment_name": video_path.stem,
-                    "video_name": video_path.stem,
-                },
-                "files_to_add": files_to_add,
-            }
-
-            all_segments.append(segment_info)
+        all_samples.append(sample_info)
 
     # Step #: Create WebDatasetF
     print("=== Step 3: Creating WebDataset ===")
@@ -1093,12 +879,12 @@ def process_without_gui(args):
     print(webdataset_dir.resolve())
 
     creator = WebDatasetCreator(webdataset_dir)
-    creator.create_webdataset(all_segments, shard_size=args.shard_size)
+    creator.create_webdataset(all_samples, shard_size=args.shard_size)
 
     # Step 4: Create manifest
     print("=== Step 4: Creating manifest ===")
     with manifest_path.open("w", encoding="utf-8") as f:
-        json.dump({"segments": all_segments}, f, indent=2)
+        json.dump({"samples": all_samples}, f, indent=2)
 
     print(f"Processing complete! Manifest saved to {manifest_path.resolve()}")
 
@@ -1136,7 +922,7 @@ def main():
         "--shard-size",
         type=int,
         default=10,
-        help="Number of segments per WebDataset shard",
+        help="Number of samples per WebDataset shard",
     )
     args = parser.parse_args()
 
