@@ -2,9 +2,39 @@
 """
 Prepare sign language videos for HuggingFace datasets.
 This script:
-1. Downloads videos from DBL-sign
-2. Processes them with sign-segmentation
-3. Packages everything into WebDataset format
+* Downloads videos from DBL-sign
+* Packages everything into WebDataset format
+
+# TODO: clean out all segmentation code. Add autosegmenter .eaf file instead.
+# TODO: add in duration, frame count and fps of video
+# TODO: Load in .ocr.manualedit.withvrefs.csv if available,
+#   * if available add in transcripts with frame indices, biblenlp-vref, text.
+#   * if not available add in one for the whole video
+# TODO: replace all os.path with pathlib
+# TODO: replace all sys.path with project restructure + pip install -e .
+
+# TODO: read more of the information directly from project metadata.xml, e.g. rights holders
+# TODO: rename mediapipe ".pose" files to ".pose-mediapipe.pose" as they are added.
+
+# TODO: add in "glosses" to match https://huggingface.co/datasets/bridgeconn/sign-bibles-isl,
+# example:
+"glosses": [
+        {
+            "text": [
+                [
+                    0,
+                    0,
+                    "nil"
+                ]
+            ],
+            "language": {
+                "name": "English",
+                "ISO639-3": "eng",
+                "BCP-47": "en-US"
+            }
+        }
+    ]
+
 """
 
 import argparse
@@ -26,6 +56,7 @@ import langcodes
 import pandas as pd
 import requests
 from processing_logger import ProcessingLogger
+from tqdm import tqdm
 
 # Initialize the logger with the correct path
 logger = ProcessingLogger(log_file_path="./output/run_log.txt")
@@ -121,7 +152,7 @@ class DBLSignDownloader:
                     "sqs",
                     "Sri Lanka",
                     "Chronological Bible Translation in Sri Lankan Sign Language",
-                    "DOOR International",
+                    "D.O.O.R. International",
                 ],
                 [
                     "055195093e2347d0",
@@ -129,7 +160,7 @@ class DBLSignDownloader:
                     "lsb",
                     "Burundi",
                     "Chronological Bible Translation in Burundian Sign Language",
-                    "DOOR International",
+                    "D.O.O.R. International",
                 ],
                 [
                     "0a3ea85ee1e34a2d",
@@ -137,7 +168,7 @@ class DBLSignDownloader:
                     "nsp",
                     "Nepal",
                     "Chronological Bible Translation in Nepali Sign Language",
-                    "DOOR International",
+                    "D.O.O.R. International",
                 ],
                 [
                     "1fcac35962494d40",
@@ -145,7 +176,7 @@ class DBLSignDownloader:
                     "ugn",
                     "Uganda",
                     "Chronological Bible Translation in Ugandan Sign Language",
-                    "DOOR International",
+                    "D.O.O.R. International",
                 ],
                 [
                     "a63aef8004db401b",
@@ -153,7 +184,7 @@ class DBLSignDownloader:
                     "eth",
                     "Ethiopia",
                     "Chronological Bible Translation in Ethiopian Sign Language",
-                    "DOOR International",
+                    "D.O.O.R. International",
                 ],
                 [
                     "56c922b7b5a44a47",
@@ -161,7 +192,15 @@ class DBLSignDownloader:
                     "mis",
                     "India",
                     "Chronological Bible Translation in Kerala Sign Language",
-                    "DOOR International",
+                    "D.O.O.R. International",
+                ],
+                [
+                    "d35ef4f076de43f6",
+                    "Kerala Sign Language",
+                    "mis",
+                    "India",
+                    "Believe God How in Kerala Sign Language",
+                    "D.O.O.R. International",
                 ],
                 [
                     "65c350c1cf9c42e4",
@@ -169,7 +208,7 @@ class DBLSignDownloader:
                     "nsi",
                     "Federal Republic Nigeria",
                     "Chronological Bible Translation in Nigerian Sign Language",
-                    "DOOR International",
+                    "D.O.O.R. International",
                 ],
                 [
                     "6ad9cf57ab084a3b",
@@ -185,7 +224,7 @@ class DBLSignDownloader:
                     "tza",
                     "Tanzania",
                     "Chronological Bible Translation in Tanzanian Sign Language",
-                    "DOOR International",
+                    "D.O.O.R. International",
                 ],
                 [
                     "6c1ffbf874d14ee1",
@@ -193,7 +232,7 @@ class DBLSignDownloader:
                     "mis",
                     "India",
                     "Chronological Bible Translation in Andhra Pradesh Sign Language",
-                    "DOOR International",
+                    "D.O.O.R. International",
                 ],
                 [
                     "2d6ac5c8b4614955",
@@ -201,7 +240,7 @@ class DBLSignDownloader:
                     "bqn",
                     "Bulgaria",
                     "Chronological Bible Translation in Bulgarian Sign Language",
-                    "DOOR International",
+                    "D.O.O.R. International",
                 ],
                 [
                     "1bacaede20da4494",
@@ -225,7 +264,7 @@ class DBLSignDownloader:
                     "mis",
                     "Republic of South Sudan",
                     "Chronological Bible Translation in South Sudanese Sign Language",
-                    "DOOR International",
+                    "D.O.O.R. International",
                 ],
                 [
                     "a28def50f139432a",
@@ -233,7 +272,14 @@ class DBLSignDownloader:
                     "xki",
                     "Kenya, Republic of",
                     "Chronological Bible Translation in Kenyan Sign Language",
-                    "DOOR International",
+                    "D.O.O.R. International",
+                ],
+                [
+                    "f6e834d17ee84710",
+                    "xki",
+                    "Kenya, Republic of",
+                    "Believe God How 52 in Kenyan Sign Language",
+                    "Deaf Opportunity Outreach International",
                 ],
                 [
                     "c4b68657ce9b48ad",
@@ -241,15 +287,15 @@ class DBLSignDownloader:
                     "gse",
                     "Ghana",
                     "Chronological Bible Translation in Ghanaian Sign Language",
-                    "DOOR International",
+                    "D.O.O.R. International",
                 ],
                 [
                     "995240c9d7e8453e",
                     "Indian (Delhi) Sign Language",
                     "ins",
                     "India",
-                    "Chronological Bible Translation in Indian (Delhi)  Sign Language",
-                    "DOOR International",
+                    "Chronological Bible Translation in Indian (Delhi) Sign Language",
+                    "D.O.O.R. International",
                 ],
                 [
                     "6d5944a5ceb944c0",
@@ -257,7 +303,7 @@ class DBLSignDownloader:
                     "rsl",
                     "Russian Federation",
                     "Chronological Bible Translation in Russian Sign Language",
-                    "DOOR International",
+                    "D.O.O.R. International",
                 ],
                 [
                     "ec8517dba29d4d93",
@@ -265,7 +311,7 @@ class DBLSignDownloader:
                     "esl",
                     "Egypt",
                     "Chronological Bible Translation in Egyptian Sign Language",
-                    "DOOR International",
+                    "D.O.O.R. International",
                 ],
                 [
                     "c0b48facec324e4b",
@@ -273,7 +319,7 @@ class DBLSignDownloader:
                     "mzy",
                     "Republic of Mozambique",
                     "Chronological Bible Translation in Mozambican Sign Language",
-                    "DOOR International",
+                    "D.O.O.R. International",
                 ],
                 [
                     "b963267b41cc443c",
@@ -281,7 +327,15 @@ class DBLSignDownloader:
                     "mis",
                     "India",
                     "Chronological Bible Translation in West Bengal Sign Language",
-                    "DOOR International",
+                    "D.O.O.R. International",
+                ],
+                [
+                    "ae505f6ab3484407",
+                    "Tamil Nadu Sign Language",
+                    "mis",
+                    "India",
+                    "Chronological Bible Translation in Tamil Nadu Sign Language",
+                    "D.O.O.R. International",
                 ],
             ]
         }
@@ -323,15 +377,15 @@ class DBLSignDownloader:
         try:
             self.generate_fresh_manifest()
         except Exception as e:
-            raise Exception(f"Failed to refresh manifest: {e}")
+            raise Exception(f"Failed to refresh manifest: {e}") from None
 
-    def download_videos(self, num_videos, language_code=None, project_name=None):
+    def download_videos(self, num_videos, language_codes=None, project_name=None):
         """
         Download a specified number of videos from DBL-sign.
 
         Args:
             num_videos: Number of videos to download
-            language_code: Optional filter by language code
+            language_codes: Optional filter by language codes
             project_name: Optional filter by project name
 
         Returns:
@@ -341,121 +395,131 @@ class DBLSignDownloader:
         if "languages" not in self.manifest:
             raise ValueError("Invalid manifest structure: 'languages' key not found")
 
-        # Filter projects based on criteria
-        filtered_projects = []
-        total_languages = len(self.manifest["languages"])
-        print(f"Total Languages in Manifest: {total_languages}")
-        for i, (lang_code, projects) in enumerate(self.manifest["languages"].items()):
-            if language_code and lang_code != language_code:
-                continue
-
-            for proj_name, proj_info in projects.items():
-                # Only filter by project name if it's explicitly provided
-                if project_name and proj_name != project_name:
+        if language_codes is None:
+            language_codes = [language_codes]
+        all_downloaded_videos = []
+        for language_code in language_codes:
+            # Filter projects based on criteria
+            filtered_projects = []
+            total_languages = len(self.manifest["languages"])
+            print(f"Total Languages in Manifest: {total_languages}")
+            for i, (lang_code, projects) in enumerate(self.manifest["languages"].items()):
+                if language_code and lang_code != language_code:
                     continue
 
-                # Count MP4 files in this project
-                mp4_count = sum(1 for file_info in proj_info["files"] if file_info["filename"].lower().endswith(".mp4"))
+                for proj_name, proj_info in projects.items():
+                    # Only filter by project name if it's explicitly provided
+                    if project_name and proj_name != project_name:
+                        continue
 
-                if mp4_count > 0:
-                    filtered_projects.append((lang_code, proj_name, proj_info))
+                    # Count MP4 files in this project
+                    mp4_count = sum(
+                        1 for file_info in proj_info["files"] if file_info["filename"].lower().endswith(".mp4")
+                    )
 
-        if not filtered_projects:
-            filter_criteria = f"language_code={language_code}"
-            if project_name:
-                filter_criteria += f", project_name={project_name}"
-            error_msg = f"No projects found matching the criteria ({filter_criteria})"
+                    if mp4_count > 0:
+                        filtered_projects.append((lang_code, proj_name, proj_info))
 
-            raise ValueError(error_msg)
+            if not filtered_projects:
+                filter_criteria = f"language_code={language_code}"
+                if project_name:
+                    filter_criteria += f", project_name={project_name}"
+                error_msg = f"No projects found matching the criteria ({filter_criteria})"
 
-        # Download videos
-        downloaded_videos = []
-        videos_downloaded = 0
+                raise ValueError(error_msg)
 
-        print(f"Found {len(filtered_projects)} projects matching the criteria")
+            # Download videos
+            downloaded_videos = []
+            videos_downloaded = 0
 
-        for i, (lang_code, proj_name, proj_info) in enumerate(filtered_projects):
-            if videos_downloaded >= num_videos:
-                break
+            print(f"Found {len(filtered_projects)} projects matching the criteria")
 
-            project_dir = os.path.join(self.output_dir, lang_code, proj_name)
-            print(f"Project Dir: {project_dir}")
-            os.makedirs(project_dir, exist_ok=True)
-
-            # Get metadata for this project
-            metadata = {
-                "language_code": lang_code,
-                "project_name": proj_name,
-                "copyright": proj_info.get("rights_holder", ""),
-                "license": proj_info.get("license", ""),
-                "source": proj_info.get("url", ""),
-            }
-
-            # Save metadata
-            with open(os.path.join(project_dir, "metadata.json"), "w", encoding="utf-8") as f:
-                json.dump(metadata, f, indent=2)
-
-            # Download MP4 files
-            mp4_files = [f for f in proj_info["files"] if f["filename"].lower().endswith(".mp4")]
-            for j, file_info in enumerate(mp4_files):
+            for i, (lang_code, proj_name, proj_info) in enumerate(filtered_projects):
                 if videos_downloaded >= num_videos:
                     break
 
-                filename = file_info["filename"]
-                filepath = os.path.join(project_dir, filename)
-                url = file_info["download_url"]
+                project_dir = os.path.join(self.output_dir, lang_code, proj_name)
+                print(f"Project Dir: {project_dir}")
+                os.makedirs(project_dir, exist_ok=True)
 
-                # Skip if file already exists
-                if os.path.exists(filepath) and os.path.getsize(filepath) > 0:
-                    print(f"File already exists: {filepath}")
+                # Get metadata for this project
+                metadata = {
+                    "language": {
+                        "ISO639-3": lang_code,
+                        "BCP-47": langcodes.standardize_tag(lang_code),
+                    },
+                    "project_name": proj_name,
+                    "copyright": proj_info.get("rights_holder", ""),
+                    "license": proj_info.get("license", ""),
+                    "source": proj_info.get("url", ""),
+                }
 
-                    downloaded_videos.append({"path": filepath, "metadata": metadata})
-                    videos_downloaded += 1
-                    continue
+                # Save metadata
+                with open(os.path.join(project_dir, "metadata.json"), "w", encoding="utf-8") as f:
+                    json.dump(metadata, f, indent=2)
 
-                # Download the file
-                print(f"Downloading {url} to {filepath}")
+                # Download MP4 files
+                mp4_files = [f for f in proj_info["files"] if f["filename"].lower().endswith(".mp4")]
+                for j, file_info in enumerate(mp4_files):
+                    if videos_downloaded >= num_videos:
+                        break
 
-                try:
-                    response = requests.get(url, stream=True)
-                    response.raise_for_status()
+                    filename = file_info["filename"]
+                    filepath = os.path.join(project_dir, filename)
+                    url = file_info["download_url"]
 
-                    # Show progress bar
-                    downloaded_size = 0
-                    block_size = 8192
+                    # Skip if file already exists
+                    if os.path.exists(filepath) and os.path.getsize(filepath) > 0:
+                        # print(f"File already exists: {filepath}")
 
-                    with open(filepath, "wb") as f:
-                        for chunk in response.iter_content(chunk_size=block_size):
-                            if chunk:
-                                f.write(chunk)
-                                downloaded_size += len(chunk)
+                        downloaded_videos.append({"path": filepath, **metadata})
+                        videos_downloaded += 1
+                        continue
 
-                    # Validate MP4
+                    # Download the file
+                    print(f"Downloading {url} to {filepath}")
 
                     try:
-                        cap = cv2.VideoCapture(filepath)
-                        if not cap.isOpened():
-                            error_msg = f"Warning: Could not open downloaded file as video: {filepath}"
+                        response = requests.get(url, stream=True)
+                        response.raise_for_status()
+
+                        # Show progress bar
+                        downloaded_size = 0
+                        block_size = 8192
+
+                        with open(filepath, "wb") as f:
+                            for chunk in response.iter_content(chunk_size=block_size):
+                                if chunk:
+                                    f.write(chunk)
+                                    downloaded_size += len(chunk)
+
+                        # Validate MP4
+
+                        try:
+                            cap = cv2.VideoCapture(filepath)
+                            if not cap.isOpened():
+                                error_msg = f"Warning: Could not open downloaded file as video: {filepath}"
+                                print(error_msg)
+
+                                continue
+                            cap.release()
+
+                        except Exception as e:
+                            error_msg = f"Error validating video: {e}"
                             print(error_msg)
 
                             continue
-                        cap.release()
+
+                        downloaded_videos.append({"path": filepath, **metadata})
+                        videos_downloaded += 1
 
                     except Exception as e:
-                        error_msg = f"Error validating video: {e}"
+                        error_msg = f"Error downloading {url}: {e}"
                         print(error_msg)
 
-                        continue
-
-                    downloaded_videos.append({"path": filepath, "metadata": metadata})
-                    videos_downloaded += 1
-
-                except Exception as e:
-                    error_msg = f"Error downloading {url}: {e}"
-                    print(error_msg)
-
-        print(f"Downloaded {videos_downloaded} videos")
-        return downloaded_videos
+            print(f"Downloaded {videos_downloaded} videos")
+            all_downloaded_videos.extend(downloaded_videos)
+        return all_downloaded_videos
 
 
 class SignSegmentationProcessor:
@@ -633,10 +697,10 @@ class SignSegmentationProcessor:
                     "segment_path": original_path,  # Use original path as the main segment path
                     "segment_metadata": {
                         **metadata,
-                        "segment_index": i,
-                        "segment_count": len(filtered_segment_files),
-                        "segment_name": segment_name,
-                        "video_name": video_name,
+                        # "segment_index": i,
+                        # "segment_count": len(filtered_segment_files),
+                        # "segment_name": segment_name,
+                        # "video_name": video_name,
                     },
                 }
 
@@ -665,12 +729,15 @@ class WebDatasetCreator:
         return self._write_shards(shards)
 
     def _split_into_shards(self, segments_info: list[dict[str, Any]], shard_size: int) -> list[list[dict[str, Any]]]:
-        return [segments_info[i : i + shard_size] for i in range(0, len(segments_info), shard_size)]
+        shards = []
+        for i in tqdm(range(0, len(segments_info), shard_size), desc="Sharding segments"):
+            shards.append(segments_info[i : i + shard_size])
+        return shards
 
     def _write_shards(self, shards: list[list[dict[str, Any]]]) -> list[str]:
         shard_paths = []
 
-        for shard_index, shard in enumerate(shards):
+        for shard_index, shard in enumerate(tqdm(shards, desc="Writing Shards")):
             shard_path = self.output_dir / f"shard_{shard_index:05d}.tar"
             with tarfile.open(shard_path, "w") as tar:
                 for segment_info in shard:
@@ -683,12 +750,10 @@ class WebDatasetCreator:
         return shard_paths
 
     def _build_sample(self, segment_info: dict[str, Any], shard_index: int) -> dict[str, str | Path]:
-        print(json.dumps(segment_info, indent=2))
         sample = {}
 
         sample["json"] = json.dumps(segment_info["segment_metadata"])
         sample["mp4"] = segment_info["segment_path"]
-        print(segment_info)
         for ext, path in segment_info["files_to_add"]:
             sample[ext] = path
 
@@ -709,12 +774,12 @@ class WebDatasetCreator:
             filename = f"{segment_name}.{ext}"
             try:
                 if ext == "json":
-                    encoded = content.encode("utf-8")  # type: ignore
+                    encoded = content.encode("utf-8")
                     info = tarfile.TarInfo(filename)
                     info.size = len(encoded)
                     tar.addfile(info, io.BytesIO(encoded))
                 else:
-                    content = Path(content)  # type: ignore
+                    content = Path(content)
                     size = content.stat().st_size
                     if size == 0:
                         print(f"Warning: File {content} has zero size. Skipping.")
@@ -890,51 +955,60 @@ def process_without_gui(args):
     # assert not duplicates.any(), f"Duplicate rows found:\n{ebible_translations_df[duplicates]}"
     language_code, translation_id = args.ebible_version.split("-")
     ebible_version_metadata = search_ebible_translations(language_code, translation_id, ebible_translations_df)
-    print(f"Metadata for {args.ebible_version}: {ebible_version_metadata}")
+    # print(f"Metadata for {args.ebible_version}: {ebible_version_metadata}")
 
     # Create directories
     downloads_dir.mkdir(parents=True, exist_ok=True)
     processed_dir.mkdir(parents=True, exist_ok=True)
 
     # Step 1: Download videos
-    print("=== Step 1: Downloading videos from DBL-sign ===")
+    print(f"=== Step 1: Downloading videos from DBL-sign. Language code filter: {args.language_code} ===")
     downloader = DBLSignDownloader(downloads_dir)
-    video_info_list = downloader.download_videos(args.num_videos, args.language_code, args.project_name)
-    print(video_info_list)
-    print(json.dumps(video_info_list, indent=4))
 
+    # TODO: default num_videos only 10 even if already downloaded!
+    video_info_list = downloader.download_videos(args.num_videos, args.language_code, args.project_name)
+    print(f"Video Info List has {len(video_info_list)} items total")
+
+    # print(json.dumps(video_info_list, indent=4))
+
+    # TODO: get language name and iso code and country from metadata.xml, need a function
+    #  also copyright statement
+    # <copyright>
+    #     <fullStatement>
+    #       <statementContent type="xhtml">
+    #         <p>© 2019-2021 Deaf Harbor</p>
+    #         <p>© 2019-2021 D.O.O.R. International</p>
+    #       </statementContent>
+    #     </fullStatement>
+    #   </copyright>
     # ---------------------------------------
     # Parse verse data from metadata.xml
     video_info_list_with_bible_refs = []
     for video_info in video_info_list:
         video_info["filename"] = Path(video_info["path"]).name
         meta_xml = Path(video_info["path"]).parent / "metadata.xml"
-        print(f"Metadata for {video_info['path']}: {meta_xml}")
 
         video_info["transcripts"] = []
 
         video_info["bible-ref"] = parse_metadata_to_bible_ref(meta_xml, video_info)
-        # print(file_to_passage)
+
         transcript = {}
         bible_text, vrefs = citation_to_text_and_vrefs(
             video_info["bible-ref"], vref_map=vref_map, bible_verses=bible_verses
         )
         video_info["biblenlp-vref"] = vrefs
-        transcript["bible_text"] = bible_text
-        # print(ebible_version_metadata)
+        transcript["text"] = bible_text
+
         # {'languageCode': 'eng', 'translationId': 'engbsb', 'languageName': 'English', 'languageNameInEnglish': 'English', 'dialect': nan, 'homeDomain': 'ebible.org', 'title': 'Berean Standard Bible', 'description': 'The Holy Bible in English: Berean Standard Bible', 'Redistributable': True, 'Copyright': 'public domain', 'UpdateDate': '2024-07-13', 'publicationURL': 'http://ebible.org/engbsb/', 'OTbooks': 39, 'OTchapters': 929, 'OTverses': 23145, 'NTbooks': 27, 'NTchapters': 260, 'NTverses': 7941, 'DCbooks': 0, 'DCchapters': 0, 'DCverses': 0, 'FCBHID': 'ENGBSB', 'Certified': True, 'inScript': 'http://eBible.org/study/?v1=GN1_1&w1=bible&t1=local%3A', 'swordName': 'engbsb2020eb', 'rodCode': nan, 'textDirection': 'ltr', 'downloadable': True, 'font': 'DejaVu Serif', 'shortTitle': 'English Berean Standard Bible', 'PODISBN': nan, 'script': 'Latin', 'sourceDate': '2024-07-13'}
         transcript["language"] = {
             "name": ebible_version_metadata["languageName"],
             "ISO639-3": ebible_version_metadata["languageCode"],
             "BCP-47": langcodes.standardize_tag(ebible_version_metadata["languageCode"]),
-            "license": ebible_version_metadata["Copyright"],
-            "source": ebible_version_metadata["publicationURL"],
-            # "BCP-47": "en-US",
         }
-        # transcript["source"] = "Berean Standard Bible"
-        transcript["source"] = ebible_version_metadata["title"]
+        transcript["license"] = ebible_version_metadata["Copyright"]
+        transcript["source"] = ebible_version_metadata["publicationURL"]
+        # transcript["source"] = ebible_version_metadata["title"]
         video_info["transcripts"].append(transcript)
-        print(video_info)
         # ebible_version_metadata
 
         video_info_list_with_bible_refs.append(video_info)
@@ -997,23 +1071,20 @@ def process_without_gui(args):
                 video_info["pose"]["mediapipe"] = str(mediapipe_path.name)
                 files_to_add.append(("pose", str(mediapipe_path)))
 
-            print(video_info)
-
             segment_info = {
                 "segment_name": video_path.stem,
                 "original": str(video_path),
                 "segment_path": str(video_path),  # Use original path as the main segment path
                 "segment_metadata": {
                     **video_info,
-                    "segment_index": 0,
-                    "segment_count": 1,
-                    "segment_name": video_path.stem,
+                    # "segment_index": 0,
+                    # "segment_count": 1,
+                    # "segment_name": video_path.stem,
                     "video_name": video_path.stem,
                 },
                 "files_to_add": files_to_add,
             }
 
-            print(segment_info)
             all_segments.append(segment_info)
 
     # Step #: Create WebDatasetF
@@ -1029,14 +1100,18 @@ def process_without_gui(args):
     with manifest_path.open("w", encoding="utf-8") as f:
         json.dump({"segments": all_segments}, f, indent=2)
 
-    print(f"Processing complete! Manifest saved to {manifest_path}")
+    print(f"Processing complete! Manifest saved to {manifest_path.resolve()}")
 
 
 def main():
     """Main function to run the entire process."""
     parser = argparse.ArgumentParser(description="Prepare sign language videos for HuggingFace datasets")
     parser.add_argument("--num-videos", type=int, default=10, help="Number of videos to download")
-    parser.add_argument("--language-code", type=str, help="Filter by language code")
+    parser.add_argument(
+        "--language-code",
+        action="append",
+        help="Filter by language code. You can specify this flag multiple times, e.g. --language-code eng --language-code spa",
+    )
     parser.add_argument("--project-name", type=str, help="Filter by project name")
     parser.add_argument(
         "--auto-segment",
@@ -1060,7 +1135,7 @@ def main():
     parser.add_argument(
         "--shard-size",
         type=int,
-        default=1000,
+        default=10,
         help="Number of segments per WebDataset shard",
     )
     args = parser.parse_args()
@@ -1070,4 +1145,5 @@ def main():
 
 if __name__ == "__main__":
     main()
-# python /opt/home/cleong/projects/semantic_and_visual_similarity/sign-bibles-dataset/dataprep/DBL-signbibles/huggingface-prep/prepare_webdataset.py --output-dir . --language-code esl
+# cd "/opt/home/cleong/projects/semantic_and_visual_similarity/sign-bibles-dataset" && conda activate /opt/home/cleong/envs/sign-bibles-dataset && python /opt/home/cleong/projects/semantic_and_visual_similarity/sign-bibles-dataset/dataprep/DBL-signbibles/huggingface-prep/prepare_webdataset.py --output-dir . --language-code esl
+# cd "/opt/home/cleong/projects/semantic_and_visual_similarity/sign-bibles-dataset" && conda activate /opt/home/cleong/envs/sign-bibles-dataset && python /opt/home/cleong/projects/semantic_and_visual_similarity/sign-bibles-dataset/dataprep/DBL-signbibles/huggingface-prep/prepare_webdataset.py --output-dir . --language-code sqs --language-code esl --num-videos 10000000000000

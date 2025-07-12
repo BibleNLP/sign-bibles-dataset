@@ -4,7 +4,6 @@ Upload WebDataset to HuggingFace datasets.
 """
 
 import argparse
-import json
 import os
 import shutil
 import tempfile
@@ -53,11 +52,11 @@ def create_dataset_card(webdataset_path, output_path, dataset_name, language_cod
         # Parse metadata if available
         if "json" in sample:
             # metadata = json.loads(sample["json"])
-            metadata = sample["json"]["metadata"]
-            print(json.dumps(metadata, indent=2))
-            if "language_code" in metadata:
-                print(metadata["language_code"])
-                languages.add(metadata["language_code"])
+            metadata = sample["json"]
+            # print(json.dumps(metadata, indent=2))
+            if "language" in metadata:
+                # print(metadata["language"])
+                languages.add(metadata["language"]["ISO639-3"])
             if "project_name" in metadata:
                 projects.add(metadata["project_name"])
 
@@ -252,4 +251,4 @@ def main():
 
 if __name__ == "__main__":
     main()
-# python dataprep/DBL-signbibles/huggingface-prep/upload_to_huggingface.py webdataset bible-nlp/sign-bibles
+# cd /opt/home/cleong/projects/semantic_and_visual_similarity/sign-bibles-dataset && conda activate /opt/home/cleong/envs/sign-bibles-dataset && python dataprep/DBL-signbibles/huggingface-prep/upload_to_huggingface.py webdataset bible-nlp/sign-bibles
