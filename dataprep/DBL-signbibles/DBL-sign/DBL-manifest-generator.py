@@ -1,12 +1,15 @@
-from bs4 import BeautifulSoup
-import requests
-import json
-from pathlib import Path
-import re
-import urllib.parse
 import argparse
+import json
+import re
 import time
+import urllib.parse
+from pathlib import Path
+
+import requests
+from bs4 import BeautifulSoup
 from tqdm import tqdm
+
+# Originally based on this: https://colab.research.google.com/drive/1_uFpG9lKJHV2S_jAUB5OA_W3m30BT14b?usp=sharing
 
 
 def create_manifest(response_data, auth=None):
@@ -57,9 +60,7 @@ def create_manifest(response_data, auth=None):
                 files = extract_files_from_html(response.text)
                 manifest["languages"][lang_code][project_name]["files"].extend(files)
             else:
-                pbar.write(
-                    f"Error fetching download listing: Status code {response.status_code}"
-                )
+                pbar.write(f"Error fetching download listing: Status code {response.status_code}")
         else:
             pbar.write(f"No download URL found for {project_name}")
 
@@ -87,9 +88,7 @@ def get_entry_info(id_val, session):
                         break
 
             # Look for download link
-            download_link = soup.find(
-                "a", href=lambda href: href and "download_listing" in href
-            )
+            download_link = soup.find("a", href=lambda href: href and "download_listing" in href)
             if download_link:
                 download_url = download_link["href"]
 
@@ -150,14 +149,10 @@ def save_manifest(manifest, output_file="manifest.json"):
 
 if __name__ == "__main__":
     # Set up argument parser
-    parser = argparse.ArgumentParser(
-        description="Generate a manifest of DBL sign language files."
-    )
+    parser = argparse.ArgumentParser(description="Generate a manifest of DBL sign language files.")
     parser.add_argument("--username", help="Username for DBL authentication")
     parser.add_argument("--password", help="Password for DBL authentication")
-    parser.add_argument(
-        "--output", default="manifest.json", help="Output JSON file path"
-    )
+    parser.add_argument("--output", default="manifest.json", help="Output JSON file path")
     args = parser.parse_args()
 
     # Create auth tuple if credentials are provided
@@ -166,6 +161,7 @@ if __name__ == "__main__":
         auth = (args.username, args.password)
 
     # Response data containing the list of sign language projects
+    # TODO: check https://app.thedigitalbiblelibrary.org/entries/open_access_entries?type=video
     response_data = {
         "aaData": [
             [
@@ -215,6 +211,14 @@ if __name__ == "__main__":
                 "India",
                 "Chronological Bible Translation in Kerala Sign Language",
                 "DOOR International",
+            ],
+            [
+                "d35ef4f076de43f6",
+                "Kerala Sign Language",
+                "mis",
+                "India",
+                "Believe God How in Kerala Sign Language",
+                "D.O.O.R. International",
             ],
             [
                 "65c350c1cf9c42e4",
@@ -289,6 +293,12 @@ if __name__ == "__main__":
                 "DOOR International",
             ],
             [
+                "xki",
+                "Kenya, Republic of",
+                "Believe God How 52 in Kenyan Sign Language",
+                "Deaf Opportunity Outreach International",
+            ],
+            [
                 "c4b68657ce9b48ad",
                 "Ghanaian Sign Language",
                 "gse",
@@ -301,7 +311,7 @@ if __name__ == "__main__":
                 "Indian (Delhi) Sign Language",
                 "ins",
                 "India",
-                "Chronological Bible Translation in Indian (Delhi)  Sign Language",
+                "Chronological Bible Translation in Indian (Delhi) Sign Language",
                 "DOOR International",
             ],
             [
@@ -334,6 +344,14 @@ if __name__ == "__main__":
                 "mis",
                 "India",
                 "Chronological Bible Translation in West Bengal Sign Language",
+                "DOOR International",
+            ],
+            [
+                "ae505f6ab3484407",
+                "Tamil Nadu Sign Language",
+                "mis",
+                "India",
+                "Chronological Bible Translation in Tamil Nadu Sign Language",
                 "DOOR International",
             ],
         ]
