@@ -239,6 +239,76 @@ def get_video_info_with_opencv(video_path: Path) -> dict:
     return video_opencv_info
 
 
+def build_transcripts(
+    video_path: Path,
+    bible_ref: str,
+    vref_map: dict[str, int],
+    bible_verses: list[str],
+    ebible_version_metadata: dict[str, Any],
+    total_frames: int,
+) -> tuple[list[dict[str, Any]], list[int]]:
+    language_info = {
+        "name": ebible_version_metadata["languageName"],
+        "ISO639-3": ebible_version_metadata["languageCode"],
+        "BCP-47": langcodes.standardize_tag(ebible_version_metadata["languageCode"]),
+    }
+    license_info = ebible_version_metadata["Copyright"]
+    source_url = ebible_version_metadata["publicationURL"]
+
+    transcripts = []
+    ocr_csv = video_path.with_suffix(".ocr.manualedit.csv")
+
+    if ocr_csv.is_file():
+        print(f"Using fine-grained transcript from {ocr_csv.name}")
+        df = pd.read_csv(ocr_csv)
+        frame_indices = df["frame_index"].tolist()
+        reference_texts = df["text"].fillna("").tolist()
+
+        for idx, start_frame in enumerate(frame_indices):
+            end_frame = frame_indices[idx + 1] - 1 if idx + 1 < len(frame_indices) else total_frames - 1
+            reference = reference_texts[idx].strip()
+            if not reference:
+                continue
+
+            verse_text, vref_indices = citation_to_text_and_vrefs(reference, vref_map, bible_verses)
+
+            transcripts.append(
+                {
+                    "text": verse_text,
+                    "start_frame": int(start_frame),
+                    "end_frame": int(end_frame),
+                    "language": language_info,
+                    "license": license_info,
+                    "source": source_url,
+                    "biblenlp-vref": vref_indices,
+                    "bible-ref": reference,
+                }
+            )
+
+        # Optional: biblenlp-vref can be merged from all segments if needed
+        biblenlp_vrefs = sorted(set(v for t in transcripts for v in t["biblenlp-vref"]))
+
+    else:
+        print(f"No fine-grained transcript for {video_path.name}, using fallback single transcript.")
+        verse_text, vref_indices = citation_to_text_and_vrefs(bible_ref, vref_map, bible_verses)
+
+        transcripts.append(
+            {
+                "text": verse_text,
+                "start_frame": 0,
+                "end_frame": total_frames - 1,
+                "language": language_info,
+                "license": license_info,
+                "source": source_url,
+                "biblenlp-vref": vref_indices,
+                "bible-ref": bible_ref,
+            }
+        )
+        biblenlp_vrefs = vref_indices
+
+    return transcripts, biblenlp_vrefs
+
+
 def process_without_gui(args):
     """Process videos without GUI updates using pathlib for filesystem operations."""
 
@@ -284,28 +354,14 @@ def process_without_gui(args):
 
         meta_xml = video_path.parent / "metadata.xml"
         video_info["bible-ref"] = parse_metadata_to_bible_ref(meta_xml, video_path.name)
-
-        # Add transcript from vref map and Bible text
-        bible_text, vrefs = citation_to_text_and_vrefs(video_info["bible-ref"], vref_map, bible_verses)
-        video_info["biblenlp-vref"] = vrefs
-        # TODO: if there is a file ending with .ocr.manualedit.withrefs.csv, use it to add transcripts
-        # if there are no more finegrained timestamps, make a single transcript spanning the whole video
-        transcript = {
-            "text": bible_text,
-            "biblenlp-vref": vrefs,
-            "bible-ref": video_info["bible-ref"],
-            "start_frame": 0,
-            "end_frame": video_info["total_frames"] - 1,
-            "language": {
-                "name": ebible_version_metadata["languageName"],
-                "ISO639-3": ebible_version_metadata["languageCode"],
-                "BCP-47": langcodes.standardize_tag(ebible_version_metadata["languageCode"]),
-            },
-            "license": ebible_version_metadata["Copyright"],
-            "source": ebible_version_metadata["publicationURL"],
-        }
-
-        video_info["transcripts"] = [transcript]
+        video_info["transcripts"], video_info["biblenlp-vref"] = build_transcripts(
+            video_path=video_path,
+            bible_ref=video_info["bible-ref"],
+            vref_map=vref_map,
+            bible_verses=bible_verses,
+            ebible_version_metadata=ebible_version_metadata,
+            total_frames=video_info["total_frames"],
+        )
 
         enriched_video_info_list.append(video_info)
 
