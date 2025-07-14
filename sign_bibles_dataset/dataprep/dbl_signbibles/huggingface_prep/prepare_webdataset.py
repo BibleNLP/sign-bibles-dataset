@@ -12,8 +12,6 @@ This script:
 # TODO: Load in .ocr.manualedit.withvrefs.csv if available,
 #   * if available add in transcripts with frame indices, biblenlp-vref, text.
 #   * if not available add in one for the whole video
-# TODO: replace all os.path with pathlib
-# TODO: replace all sys.path with project restructure + pip install -e .
 
 # TODO: read more of the information directly from project metadata.xml, e.g. rights holders
 # TODO: rename mediapipe ".pose" files to ".pose-mediapipe.pose" as they are added.
@@ -40,7 +38,6 @@ This script:
 """
 
 import argparse
-import importlib.util
 import io
 import json
 import os
@@ -61,9 +58,6 @@ from tqdm import tqdm
 
 from sign_bibles_dataset.dataprep.dbl_signbibles.dbl_sign import dbl_manifest_generator
 
-print(dir(dbl_manifest_generator))
-exit()
-
 # Initialize the logger with the correct path
 logger = ProcessingLogger(log_file_path="./output/run_log.txt")
 # Clear the log at the start of the process
@@ -73,70 +67,18 @@ logger.clear_log()
 logger.log_info(f"Command: {' '.join(sys.argv)}")
 
 
-# Add parent directory to path for importing from other modules
-parent_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-sys.path.append(parent_dir)
-dbl_sign_dir = os.path.join(parent_dir, "DBL-sign")
-sys.path.append(dbl_sign_dir)
-
-# Import DBL-sign utilities
-# Import manifest generator functions - using a different import approach
-# since the file has a dash in the name
-manifest_generator_path = os.path.join(dbl_sign_dir, "DBL-manifest-generator.py")
-manifest_generator_spec = importlib.util.spec_from_file_location("DBL_manifest_generator", manifest_generator_path)
-manifest_generator = importlib.util.module_from_spec(manifest_generator_spec)
-manifest_generator_spec.loader.exec_module(manifest_generator)
-
-
-def import_module_from_file(module_name, file_path):
-    """
-    Import a module from a file path.
-
-    Args:
-        module_name: Name to assign to the module
-        file_path: Path to the Python file
-
-    Returns:
-        Imported module
-
-    """
-    try:
-        if not os.path.exists(file_path):
-            print(f"Error: Module file not found: {file_path}")
-            return None
-
-        spec = importlib.util.spec_from_file_location(module_name, file_path)
-        if spec is None:
-            print(f"Error: Failed to create module spec for {file_path}")
-            return None
-
-        module = importlib.util.module_from_spec(spec)
-        if module is None:
-            print(f"Error: Failed to create module from spec for {file_path}")
-            return None
-
-        sys.modules[module_name] = module
-
-        try:
-            spec.loader.exec_module(module)
-        except Exception as e:
-            print(f"Error executing module {module_name} from {file_path}: {e!s}")
-            return None
-
-        return module
-    except Exception as e:
-        print(f"Error importing module {module_name} from {file_path}: {e!s}")
-        return None
+PARENT_DIR = Path(__file__).resolve().parent.parent
+DBL_SIGN_DIR = PARENT_DIR / "dbl_sign"
 
 
 class DBLSignDownloader:
     """Class to handle downloading videos from DBL-sign."""
 
-    def __init__(self, output_dir):
+    def __init__(self, output_dir: Path | str):
         """Initialize the downloader with output directory."""
-        self.output_dir = output_dir
+        self.output_dir = Path(output_dir)
         os.makedirs(self.output_dir, exist_ok=True)
-        self.manifest_path = os.path.join(dbl_sign_dir, "manifest.json")
+        self.manifest_path = DBL_SIGN_DIR / "manifest.json"
         self.manifest = None
 
         # Load manifest
@@ -147,207 +89,13 @@ class DBLSignDownloader:
         print("Generating fresh manifest...")
 
         # Response data containing the list of sign language projects (hardcoded in the original script)
-        response_data = {
-            "aaData": [
-                [
-                    "245cca6ac5984130",
-                    "Sri Lankan Sign Language",
-                    "sqs",
-                    "Sri Lanka",
-                    "Chronological Bible Translation in Sri Lankan Sign Language",
-                    "D.O.O.R. International",
-                ],
-                [
-                    "055195093e2347d0",
-                    "Burundian Sign Language",
-                    "lsb",
-                    "Burundi",
-                    "Chronological Bible Translation in Burundian Sign Language",
-                    "D.O.O.R. International",
-                ],
-                [
-                    "0a3ea85ee1e34a2d",
-                    "Nepali Sign Language",
-                    "nsp",
-                    "Nepal",
-                    "Chronological Bible Translation in Nepali Sign Language",
-                    "D.O.O.R. International",
-                ],
-                [
-                    "1fcac35962494d40",
-                    "Ugandan Sign Language",
-                    "ugn",
-                    "Uganda",
-                    "Chronological Bible Translation in Ugandan Sign Language",
-                    "D.O.O.R. International",
-                ],
-                [
-                    "a63aef8004db401b",
-                    "Ethiopian Sign Language",
-                    "eth",
-                    "Ethiopia",
-                    "Chronological Bible Translation in Ethiopian Sign Language",
-                    "D.O.O.R. International",
-                ],
-                [
-                    "56c922b7b5a44a47",
-                    "Kerala Sign Language",
-                    "mis",
-                    "India",
-                    "Chronological Bible Translation in Kerala Sign Language",
-                    "D.O.O.R. International",
-                ],
-                [
-                    "d35ef4f076de43f6",
-                    "Kerala Sign Language",
-                    "mis",
-                    "India",
-                    "Believe God How in Kerala Sign Language",
-                    "D.O.O.R. International",
-                ],
-                [
-                    "65c350c1cf9c42e4",
-                    "Nigerian Sign Language",
-                    "nsi",
-                    "Federal Republic Nigeria",
-                    "Chronological Bible Translation in Nigerian Sign Language",
-                    "D.O.O.R. International",
-                ],
-                [
-                    "6ad9cf57ab084a3b",
-                    "Estonian Sign Language",
-                    "eso",
-                    "Estonia",
-                    "The Bible in Estonian Sign Language",
-                    "Deaf Bible Society",
-                ],
-                [
-                    "9e9e20d036fa4e91",
-                    "Tanzanian Sign Language",
-                    "tza",
-                    "Tanzania",
-                    "Chronological Bible Translation in Tanzanian Sign Language",
-                    "D.O.O.R. International",
-                ],
-                [
-                    "6c1ffbf874d14ee1",
-                    "Andhra Pradesh Sign Language",
-                    "mis",
-                    "India",
-                    "Chronological Bible Translation in Andhra Pradesh Sign Language",
-                    "D.O.O.R. International",
-                ],
-                [
-                    "2d6ac5c8b4614955",
-                    "Bulgarian Sign Language",
-                    "bqn",
-                    "Bulgaria",
-                    "Chronological Bible Translation in Bulgarian Sign Language",
-                    "D.O.O.R. International",
-                ],
-                [
-                    "1bacaede20da4494",
-                    "American Sign Language",
-                    "ase",
-                    "United States of America",
-                    "Chronological Bible Translation in American Sign Language (119 Introductions and Passages expanded with More Information)",
-                    "Deaf Harbor ",
-                ],
-                [
-                    "d2027facd4cc4c2a",
-                    "American Sign Language",
-                    "ase",
-                    "United States of America",
-                    "Chronological Bible Translation in American Sign Language (119 Introductions and Passages)",
-                    "Deaf Harbor ",
-                ],
-                [
-                    "6543fec2ced7421d",
-                    "South Sudanese Sign Language",
-                    "mis",
-                    "Republic of South Sudan",
-                    "Chronological Bible Translation in South Sudanese Sign Language",
-                    "D.O.O.R. International",
-                ],
-                [
-                    "a28def50f139432a",
-                    "Kenyan Sign Language",
-                    "xki",
-                    "Kenya, Republic of",
-                    "Chronological Bible Translation in Kenyan Sign Language",
-                    "D.O.O.R. International",
-                ],
-                [
-                    "f6e834d17ee84710",
-                    "xki",
-                    "Kenya, Republic of",
-                    "Believe God How 52 in Kenyan Sign Language",
-                    "Deaf Opportunity Outreach International",
-                ],
-                [
-                    "c4b68657ce9b48ad",
-                    "Ghanaian Sign Language",
-                    "gse",
-                    "Ghana",
-                    "Chronological Bible Translation in Ghanaian Sign Language",
-                    "D.O.O.R. International",
-                ],
-                [
-                    "995240c9d7e8453e",
-                    "Indian (Delhi) Sign Language",
-                    "ins",
-                    "India",
-                    "Chronological Bible Translation in Indian (Delhi) Sign Language",
-                    "D.O.O.R. International",
-                ],
-                [
-                    "6d5944a5ceb944c0",
-                    "Russian Sign Language",
-                    "rsl",
-                    "Russian Federation",
-                    "Chronological Bible Translation in Russian Sign Language",
-                    "D.O.O.R. International",
-                ],
-                [
-                    "ec8517dba29d4d93",
-                    "Egyptian Sign Language",
-                    "esl",
-                    "Egypt",
-                    "Chronological Bible Translation in Egyptian Sign Language",
-                    "D.O.O.R. International",
-                ],
-                [
-                    "c0b48facec324e4b",
-                    "Mozambican Sign Language",
-                    "mzy",
-                    "Republic of Mozambique",
-                    "Chronological Bible Translation in Mozambican Sign Language",
-                    "D.O.O.R. International",
-                ],
-                [
-                    "b963267b41cc443c",
-                    "West Bengal Sign Language",
-                    "mis",
-                    "India",
-                    "Chronological Bible Translation in West Bengal Sign Language",
-                    "D.O.O.R. International",
-                ],
-                [
-                    "ae505f6ab3484407",
-                    "Tamil Nadu Sign Language",
-                    "mis",
-                    "India",
-                    "Chronological Bible Translation in Tamil Nadu Sign Language",
-                    "D.O.O.R. International",
-                ],
-            ]
-        }
+        response_data = dbl_manifest_generator.get_response_data()
 
         # Create manifest using the imported function
-        manifest = manifest_generator.create_manifest(response_data)
+        manifest = dbl_manifest_generator.create_manifest(response_data)
 
         # Save manifest using the imported function
-        manifest_generator.save_manifest(manifest, self.manifest_path)
+        dbl_manifest_generator.save_manifest(manifest, self.manifest_path)
 
         print("Fresh manifest generated successfully.")
 
@@ -359,12 +107,12 @@ class DBLSignDownloader:
 
     def load_manifest(self):
         """Load the manifest file."""
-        if not os.path.exists(self.manifest_path):
+        if not self.manifest_path.exists():
             print("Manifest file not found. Generating a fresh one...")
             return self.generate_fresh_manifest()
 
         # Check if manifest is older than 24 hours
-        manifest_age = time.time() - os.path.getmtime(self.manifest_path)
+        manifest_age = time.time() - self.manifest_path.stat().st_mtime
         if manifest_age > 86400:  # 24 hours in seconds
             print("Manifest is older than 24 hours. Generating a fresh one...")
             return self.generate_fresh_manifest()
@@ -441,7 +189,7 @@ class DBLSignDownloader:
                 if videos_downloaded >= num_videos:
                     break
 
-                project_dir = os.path.join(self.output_dir, lang_code, proj_name)
+                project_dir = self.output_dir / lang_code / proj_name
                 print(f"Project Dir: {project_dir}")
                 os.makedirs(project_dir, exist_ok=True)
 
@@ -458,7 +206,7 @@ class DBLSignDownloader:
                 }
 
                 # Save metadata
-                with open(os.path.join(project_dir, "metadata.json"), "w", encoding="utf-8") as f:
+                with open(project_dir / "metadata.json", "w", encoding="utf-8") as f:
                     json.dump(metadata, f, indent=2)
 
                 # Download MP4 files
@@ -468,14 +216,14 @@ class DBLSignDownloader:
                         break
 
                     filename = file_info["filename"]
-                    filepath = os.path.join(project_dir, filename)
+                    filepath = Path(project_dir) / filename
                     url = file_info["download_url"]
 
                     # Skip if file already exists
-                    if os.path.exists(filepath) and os.path.getsize(filepath) > 0:
+                    if filepath.exists() and filepath.stat().st_size > 0:
                         # print(f"File already exists: {filepath}")
 
-                        downloaded_videos.append({"path": filepath, **metadata})
+                        downloaded_videos.append({"path": str(filepath), **metadata})
                         videos_downloaded += 1
                         continue
 
@@ -916,7 +664,7 @@ def main():
         "--ebible-corpus-path",
         type=Path,
         help="Root directory of the eBible corpus. https://github.com/BibleNLP/ebible",
-        default=Path(parent_dir) / "ebible/",
+        default=Path(PARENT_DIR) / "ebible/",
     )
     parser.add_argument(
         "--ebible-version",

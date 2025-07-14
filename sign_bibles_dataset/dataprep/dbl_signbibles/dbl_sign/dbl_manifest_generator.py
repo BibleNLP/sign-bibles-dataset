@@ -147,21 +147,7 @@ def save_manifest(manifest, output_file="manifest.json"):
     print(f"Manifest saved to {output_file}")
 
 
-if __name__ == "__main__":
-    # Set up argument parser
-    parser = argparse.ArgumentParser(description="Generate a manifest of DBL sign language files.")
-    parser.add_argument("--username", help="Username for DBL authentication")
-    parser.add_argument("--password", help="Password for DBL authentication")
-    parser.add_argument("--output", default="manifest.json", help="Output JSON file path")
-    args = parser.parse_args()
-
-    # Create auth tuple if credentials are provided
-    auth = None
-    if args.username and args.password:
-        auth = (args.username, args.password)
-
-    # Response data containing the list of sign language projects
-    # TODO: check https://app.thedigitalbiblelibrary.org/entries/open_access_entries?type=video
+def get_response_data() -> dict:
     response_data = {
         "aaData": [
             [
@@ -356,10 +342,35 @@ if __name__ == "__main__":
             ],
         ]
     }
+    return response_data
+
+
+def refresh_manifest(output: Path = "manifest.json", auth=tuple | None):
+    # Response data containing the list of sign language projects
+    # TODO: check https://app.thedigitalbiblelibrary.org/entries/open_access_entries?type=video
+    # TODO: figure out how to get this dynamically instead of hardcoded.
+    response_data = get_response_data()
 
     # Create manifest
     manifest = create_manifest(response_data, auth)
 
     # Save manifest
-    save_manifest(manifest, args.output)
-    print("\nDone! Check manifest.json for the results.")
+    save_manifest(manifest, output)
+    print(f"\nDone! Check {output.resolve()} for the results.")
+    return output
+
+
+if __name__ == "__main__":
+    # Set up argument parser
+    parser = argparse.ArgumentParser(description="Generate a manifest of DBL sign language files.")
+    parser.add_argument("--username", help="Username for DBL authentication")
+    parser.add_argument("--password", help="Password for DBL authentication")
+    parser.add_argument("--output", default="manifest.json", help="Output JSON file path")
+    args = parser.parse_args()
+
+    if args.username and args.password:
+        auth = (args.username, args.password)
+    else:
+        print("Username and password are not provided, proceeding without them")
+        auth = None
+    refresh_manifest(output=args.output)

@@ -1,9 +1,12 @@
-import json
-import requests
-from pathlib import Path
 import argparse
+import json
 import time
+from pathlib import Path
+
+import requests
 from dbl_utils import DownloadLog, S3Storage, validate_mp4
+
+from sign_bibles_dataset.dataprep.dbl_signbibles.dbl_sign.dbl_manifest_generator import refresh_manifest
 
 
 class HeadlessProgress:
@@ -18,22 +21,6 @@ class HeadlessProgress:
 
     def complete(self):
         print("[COMPLETE]")
-
-
-def refresh_manifest(manifest_path, auth=None):
-    """Refresh the manifest using the manifest generator script."""
-    try:
-        import subprocess
-
-        cmd = ["python", "DBL-manifest-generator.py"]
-        if auth:
-            cmd.extend(["--username", auth[0], "--password", auth[1]])
-        subprocess.run(cmd, check=True)
-
-        with open(manifest_path, "r", encoding="utf-8") as f:
-            return json.load(f)
-    except Exception as e:
-        raise Exception(f"Failed to refresh manifest: {e}")
 
 
 def check_manifest_timestamp(manifest):
@@ -73,9 +60,7 @@ def download_file(url, filepath, session, progress_window, s3_storage=None):
                         f.write(chunk)
                         downloaded += len(chunk)
                         progress = (downloaded / file_size) * 100
-                        progress_window.update_file_progress(
-                            progress, f"Downloading: {filepath}"
-                        )
+                        progress_window.update_file_progress(progress, f"Downloading: {filepath}")
 
         # For S3 storage
         if s3_storage:
@@ -111,9 +96,7 @@ def download_file(url, filepath, session, progress_window, s3_storage=None):
         else:
             if filepath.exists():
                 if not filepath.suffix.lower() == ".mp4" or validate_mp4(filepath):
-                    progress_window.update_status(
-                        f"File already exists and is valid: {filepath}"
-                    )
+                    progress_window.update_status(f"File already exists and is valid: {filepath}")
                     temp_filepath.unlink()
                     return True
 
@@ -139,9 +122,7 @@ def download_file(url, filepath, session, progress_window, s3_storage=None):
         return False
 
 
-def download_manifest_files(
-    manifest_path, base_dir="downloads", auth=None, file_limit=None, s3_storage=None
-):
+def download_manifest_files(manifest_path, base_dir="downloads", auth=None, file_limit=None, s3_storage=None):
     # Create progress window
     # try:
     #     progress_window = DownloadProgressWindow()
@@ -153,16 +134,14 @@ def download_manifest_files(
     def download_thread():
         try:
             # Initialize download log
-            log_file = (
-                Path(manifest_path).parent / f"{Path(manifest_path).stem}_download.log"
-            )
+            log_file = Path(manifest_path).parent / f"{Path(manifest_path).stem}_download.log"
             download_log = DownloadLog(log_file)
 
             progress_window.update_status("Loading manifest file...")
 
             # Load manifest
             try:
-                with open(manifest_path, "r", encoding="utf-8") as f:
+                with open(manifest_path, encoding="utf-8") as f:
                     manifest = json.load(f)
             except FileNotFoundError:
                 raise Exception(f"Manifest file not found: {manifest_path}")
@@ -171,9 +150,7 @@ def download_manifest_files(
 
             # Check if manifest needs refresh
             if check_manifest_timestamp(manifest):
-                progress_window.update_status(
-                    "Manifest is older than 3 hours. Refreshing..."
-                )
+                progress_window.update_status("Manifest is older than 3 hours. Refreshing...")
                 try:
                     manifest = refresh_manifest(manifest_path, auth)
                 except Exception as e:
@@ -204,14 +181,9 @@ def download_manifest_files(
                 for lang_code, projects in manifest["languages"].items():
                     for project_name, project_info in projects.items():
                         project_mp4_count = sum(
-                            1
-                            for file_info in project_info["files"]
-                            if file_info["filename"].lower().endswith(".mp4")
+                            1 for file_info in project_info["files"] if file_info["filename"].lower().endswith(".mp4")
                         )
-                        if (
-                            file_limit is None
-                            or mp4_count + project_mp4_count <= file_limit
-                        ):
+                        if file_limit is None or mp4_count + project_mp4_count <= file_limit:
                             mp4_count += project_mp4_count
                             all_projects.append((lang_code, project_name, project_info))
                         if file_limit is not None and mp4_count >= file_limit:
@@ -219,9 +191,7 @@ def download_manifest_files(
                     if file_limit is not None and mp4_count >= file_limit:
                         break
 
-                progress_window.update_status(
-                    f"Found {len(all_projects)} projects to process..."
-                )
+                progress_window.update_status(f"Found {len(all_projects)} projects to process...")
 
                 # Now process files for selected projects
                 for lang_code, project_name, project_info in all_projects:
@@ -239,8 +209,7 @@ def download_manifest_files(
                             exists = s3_storage.file_exists(filepath)
                         else:
                             exists = (
-                                filepath.exists()
-                                and (not is_mp4 or validate_mp4(filepath))
+                                filepath.exists() and (not is_mp4 or validate_mp4(filepath))
                             ) or download_log.is_completed(filepath)
 
                         if exists:
@@ -263,15 +232,9 @@ def download_manifest_files(
                         project_dir.mkdir(parents=True, exist_ok=True)
                         license_file = project_dir / "license_info.txt"
                         with open(license_file, "w", encoding="utf-8") as f:
-                            f.write(
-                                f"License: {project_info.get('license', 'Unknown')}\n"
-                            )
-                            f.write(
-                                f"Rights Holder: {project_info.get('rights_holder', 'Unknown')}\n"
-                            )
-                            f.write(
-                                f"Project URL: {project_info.get('url', 'Unknown')}\n"
-                            )
+                            f.write(f"License: {project_info.get('license', 'Unknown')}\n")
+                            f.write(f"Rights Holder: {project_info.get('rights_holder', 'Unknown')}\n")
+                            f.write(f"Project URL: {project_info.get('url', 'Unknown')}\n")
                     else:
                         license_info = (
                             f"License: {project_info.get('license', 'Unknown')}\n"
@@ -279,15 +242,11 @@ def download_manifest_files(
                             f"Project URL: {project_info.get('url', 'Unknown')}\n"
                         )
                         license_path = project_dir / "license_info.txt"
-                        s3_storage.upload_file(
-                            license_info.encode("utf-8"), license_path
-                        )
+                        s3_storage.upload_file(license_info.encode("utf-8"), license_path)
 
                 # Update total count and initial progress
                 current_mp4_count = sum(1 for _, _, is_mp4 in existing_files if is_mp4)
-                overall_progress = (current_mp4_count * 100) / (
-                    file_limit or total_mp4_files
-                )
+                overall_progress = (current_mp4_count * 100) / (file_limit or total_mp4_files)
 
                 progress_window.update_status(
                     f"Found {len(existing_files)} existing files ({current_mp4_count} MP4s) and {len(files_to_download)} files to download "
@@ -315,9 +274,7 @@ def download_manifest_files(
                         existing_files.append((filepath, file_info, is_mp4))
                         if is_mp4:
                             current_mp4_count += 1
-                            overall_progress = (current_mp4_count * 100) / (
-                                file_limit or total_mp4_files
-                            )
+                            overall_progress = (current_mp4_count * 100) / (file_limit or total_mp4_files)
                             progress_window.update_overall_progress(
                                 overall_progress,
                                 current_mp4_count,
@@ -330,9 +287,7 @@ def download_manifest_files(
                 final_mp4_count = sum(1 for _, _, is_mp4 in existing_files if is_mp4)
                 if final_mp4_count == total_mp4_files:
                     download_log.cleanup()
-                    progress_window.update_status(
-                        "Download complete! Log file cleaned up."
-                    )
+                    progress_window.update_status("Download complete! Log file cleaned up.")
                 else:
                     progress_window.update_status(
                         f"Download complete with some failures. {final_mp4_count} of {total_mp4_files} MP4 files processed. "
@@ -362,20 +317,12 @@ def download_manifest_files(
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(
-        description="Download files from a manifest JSON file."
-    )
-    parser.add_argument(
-        "--manifest", default="manifest.json", help="Path to the manifest JSON file"
-    )
-    parser.add_argument(
-        "--output", default="downloads", help="Base directory for downloaded files"
-    )
+    parser = argparse.ArgumentParser(description="Download files from a manifest JSON file.")
+    parser.add_argument("--manifest", default="manifest.json", help="Path to the manifest JSON file")
+    parser.add_argument("--output", default="downloads", help="Base directory for downloaded files")
     parser.add_argument("--username", help="Username for authentication")
     parser.add_argument("--password", help="Password for authentication")
-    parser.add_argument(
-        "--limit", type=int, help="Limit the number of MP4 files to download"
-    )
+    parser.add_argument("--limit", type=int, help="Limit the number of MP4 files to download")
     parser.add_argument("--s3-bucket", help="S3 bucket to upload files to")
     parser.add_argument(
         "--s3-folder",
