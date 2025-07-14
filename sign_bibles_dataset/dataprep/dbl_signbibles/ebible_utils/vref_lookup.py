@@ -1,6 +1,9 @@
 # vref_lookup.py
 import csv
 import re
+from pathlib import Path
+
+BOOK_MAP_PATH = Path(__file__).parent / "data" / "usfm_book_identifiers.csv"
 
 
 def load_vref_map(vref_path: str) -> dict[str, int]:
@@ -138,13 +141,19 @@ def parse_citation_string(citation: str, vref_map: dict[str, int]) -> list[int]:
 def citation_to_text_and_vrefs(
     citation: str,
     vref_map: dict[str, int],
-    bible_lines: list[str],
-    book_map: dict[str, str],
+    bible_verses: list[str],
+    book_map: dict[str, str] | None = None,
 ) -> tuple[str, list[int]]:
+    """
+    Given something like 'Genesis 1:12' or 'GEN 12:16,17' or other such, will give you the actual text
+    for those verses, as well as the indices from the eBible corpus
+    """
+    if book_map is None:
+        book_map = load_usfm_book_map(BOOK_MAP_PATH)
     normalized = normalize_book_names(citation, book_map)
     expanded = expand_compound_citations(normalized)
     vrefs = parse_citation_string(expanded, vref_map)
-    verses = [bible_lines[i] for i in vrefs if 0 <= i < len(bible_lines)]
+    verses = [bible_verses[i] for i in vrefs if 0 <= i < len(bible_verses)]
     return "".join(verses), vrefs
 
 

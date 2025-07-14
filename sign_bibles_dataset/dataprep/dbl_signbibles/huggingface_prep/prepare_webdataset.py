@@ -469,15 +469,6 @@ def parse_citation_string(citation: str, vref_map: dict[str, int]) -> list[int]:
     return sorted(set(all_indices))
 
 
-# def citation_to_text_and_vrefs(citation: str, vref_map, bible_verses):
-#     vrefs = parse_citation_string(citation, vref_map)
-
-#     verses = [bible_verses[i] for i in vrefs if 0 <= i < len(bible_verses)]
-
-#     bible_text = "".join(verses)
-#     return bible_text, vrefs
-
-
 def get_video_info_with_opencv(video_path: Path) -> dict:
     cap = cv2.VideoCapture(str(video_path))
     if not cap.isOpened():
