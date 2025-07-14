@@ -9,7 +9,7 @@ from pathlib import Path
 from typing import Any
 
 from pytubefix import YouTube
-from pytubefix.exceptions import RegexMatchError, VideoUnavailable
+from pytubefix.exceptions import BotDetection, RegexMatchError, VideoUnavailable
 from tqdm import tqdm
 
 
@@ -51,6 +51,8 @@ def download_video(video_id: str, metadata: dict[str, Any], base_dir: Path) -> N
             except OSError as e:
                 logging.error(f"[{video_id}] Failed to write metadata: {e}")
             return
+        elif json_files and not mp4_files:
+            logging.info(f"[{video_id}] JSON found but no mp4. Downloading video")
 
     output_dir.mkdir(parents=True, exist_ok=True)
 
@@ -106,8 +108,17 @@ def main() -> None:
     args.download_dir.mkdir(parents=True, exist_ok=True)
     metadata_dict = load_metadata(args.json_path)
 
+    botdetected_video_ids = []
     for video_id, metadata in tqdm(metadata_dict.items(), desc="Downloading videos"):
-        download_video(video_id, metadata, args.download_dir)
+        try:
+            download_video(video_id, metadata, args.download_dir)
+        except BotDetection as e:
+            logging.info(f"[{video_id}] cannot be downloaded: {type(e)} {e}.")
+            botdetected_video_ids.append(video_id)
+    print(f"{len(botdetected_video_ids)} could not be downloaded due to bot detection")
+    for video_id in botdetected_video_ids:
+        print(video_id)
+        print(args.download_dir / f"manos3d_{video_id}")
 
 
 if __name__ == "__main__":
