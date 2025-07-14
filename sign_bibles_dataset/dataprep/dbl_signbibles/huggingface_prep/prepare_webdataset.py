@@ -6,15 +6,8 @@ This script:
 * Packages everything into WebDataset format
 
 
-# TODO: Rename files to include language code and project name, to ensure unique IDs
 # TODO: Add autosegmenter .eaf file instead, though maybe clean them up to remove paths. (need pympi-ling)
 # TODO: size-based sharding, try for not too big?
-# TODO: Load in .ocr.manualedit.withvrefs.csv if available,
-#   * if available add in transcripts with frame indices, biblenlp-vref, text.
-#   * if not available add in one for the whole video
-# TODO: read more of the information directly from project metadata.xml, e.g. rights holders
-# TODO: rename mediapipe ".pose" files to ".pose-mediapipe.pose" as they are added.
-# TODO: parse metadata.xml to get country code
 # TODO: add in "glosses" to match https://huggingface.co/datasets/bridgeconn/sign-bibles-isl?
 # example:
 "glosses": [
@@ -39,6 +32,7 @@ This script:
 import argparse
 import io
 import json
+import logging
 import re
 import sys
 import tarfile
@@ -49,7 +43,6 @@ from typing import Any
 import cv2
 import langcodes
 import pandas as pd
-from processing_logger import ProcessingLogger
 from tqdm import tqdm
 
 from sign_bibles_dataset.dataprep.dbl_signbibles.ebible_utils.vref_lookup import (
@@ -60,12 +53,38 @@ from sign_bibles_dataset.dataprep.dbl_signbibles.ebible_utils.vref_lookup import
 from sign_bibles_dataset.dataprep.dbl_signbibles.huggingface_prep.dbl_sign_downloader import DBLSignDownloader
 
 # Initialize the logger with the correct path
-logger = ProcessingLogger(log_file_path="./output/run_log.txt")
-# Clear the log at the start of the process
-logger.clear_log()
 
-# Add command line info to the log
-logger.log_info(f"Command: {' '.join(sys.argv)}")
+
+def setup_logger(log_file_path: str) -> logging.Logger:
+    log_file = Path(log_file_path)
+    log_file.parent.mkdir(parents=True, exist_ok=True)
+
+    logger = logging.getLogger("ProcessingLogger")
+    logger.setLevel(logging.DEBUG)  # Capture everything
+
+    # Clear existing handlers (important if rerunning in notebooks or scripts)
+    if logger.hasHandlers():
+        logger.handlers.clear()
+
+    # File Handler (all messages)
+    file_handler = logging.FileHandler(log_file_path, mode="w")
+    file_handler.setLevel(logging.DEBUG)
+    file_format = logging.Formatter("[%(asctime)s] %(levelname)s: %(message)s")
+    file_handler.setFormatter(file_format)
+    logger.addHandler(file_handler)
+
+    # Console Handler (INFO and above)
+    console_handler = logging.StreamHandler()
+    console_handler.setLevel(logging.INFO)
+    console_format = logging.Formatter("%(levelname)s: %(message)s")
+    console_handler.setFormatter(console_format)
+    logger.addHandler(console_handler)
+
+    return logger
+
+
+logger = setup_logger("./output/run_log.txt")
+logger.info(f"Command: {' '.join(sys.argv)}")
 
 
 class WebDatasetCreator:
@@ -105,7 +124,7 @@ class WebDatasetCreator:
 
         # Prepare sample name
         metadata = video_info.copy()
-        language_code = metadata["transcripts"][0]["language"]["ISO639-3"]
+        language_code = metadata["language"]["ISO639-3"]
         project_name = metadata["project_name"]
         project_slug = self._slugify(project_name)
         original_name = Path(metadata["filename"]).stem
@@ -159,7 +178,7 @@ class WebDatasetCreator:
         for tar_filename, src_path in sample["files"].items():
             src_path = Path(src_path)
             if not src_path.is_file():
-                print(f"Warning: File {src_path} not found, skipping.")
+                logger.debug(f"Warning: File {src_path} not found, skipping.")
                 continue
             info = tarfile.TarInfo(tar_filename)
             info.size = src_path.stat().st_size
@@ -179,7 +198,7 @@ def parse_metadata_to_bible_ref(xml_path: Path, filename):
     Parse a metadata.xml and return bible ref associated, or empty string
     e.g. "CBT-001-esl-3_Bible_God Creates Everything.mp4" -> "GEN 1:1-31,2:1-3"
     """
-    print(f"Parsing metadata to find bible refs for {filename}")
+    logger.debug(f"Parsing metadata to find bible refs for {filename}")
     try:
         tree = ET.parse(xml_path)
         root = tree.getroot()
@@ -194,14 +213,66 @@ def parse_metadata_to_bible_ref(xml_path: Path, filename):
                     src = content.attrib.get("src", "").strip()
                     xml_filename = Path(src).name
                     file_to_passage[xml_filename] = passage
-        # print(json.dumps(file_to_passage, indent=2))
+        logger.debug("File to Bible Passage Map:\n", json.dumps(file_to_passage, indent=2))
         passage_found = file_to_passage.get(filename, "")
-        print(f"Found Passage {passage_found} for filename {filename}")
+        logger.debug(f"Found Passage {passage_found} for filename {filename}")
         return passage_found
 
     except ET.ParseError as e:
-        print(f"[ERROR] Could not parse {xml_path}: {e}")
+        logger.error(f"[ERROR] Could not parse {xml_path}: {e}")
         return None, {}
+
+
+def parse_metadata_to_info(xml_path: Path):
+    """
+    Parse a metadata.xml file and extract language, countries, and rights holders.
+    Returns a tuple: (language_dict, countries_list, rights_holders_list)
+    """
+    logger.debug(f"Parsing metadata for language, countries, and rights holders: {xml_path}")
+    try:
+        tree = ET.parse(xml_path)
+        root = tree.getroot()
+
+        # LANGUAGE
+        language_node = root.find("./language")
+        language = (
+            {
+                "iso": language_node.findtext("iso", default="").strip(),
+                "name": language_node.findtext("name", default="").strip(),
+                "nameLocal": language_node.findtext("nameLocal", default="").strip(),
+            }
+            if language_node is not None
+            else {}
+        )
+
+        # COUNTRIES
+        countries = []
+        for country in root.findall("./countries/country"):
+            countries.append(
+                {
+                    "iso": country.findtext("iso", default="").strip(),
+                    "name": country.findtext("name", default="").strip(),
+                    "nameLocal": country.findtext("nameLocal", default="").strip(),
+                }
+            )
+
+        # RIGHTS HOLDERS
+        rights_holders = []
+        for rh in root.findall("./agencies/rightsHolder"):
+            rights_holders.append(
+                {
+                    # "uid": rh.findtext("uid", default="").strip(),
+                    "name": rh.findtext("name", default="").strip(),
+                    "abbr": rh.findtext("abbr", default="").strip(),
+                    "url": rh.findtext("url", default="").strip(),
+                }
+            )
+
+        return language, countries, rights_holders
+
+    except ET.ParseError as e:
+        logger.error(f"[ERROR] Could not parse {xml_path}: {e}")
+        return {}, [], []
 
 
 def search_ebible_translations(
@@ -212,10 +283,10 @@ def search_ebible_translations(
         & (ebible_translations_df["translationId"] == translation_id)
     ]
     if result.empty:
-        print(f"No results found for ({language_code}, {translation_id})")
+        logger.warn(f"No results found for ({language_code}, {translation_id})")
         return None
     elif len(result) > 1:
-        print(f"Warning: Multiple results found for ({language_code}, {translation_id}), returning the first.")
+        logger.warn(f"Warning: Multiple results found for ({language_code}, {translation_id}), returning the first.")
 
     return result.iloc[0].to_dict()
 
@@ -259,7 +330,7 @@ def build_transcripts(
     ocr_csv = video_path.with_suffix(".ocr.manualedit.csv")
 
     if ocr_csv.is_file():
-        print(f"Using fine-grained transcript from {ocr_csv.name}")
+        logger.debug(f"Using fine-grained transcript from {ocr_csv.name}")
         df = pd.read_csv(ocr_csv)
         frame_indices = df["frame_index"].tolist()
         reference_texts = df["text"].fillna("").tolist()
@@ -289,8 +360,11 @@ def build_transcripts(
         biblenlp_vrefs = sorted(set(v for t in transcripts for v in t["biblenlp-vref"]))
 
     else:
-        print(f"No fine-grained transcript for {video_path.name}, using fallback single transcript.")
+        logger.debug(f"No fine-grained transcript for {video_path.name}, using fallback single transcript.")
         verse_text, vref_indices = citation_to_text_and_vrefs(bible_ref, vref_map, bible_verses)
+        if not verse_text:
+            logger.warn(f"No verses found for {video_path} reference {bible_ref}, returning empty lists")
+            return [], vref_indices
 
         transcripts.append(
             {
@@ -332,16 +406,29 @@ def process_without_gui(args):
     bible_verses = load_bible_lines(ebible_corpus_path / "corpus" / f"{args.ebible_version}.txt")
     ebible_translations_df = pd.read_csv(ebible_corpus_path / "metadata" / "translations.csv")
 
-    print(f"Loaded {len(vref_map)} vrefs, {len(bible_verses)} verses, {len(ebible_translations_df)} translations")
+    logger.info(f"Loaded {len(vref_map)} vrefs, {len(bible_verses)} verses, {len(ebible_translations_df)} translations")
 
     language_code, translation_id = args.ebible_version.split("-")
     ebible_version_metadata = search_ebible_translations(language_code, translation_id, ebible_translations_df)
 
     # === Step 2: Download Videos ===
-    print(f"=== Downloading {args.num_videos} videos (language code: {args.language_code}) ===")
+    logger.info(f"=== Downloading {args.num_videos} videos (language code: {args.language_code}) ===")
     downloader = DBLSignDownloader(downloads_dir)
     video_info_list = downloader.download_videos(args.num_videos, args.language_code, args.project_name)
-    print(f"Downloaded {len(video_info_list)} videos")
+    logger.info(f"Downloaded {len(video_info_list)} videos")
+
+    # === Step #: Parse
+    for video_info in video_info_list:
+        meta_xml_language, meta_xml_countries, meta_xml_rights_holders = parse_metadata_to_info(
+            Path(video_info["path"]).parent / "metadata.xml"
+        )
+        video_info["language"]["name"] = meta_xml_language["name"]
+        video_info["language"]["nameLocal"] = meta_xml_language["nameLocal"]
+        video_info["language"]["ISO639-3"] = meta_xml_language["iso"]
+        # possibly try meta_xml_countries["countries"][0]["iso"]?
+        video_info["language"]["BCP-47"] = langcodes.standardize_tag(meta_xml_language["iso"])
+
+        video_info["copyright"] = meta_xml_rights_holders
 
     # === Step 3: Enrich Video Metadata with eBible References ===
     enriched_video_info_list = []
@@ -366,19 +453,19 @@ def process_without_gui(args):
         enriched_video_info_list.append(video_info)
 
     # === Step 4: Create WebDataset ===
-    print(f"=== Creating WebDataset with {len(enriched_video_info_list)} samples ===")
+    logger.info(f"=== Creating WebDataset with {len(enriched_video_info_list)} samples ===")
     creator = WebDatasetCreator(webdataset_dir)
     shard_paths = creator.create_webdataset(enriched_video_info_list, shard_size=args.shard_size)
 
-    print(f"Created {len(shard_paths)} shards in {webdataset_dir.resolve()}")
+    logger.info(f"Created {len(shard_paths)} shards in {webdataset_dir.resolve()}")
 
     # === Step 5: Save Manifest ===
-    print("=== Saving Manifest ===")
+    logger.info("=== Saving Manifest ===")
     with manifest_path.open("w", encoding="utf-8") as f:
         json.dump({"samples": enriched_video_info_list}, f, indent=2)
 
-    print(f"Processing complete! Manifest saved to {manifest_path.resolve()}")
-    logger.log(f"Done, see {logger.log_file_path} for logs")
+    logger.info(f"Processing complete! Manifest saved to {manifest_path.resolve()}")
+    logger.info(f"Done, see {logger.log_file_path} for logs")
 
 
 def main():

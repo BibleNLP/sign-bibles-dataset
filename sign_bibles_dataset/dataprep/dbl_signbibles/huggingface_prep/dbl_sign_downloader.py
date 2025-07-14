@@ -102,7 +102,10 @@ class DBLSignDownloader:
                 for proj_name, proj_info in projects.items():
                     # Only filter by project name if it's explicitly provided
                     if project_name and proj_name != project_name:
+                        print(f"Project name for {proj_name} does not match {project_name}")
                         continue
+
+                    print(f"Found a matching project name! {proj_name}")
 
                     # Count MP4 files in this project
                     mp4_count = sum(
