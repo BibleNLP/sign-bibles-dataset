@@ -33,7 +33,7 @@ def expand_compound_citations(citation: str) -> str:
             continue
 
         parts = token.split(",")
-        for i, part in enumerate(parts):
+        for part in parts:
             part = part.strip()
 
             # Book and chapter present: "Genesis 6:3"

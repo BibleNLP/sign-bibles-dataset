@@ -50,7 +50,11 @@ import pandas as pd
 from processing_logger import ProcessingLogger
 from tqdm import tqdm
 
-from sign_bibles_dataset.dataprep.dbl_signbibles.ebible_utils.vref_lookup import citation_to_text_and_vrefs
+from sign_bibles_dataset.dataprep.dbl_signbibles.ebible_utils.vref_lookup import (
+    citation_to_text_and_vrefs,
+    load_bible_lines,
+    load_vref_map,
+)
 from sign_bibles_dataset.dataprep.dbl_signbibles.huggingface_prep.dbl_sign_downloader import DBLSignDownloader
 
 # Initialize the logger with the correct path
@@ -131,6 +135,13 @@ class WebDatasetCreator:
             except Exception as e:
                 print(f"Error adding {filename} to tar: {e}")
 
+    def _slugify(self, text: str) -> str:
+        """Simplify project name into safe filename slug."""
+        text = text.lower()
+        text = re.sub(r"[^\w\s-]", "", text)
+        text = re.sub(r"[\s_-]+", "_", text)
+        return text.strip("_")
+
 
 def parse_metadata_to_bible_ref(xml_path: Path, filename):
     """
@@ -176,86 +187,6 @@ def search_ebible_translations(
         print(f"Warning: Multiple results found for ({language_code}, {translation_id}), returning the first.")
 
     return result.iloc[0].to_dict()
-
-
-def load_vref_map(vref_path: str) -> dict[str, int]:
-    with open(vref_path, encoding="utf-8") as f:
-        return {line.strip(): idx for idx, line in enumerate(f) if line.strip()}
-
-
-def load_bible_lines(bible_path: str) -> list[str]:
-    with open(bible_path, encoding="utf-8") as f:
-        return [line.strip() for line in f]
-
-
-def parse_citation_string(citation: str, vref_map: dict[str, int]) -> list[int]:
-    all_indices = []
-    current_book = None
-    current_chapter = None
-    tokens = re.split(r";\s*", citation.strip())
-
-    for token in tokens:
-        token = token.strip()
-        if not token:
-            continue
-
-        m = re.fullmatch(r"([1-3]?[A-Z]+)\s+(\d+)", token)
-        if m:
-            book, chapter = m.groups()
-            current_book = book
-            current_chapter = chapter
-            prefix = f"{book} {chapter}:"
-            matches = [i for ref, i in vref_map.items() if ref.startswith(prefix)]
-            all_indices.extend(matches)
-            continue
-
-        m = re.fullmatch(r"([1-3]?[A-Z]+)", token)
-        if m:
-            book = m.group(1)
-            current_book = book
-            matches = [i for ref, i in vref_map.items() if ref.startswith(f"{book} ")]
-            all_indices.extend(matches)
-            continue
-
-        m = re.fullmatch(r"([1-3]?[A-Z]+)?\s*(\d+:\d+)\s*-\s*([1-3]?[A-Z]+)?\s*(\d+:\d+)", token)
-        if m:
-            book1, start, book2, end = m.groups()
-            if book1:
-                current_book = book1
-            book2 = book2 or current_book
-            if not (current_book and book2):
-                continue
-            start_ref = f"{current_book} {start}"
-            end_ref = f"{book2} {end}"
-            if start_ref in vref_map and end_ref in vref_map:
-                i1, i2 = vref_map[start_ref], vref_map[end_ref]
-                if i1 <= i2:
-                    all_indices.extend(range(i1, i2 + 1))
-            continue
-
-        parts = token.split(",")
-        for part in parts:
-            part = part.strip()
-            m = re.fullmatch(r"([1-3]?[A-Z]+)?\s*(\d+):(\d+(?:-\d+)?)", part)
-            if m:
-                maybe_book, ch, verse_range = m.groups()
-                if maybe_book:
-                    current_book = maybe_book
-                current_chapter = ch
-                if not current_book:
-                    continue
-
-                if "-" in verse_range:
-                    start_v, end_v = map(int, verse_range.split("-"))
-                    verse_numbers = range(start_v, end_v + 1)
-                else:
-                    verse_numbers = [int(verse_range)]
-
-                for v in verse_numbers:
-                    ref = f"{current_book} {current_chapter}:{v}"
-                    if ref in vref_map:
-                        all_indices.append(vref_map[ref])
-    return sorted(set(all_indices))
 
 
 def get_video_info_with_opencv(video_path: Path) -> dict:
@@ -394,8 +325,9 @@ def process_without_gui(args):
             video_info["pose"]["mediapipe"] = str(mediapipe_path.name)
             files_to_add.append(("pose", str(mediapipe_path)))
 
+        sample_name = video_path.stem
         sample_info = {
-            "sample_name": video_path.stem,
+            "sample_name": sample_name,
             "sample_path": str(video_path),
             "sample_metadata": {
                 **video_info,
@@ -419,6 +351,7 @@ def process_without_gui(args):
         json.dump({"samples": all_samples}, f, indent=2)
 
     print(f"Processing complete! Manifest saved to {manifest_path.resolve()}")
+    logger.log(f"Done, see {logger.log_file_path} for logs")
 
 
 def main():
@@ -459,8 +392,6 @@ def main():
     args = parser.parse_args()
 
     process_without_gui(args)
-
-    logger.info(f"Done, see {logger.log_file_path} for logs")
 
 
 if __name__ == "__main__":
