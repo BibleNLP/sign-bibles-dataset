@@ -120,17 +120,26 @@ class WebDatasetCreator:
         sample["files"] = {f"{sample_name}.mp4": video_path}
 
         # Optional pose files
+        # add metadata information for each of the pose files
+        metadata["pose"] = {}
         dw_pose = video_path.with_suffix(".pose-dwpose.npz")
         if dw_pose.exists():
-            sample["files"][f"{sample_name}.pose-dwpose.npz"] = dw_pose
+            desired_name = f"{sample_name}.pose-dwpose.npz"
+            metadata["pose"]["dwpose"] = desired_name
+            sample["files"][desired_name] = dw_pose
 
         mediapipe_pose = video_path.with_suffix(".pose")
         if mediapipe_pose.exists():
-            sample["files"][f"{sample_name}.pose"] = mediapipe_pose
+            desired_name = f"{sample_name}.pose-mediapipe.pose"
+            metadata["pose"]["mediapipe"] = desired_name
+            sample["files"][desired_name] = mediapipe_pose
 
         # don't actually add the paths to the final json
         del metadata["path"]
         del metadata["filename_path"]
+
+        # overwrite filename
+        metadata["filename"] = f"{sample_name}.mp4"
 
         # JSON metadata
         json_data = json.dumps(metadata)
