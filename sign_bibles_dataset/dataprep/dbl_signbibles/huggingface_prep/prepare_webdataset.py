@@ -5,10 +5,10 @@ This script:
 * Downloads videos from DBL-sign
 * Packages everything into WebDataset format
 
-# TODO: clean out all segmentation code.
-# TODO: Add autosegmenter .eaf file instead.
+# TODO: Add autosegmenter .eaf file instead, though maybe clean them up to remove paths. (need pympi-ling)
 # TODO: move the classes to their own files.
-# TODO: import citation_to_text_and_vrefs from the actual module instead of copying it in here
+# TODO: import citation_to_text_and_vrefs from the actual ebible_utils instead of copying it in here
+# TODO: size-based sharding, try for not too big?
 # TODO: Load in .ocr.manualedit.withvrefs.csv if available,
 #   * if available add in transcripts with frame indices, biblenlp-vref, text.
 #   * if not available add in one for the whole video
@@ -58,6 +58,11 @@ import pandas as pd
 import requests
 from processing_logger import ProcessingLogger
 from tqdm import tqdm
+
+from sign_bibles_dataset.dataprep.dbl_signbibles.dbl_sign import dbl_manifest_generator
+
+print(dir(dbl_manifest_generator))
+exit()
 
 # Initialize the logger with the correct path
 logger = ProcessingLogger(log_file_path="./output/run_log.txt")
@@ -816,6 +821,7 @@ def process_without_gui(args):
 
         video_info["bible-ref"] = parse_metadata_to_bible_ref(meta_xml, Path(video_info["path"]).name)
 
+        # look for .withvrefs.csv here and if so load transcripts from there
         transcript = {}
         bible_text, vrefs = citation_to_text_and_vrefs(
             video_info["bible-ref"], vref_map=vref_map, bible_verses=bible_verses
@@ -828,6 +834,8 @@ def process_without_gui(args):
             "name": ebible_version_metadata["languageName"],
             "ISO639-3": ebible_version_metadata["languageCode"],
             "BCP-47": langcodes.standardize_tag(ebible_version_metadata["languageCode"]),
+            "start_frame": 0,
+            "end_frame": video_info["total_frames"],
         }
         transcript["license"] = ebible_version_metadata["Copyright"]
         transcript["source"] = ebible_version_metadata["publicationURL"]
