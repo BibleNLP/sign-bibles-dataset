@@ -5,9 +5,9 @@ This script:
 * Downloads videos from DBL-sign
 * Packages everything into WebDataset format
 
+# TODO: add a unique key to each sample, like in https://huggingface.co/datasets/sayakpaul/ucf101-subset
 # TODO: Add autosegmenter .eaf file instead, though maybe clean them up to remove paths. (need pympi-ling)
 # TODO: move the classes to their own files.
-# TODO: import citation_to_text_and_vrefs from the actual ebible_utils instead of copying it in here
 # TODO: size-based sharding, try for not too big?
 # TODO: Load in .ocr.manualedit.withvrefs.csv if available,
 #   * if available add in transcripts with frame indices, biblenlp-vref, text.
@@ -15,8 +15,7 @@ This script:
 
 # TODO: read more of the information directly from project metadata.xml, e.g. rights holders
 # TODO: rename mediapipe ".pose" files to ".pose-mediapipe.pose" as they are added.
-# TODO: don't add pose animations, they are big and easily generated.
-# TODO: add in "glosses" to match https://huggingface.co/datasets/bridgeconn/sign-bibles-isl,
+# TODO: add in "glosses" to match https://huggingface.co/datasets/bridgeconn/sign-bibles-isl?
 # example:
 "glosses": [
         {
@@ -56,7 +55,8 @@ import requests
 from processing_logger import ProcessingLogger
 from tqdm import tqdm
 
-from sign_bibles_dataset.dataprep.dbl_signbibles.dbl_sign import dbl_manifest_generator
+from sign_bibles_dataset.dataprep.dbl_signbibles.dbl_sign import dbl_manifest_downloader, dbl_manifest_generator
+from sign_bibles_dataset.dataprep.dbl_signbibles.ebible_utils.vref_lookup import citation_to_text_and_vrefs
 
 # Initialize the logger with the correct path
 logger = ProcessingLogger(log_file_path="./output/run_log.txt")
@@ -469,13 +469,13 @@ def parse_citation_string(citation: str, vref_map: dict[str, int]) -> list[int]:
     return sorted(set(all_indices))
 
 
-def citation_to_text_and_vrefs(citation: str, vref_map, bible_verses):
-    vrefs = parse_citation_string(citation, vref_map)
+# def citation_to_text_and_vrefs(citation: str, vref_map, bible_verses):
+#     vrefs = parse_citation_string(citation, vref_map)
 
-    verses = [bible_verses[i] for i in vrefs if 0 <= i < len(bible_verses)]
+#     verses = [bible_verses[i] for i in vrefs if 0 <= i < len(bible_verses)]
 
-    bible_text = "".join(verses)
-    return bible_text, vrefs
+#     bible_text = "".join(verses)
+#     return bible_text, vrefs
 
 
 def get_video_info_with_opencv(video_path: Path) -> dict:
@@ -603,10 +603,6 @@ def process_without_gui(args):
         video_info["pose"] = {}
 
         files_to_add = []
-        pose_animation_path = video_path.with_suffix(".pose-animation.mp4")
-        if pose_animation_path.is_file():
-            video_info["pose"]["animation"] = str(pose_animation_path.name)
-            files_to_add.append(("pose-animation.mp4", str(pose_animation_path)))
 
         dw_pose_path = video_path.with_suffix(".pose-dwpose.npz")
         if dw_pose_path.is_file():
