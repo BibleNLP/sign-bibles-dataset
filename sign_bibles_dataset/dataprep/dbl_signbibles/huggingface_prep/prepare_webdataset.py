@@ -5,6 +5,7 @@ This script:
 * Downloads videos from DBL-sign
 * Packages everything into WebDataset format
 
+
 # TODO: Rename files to include language code and project name, to ensure unique IDs
 # TODO: Add autosegmenter .eaf file instead, though maybe clean them up to remove paths. (need pympi-ling)
 # TODO: size-based sharding, try for not too big?
@@ -13,6 +14,7 @@ This script:
 #   * if not available add in one for the whole video
 # TODO: read more of the information directly from project metadata.xml, e.g. rights holders
 # TODO: rename mediapipe ".pose" files to ".pose-mediapipe.pose" as they are added.
+# TODO: parse metadata.xml to get country code
 # TODO: add in "glosses" to match https://huggingface.co/datasets/bridgeconn/sign-bibles-isl?
 # example:
 "glosses": [
@@ -89,51 +91,71 @@ class WebDatasetCreator:
         for shard_index, shard in enumerate(tqdm(shards, desc="Writing Shards")):
             shard_path = self.output_dir / f"shard_{shard_index:05d}.tar"
             with tarfile.open(shard_path, "w") as tar:
-                for sample_info in shard:
-                    sample = self._build_sample(sample_info, shard_index)
+                for video_info in shard:
+                    sample = self._build_sample(video_info, shard_index)
                     if not sample:
                         continue
-                    self._add_sample_to_tar(tar, sample, sample_info["sample_name"])
+                    self._add_sample_to_tar(tar, sample, sample["__key__"])
             shard_paths.append(str(shard_path))
 
         return shard_paths
 
-    def _build_sample(self, sample_info: dict[str, Any], shard_index: int) -> dict[str, str | Path]:
+    def _build_sample(self, video_info: dict[str, Any], shard_index: int) -> dict[str, Any]:
         sample = {}
 
-        sample["json"] = json.dumps(sample_info["sample_metadata"])
-        sample["mp4"] = sample_info["sample_path"]
-        for ext, path in sample_info["files_to_add"]:
-            sample[ext] = path
+        # Prepare sample name
+        metadata = video_info.copy()
+        language_code = metadata["transcripts"][0]["language"]["ISO639-3"]
+        project_name = metadata["project_name"]
+        project_slug = self._slugify(project_name)
+        original_name = Path(metadata["filename"]).stem
+
+        sample_name = f"{language_code}_{project_slug}_{original_name}"
+        sample["__key__"] = sample_name
+
+        # Actual disk files
+        video_path = Path(metadata["filename_path"])
+
+        # Files inside tar: renamed
+        sample["files"] = {f"{sample_name}.mp4": video_path}
+
+        # Optional pose files
+        dw_pose = video_path.with_suffix(".pose-dwpose.npz")
+        if dw_pose.exists():
+            sample["files"][f"{sample_name}.pose-dwpose.npz"] = dw_pose
+
+        mediapipe_pose = video_path.with_suffix(".pose")
+        if mediapipe_pose.exists():
+            sample["files"][f"{sample_name}.pose"] = mediapipe_pose
+
+        # don't actually add the paths to the final json
+        del metadata["path"]
+        del metadata["filename_path"]
+
+        # JSON metadata
+        json_data = json.dumps(metadata)
+        sample["json_data"] = json_data
+        sample["json_filename"] = f"{sample_name}.json"
 
         return sample
 
-    def _add_sample_to_tar(
-        self,
-        tar: tarfile.TarFile,
-        sample: dict[str, str | Path],
-        sample_name: str,
-    ):
-        for ext, content in sample.items():
-            filename = f"{sample_name}.{ext}"
-            try:
-                if ext == "json":
-                    encoded = content.encode("utf-8")
-                    info = tarfile.TarInfo(filename)
-                    info.size = len(encoded)
-                    tar.addfile(info, io.BytesIO(encoded))
-                else:
-                    content = Path(content)
-                    size = content.stat().st_size
-                    if size == 0:
-                        print(f"Warning: File {content} has zero size. Skipping.")
-                        continue
-                    info = tarfile.TarInfo(filename)
-                    info.size = size
-                    with content.open("rb") as f:
-                        tar.addfile(info, f)
-            except Exception as e:
-                print(f"Error adding {filename} to tar: {e}")
+    def _add_sample_to_tar(self, tar: tarfile.TarFile, sample: dict[str, Any], sample_name: str):
+        # Add JSON metadata
+        encoded = sample["json_data"].encode("utf-8")
+        info = tarfile.TarInfo(sample["json_filename"])
+        info.size = len(encoded)
+        tar.addfile(info, io.BytesIO(encoded))
+
+        # Add actual files
+        for tar_filename, src_path in sample["files"].items():
+            src_path = Path(src_path)
+            if not src_path.is_file():
+                print(f"Warning: File {src_path} not found, skipping.")
+                continue
+            info = tarfile.TarInfo(tar_filename)
+            info.size = src_path.stat().st_size
+            with src_path.open("rb") as f:
+                tar.addfile(info, f)
 
     def _slugify(self, text: str) -> str:
         """Simplify project name into safe filename slug."""
@@ -210,145 +232,85 @@ def get_video_info_with_opencv(video_path: Path) -> dict:
 
 def process_without_gui(args):
     """Process videos without GUI updates using pathlib for filesystem operations."""
-    # Initialize paths
+
+    # === Step 0: Initialize Paths ===
     output_dir = Path(args.output_dir)
     downloads_dir = output_dir / "downloads"
-    processed_dir = output_dir / "processed"
     webdataset_dir = output_dir / "webdataset"
     manifest_path = output_dir / "manifest.json"
 
-    # eBible Corpus
+    downloads_dir.mkdir(parents=True, exist_ok=True)
+    webdataset_dir.mkdir(parents=True, exist_ok=True)
+
+    # === Step 1: Load eBible Corpus ===
     ebible_corpus_path = args.ebible_corpus_path
-    vref_text_path = ebible_corpus_path / "metadata" / "vref.txt"
-    ebible_translations_csv_path = ebible_corpus_path / "metadata" / "translations.csv"
-    ebible_text_path = ebible_corpus_path / "corpus" / f"{args.ebible_version}.txt"
     if not ebible_corpus_path.is_dir():
         raise ValueError(
-            f"eBible Corpus is not at {ebible_corpus_path}. Please clone it there or pass --ebible-corpus-path"
+            f"eBible Corpus not found at {ebible_corpus_path}. Please clone it there or pass --ebible-corpus-path"
         )
 
-    vref_map = load_vref_map(vref_text_path)
-    bible_verses = load_bible_lines(ebible_text_path)
-    print(f"Loading vref-to-index map from {vref_text_path}: {len(vref_map)} keys")
-    print(f"Loading {args.ebible_version} verses from {ebible_text_path}: {len(bible_verses)} loaded")
-    ebible_translations_df = pd.read_csv(ebible_translations_csv_path)
-    print(f"Loading translations info from {ebible_translations_csv_path}: {len(ebible_translations_df)} translations")
+    vref_map = load_vref_map(ebible_corpus_path / "metadata" / "vref.txt")
+    bible_verses = load_bible_lines(ebible_corpus_path / "corpus" / f"{args.ebible_version}.txt")
+    ebible_translations_df = pd.read_csv(ebible_corpus_path / "metadata" / "translations.csv")
 
-    # Assert uniqueness of (languageCode, translationId)
-    # duplicates = ebible_translations_df.duplicated(subset=["languageCode", "translationId"], keep=False)
-    # assert not duplicates.any(), f"Duplicate rows found:\n{ebible_translations_df[duplicates]}"
+    print(f"Loaded {len(vref_map)} vrefs, {len(bible_verses)} verses, {len(ebible_translations_df)} translations")
+
     language_code, translation_id = args.ebible_version.split("-")
     ebible_version_metadata = search_ebible_translations(language_code, translation_id, ebible_translations_df)
-    # print(f"Metadata for {args.ebible_version}: {ebible_version_metadata}")
 
-    # Create directories
-    downloads_dir.mkdir(parents=True, exist_ok=True)
-    processed_dir.mkdir(parents=True, exist_ok=True)
-
-    # Step 1: Download videos
-    print(f"=== Step 1: Downloading videos from DBL-sign. Language code filter: {args.language_code} ===")
+    # === Step 2: Download Videos ===
+    print(f"=== Downloading {args.num_videos} videos (language code: {args.language_code}) ===")
     downloader = DBLSignDownloader(downloads_dir)
-
-    # TODO: default num_videos only 10 even if already downloaded!
     video_info_list = downloader.download_videos(args.num_videos, args.language_code, args.project_name)
-    print(f"Video Info List has {len(video_info_list)} items total")
+    print(f"Downloaded {len(video_info_list)} videos")
 
-    # print(json.dumps(video_info_list, indent=4))
-
-    # TODO: get language name and iso code and country from metadata.xml, need a function
-    #  also copyright statement
-    # <copyright>
-    #     <fullStatement>
-    #       <statementContent type="xhtml">
-    #         <p>© 2019-2021 Deaf Harbor</p>
-    #         <p>© 2019-2021 D.O.O.R. International</p>
-    #       </statementContent>
-    #     </fullStatement>
-    #   </copyright>
-    # ---------------------------------------
-    # Parse verse data from metadata.xml
-    video_info_list_with_bible_refs = []
-    for video_info in video_info_list:
-        video_info["filename"] = Path(video_info["path"]).name
-
-        video_opencv_info = get_video_info_with_opencv(video_info["path"])
-        video_info.update(video_opencv_info)
-
-        meta_xml = Path(video_info["path"]).parent / "metadata.xml"
-
-        video_info["transcripts"] = []
-
-        video_info["bible-ref"] = parse_metadata_to_bible_ref(meta_xml, Path(video_info["path"]).name)
-
-        # look for .withvrefs.csv here and if so load transcripts from there
-        transcript = {}
-        bible_text, vrefs = citation_to_text_and_vrefs(
-            video_info["bible-ref"], vref_map=vref_map, bible_verses=bible_verses
-        )
-        video_info["biblenlp-vref"] = vrefs
-        transcript["text"] = bible_text
-
-        # {'languageCode': 'eng', 'translationId': 'engbsb', 'languageName': 'English', 'languageNameInEnglish': 'English', 'dialect': nan, 'homeDomain': 'ebible.org', 'title': 'Berean Standard Bible', 'description': 'The Holy Bible in English: Berean Standard Bible', 'Redistributable': True, 'Copyright': 'public domain', 'UpdateDate': '2024-07-13', 'publicationURL': 'http://ebible.org/engbsb/', 'OTbooks': 39, 'OTchapters': 929, 'OTverses': 23145, 'NTbooks': 27, 'NTchapters': 260, 'NTverses': 7941, 'DCbooks': 0, 'DCchapters': 0, 'DCverses': 0, 'FCBHID': 'ENGBSB', 'Certified': True, 'inScript': 'http://eBible.org/study/?v1=GN1_1&w1=bible&t1=local%3A', 'swordName': 'engbsb2020eb', 'rodCode': nan, 'textDirection': 'ltr', 'downloadable': True, 'font': 'DejaVu Serif', 'shortTitle': 'English Berean Standard Bible', 'PODISBN': nan, 'script': 'Latin', 'sourceDate': '2024-07-13'}
-        transcript["language"] = {
-            "name": ebible_version_metadata["languageName"],
-            "ISO639-3": ebible_version_metadata["languageCode"],
-            "BCP-47": langcodes.standardize_tag(ebible_version_metadata["languageCode"]),
-            "start_frame": 0,
-            "end_frame": video_info["total_frames"],
-        }
-        transcript["license"] = ebible_version_metadata["Copyright"]
-        transcript["source"] = ebible_version_metadata["publicationURL"]
-        # transcript["source"] = ebible_version_metadata["title"]
-        video_info["transcripts"].append(transcript)
-        # ebible_version_metadata
-
-        video_info_list_with_bible_refs.append(video_info)
-
-    video_info_list = video_info_list_with_bible_refs
-
-    print("=== Step 2: Processing videos to samples ===")
-    all_samples = []
+    # === Step 3: Enrich Video Metadata with eBible References ===
+    enriched_video_info_list = []
     for video_info in video_info_list:
         video_path = Path(video_info["path"])
-        del video_info["path"]
-        video_info["pose"] = {}
+        video_info["filename"] = video_path.name
+        video_info["filename_path"] = str(video_path)
 
-        files_to_add = []
+        video_info.update(get_video_info_with_opencv(video_path))
 
-        dw_pose_path = video_path.with_suffix(".pose-dwpose.npz")
-        if dw_pose_path.is_file():
-            video_info["pose"]["dwpose"] = str(dw_pose_path.name)
-            files_to_add.append(("pose-dwpose.npz", str(dw_pose_path)))
+        meta_xml = video_path.parent / "metadata.xml"
+        video_info["bible-ref"] = parse_metadata_to_bible_ref(meta_xml, video_path.name)
 
-        mediapipe_path = video_path.with_suffix(".pose")
-        if mediapipe_path.is_file():
-            video_info["pose"]["mediapipe"] = str(mediapipe_path.name)
-            files_to_add.append(("pose", str(mediapipe_path)))
-
-        sample_name = video_path.stem
-        sample_info = {
-            "sample_name": sample_name,
-            "sample_path": str(video_path),
-            "sample_metadata": {
-                **video_info,
+        # Add transcript from vref map and Bible text
+        bible_text, vrefs = citation_to_text_and_vrefs(video_info["bible-ref"], vref_map, bible_verses)
+        video_info["biblenlp-vref"] = vrefs
+        # TODO: if there is a file ending with .ocr.manualedit.withrefs.csv, use it to add transcripts
+        # if there are no more finegrained timestamps, make a single transcript spanning the whole video
+        transcript = {
+            "text": bible_text,
+            "biblenlp-vref": vrefs,
+            "bible-ref": video_info["bible-ref"],
+            "start_frame": 0,
+            "end_frame": video_info["total_frames"] - 1,
+            "language": {
+                "name": ebible_version_metadata["languageName"],
+                "ISO639-3": ebible_version_metadata["languageCode"],
+                "BCP-47": langcodes.standardize_tag(ebible_version_metadata["languageCode"]),
             },
-            "files_to_add": files_to_add,
+            "license": ebible_version_metadata["Copyright"],
+            "source": ebible_version_metadata["publicationURL"],
         }
 
-        all_samples.append(sample_info)
+        video_info["transcripts"] = [transcript]
 
-    # Step #: Create WebDatasetF
-    print("=== Step 3: Creating WebDataset ===")
-    webdataset_dir.mkdir(parents=True, exist_ok=True)
-    print(webdataset_dir.resolve())
+        enriched_video_info_list.append(video_info)
 
+    # === Step 4: Create WebDataset ===
+    print(f"=== Creating WebDataset with {len(enriched_video_info_list)} samples ===")
     creator = WebDatasetCreator(webdataset_dir)
-    creator.create_webdataset(all_samples, shard_size=args.shard_size)
+    shard_paths = creator.create_webdataset(enriched_video_info_list, shard_size=args.shard_size)
 
-    # Step 4: Create manifest
-    print("=== Step 4: Creating manifest ===")
+    print(f"Created {len(shard_paths)} shards in {webdataset_dir.resolve()}")
+
+    # === Step 5: Save Manifest ===
+    print("=== Saving Manifest ===")
     with manifest_path.open("w", encoding="utf-8") as f:
-        json.dump({"samples": all_samples}, f, indent=2)
+        json.dump({"samples": enriched_video_info_list}, f, indent=2)
 
     print(f"Processing complete! Manifest saved to {manifest_path.resolve()}")
     logger.log(f"Done, see {logger.log_file_path} for logs")
