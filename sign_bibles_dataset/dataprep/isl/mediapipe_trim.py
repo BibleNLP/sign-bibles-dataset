@@ -1,7 +1,8 @@
+import io
+import os
+
 import cv2
 import mediapipe as mp
-import os
-import io
 
 
 class VideoTrimmer:
@@ -45,10 +46,7 @@ class VideoTrimmer:
                     else:
                         hand_displacement = max(
                             hand_displacement,
-                            abs(
-                                right_hand_pos
-                                - results.right_hand_landmarks.landmark[16].y
-                            ),
+                            abs(right_hand_pos - results.right_hand_landmarks.landmark[16].y),
                         )
 
                 if results.left_hand_landmarks:
@@ -57,10 +55,7 @@ class VideoTrimmer:
                     else:
                         hand_displacement = max(
                             hand_displacement,
-                            abs(
-                                left_hand_pos
-                                - results.left_hand_landmarks.landmark[15].y
-                            ),
+                            abs(left_hand_pos - results.left_hand_landmarks.landmark[15].y),
                         )
                 # print(f'{frame_idx=} {hand_displacement=}')
 
@@ -105,12 +100,8 @@ class VideoTrimmer:
             # print(f"about to trim! Width: {width}, Height: {height}, FPS: {fps}")
 
             fourcc = "mp4v"
-            fourcc_code = cv2.VideoWriter_fourcc(
-                *fourcc
-            )  # Codec (e.g., 'mp4v', 'XVID')
-            video_writer = cv2.VideoWriter(
-                temp_file2, fourcc_code, fps, (width, height)
-            )
+            fourcc_code = cv2.VideoWriter_fourcc(*fourcc)  # Codec (e.g., 'mp4v', 'XVID')
+            video_writer = cv2.VideoWriter(temp_file2, fourcc_code, fps, (width, height))
 
             while True:
                 ret, frame = cap.read()

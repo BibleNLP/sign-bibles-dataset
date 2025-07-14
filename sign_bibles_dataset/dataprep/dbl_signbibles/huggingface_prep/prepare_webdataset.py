@@ -55,7 +55,7 @@ import requests
 from processing_logger import ProcessingLogger
 from tqdm import tqdm
 
-from sign_bibles_dataset.dataprep.dbl_signbibles.dbl_sign import dbl_manifest_downloader, dbl_manifest_generator
+from sign_bibles_dataset.dataprep.dbl_signbibles.dbl_sign import dbl_manifest_generator
 from sign_bibles_dataset.dataprep.dbl_signbibles.ebible_utils.vref_lookup import citation_to_text_and_vrefs
 
 # Initialize the logger with the correct path

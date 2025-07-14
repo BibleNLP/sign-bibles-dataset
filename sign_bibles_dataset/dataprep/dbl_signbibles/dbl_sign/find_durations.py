@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 
-import subprocess
 import csv
+import subprocess
 from pathlib import Path
+
 from tqdm import tqdm
 
 

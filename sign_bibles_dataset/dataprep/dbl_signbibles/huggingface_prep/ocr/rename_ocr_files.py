@@ -1,5 +1,5 @@
-from pathlib import Path
 import argparse
+from pathlib import Path
 
 
 def rename_ocr_files_recursive(directory: Path, dry_run: bool = False) -> None:
@@ -43,13 +43,9 @@ def rename_ocr_files_recursive(directory: Path, dry_run: bool = False) -> None:
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(
-        description="Recursively rename OCR text files to use .ocr.json suffix."
-    )
+    parser = argparse.ArgumentParser(description="Recursively rename OCR text files to use .ocr.json suffix.")
     parser.add_argument("directory", type=Path, help="Path to the base directory.")
-    parser.add_argument(
-        "--dry-run", action="store_true", help="Only print what would be renamed."
-    )
+    parser.add_argument("--dry-run", action="store_true", help="Only print what would be renamed.")
     args = parser.parse_args()
 
     rename_ocr_files_recursive(args.directory, dry_run=args.dry_run)

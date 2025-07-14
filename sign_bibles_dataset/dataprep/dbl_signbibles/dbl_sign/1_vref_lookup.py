@@ -43,9 +43,7 @@ def parse_citation_string(citation: str, vref_map: dict[str, int]) -> list[int]:
             all_indices.extend(matches)
             continue
 
-        m = re.fullmatch(
-            r"([1-3]?[A-Z]+)?\s*(\d+:\d+)\s*-\s*([1-3]?[A-Z]+)?\s*(\d+:\d+)", token
-        )
+        m = re.fullmatch(r"([1-3]?[A-Z]+)?\s*(\d+:\d+)\s*-\s*([1-3]?[A-Z]+)?\s*(\d+:\d+)", token)
         if m:
             book1, start, book2, end = m.groups()
             if book1:
@@ -107,17 +105,11 @@ def citation_to_text_and_vrefs(citation: str, vref_map, bible_lines):
 
 
 def main():
-    parser = argparse.ArgumentParser(
-        description="Augment video JSON with eBible verse indices and text."
-    )
+    parser = argparse.ArgumentParser(description="Augment video JSON with eBible verse indices and text.")
     parser.add_argument("vref_path", help="Path to vref.txt file")
-    parser.add_argument(
-        "json_path", help="Path to input JSON file, or dir of json files"
-    )
+    parser.add_argument("json_path", help="Path to input JSON file, or dir of json files")
 
-    parser.add_argument(
-        "bible_path", help="Path to eBible .txt file (one verse per line)"
-    )
+    parser.add_argument("bible_path", help="Path to eBible .txt file (one verse per line)")
     parser.add_argument("--iso_code", help="ISO 639-3 for the Bible")
     parser.add_argument("--bcp_code", help="BCP-47 for the Bible")
     parser.add_argument("--output_json", help="Path to write updated JSON")
@@ -135,9 +127,7 @@ def main():
             transcript = {}
             indices = parse_citation_string(citation, vref_map)
             video_metadata["biblenlp-vref"] = indices
-            transcript["bible_text"] = "".join(
-                [bible_lines[i] for i in indices if 0 <= i < len(bible_lines)]
-            )
+            transcript["bible_text"] = "".join([bible_lines[i] for i in indices if 0 <= i < len(bible_lines)])
             transcript["language"] = {
                 "name": "English",
                 "ISO639-3": "eng",

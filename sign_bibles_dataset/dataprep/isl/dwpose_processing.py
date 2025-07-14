@@ -1,10 +1,11 @@
-import sys
-import os
 import io
-import matplotlib
+import os
+import sys
+
 import cv2
-import torch
+import matplotlib
 import numpy as np
+import torch
 from dotenv import load_dotenv
 
 # Load environment variables from .env
@@ -66,7 +67,7 @@ def draw_handpose(canvas, all_hand_peaks, hands_scores):
         [19, 20],
     ]
 
-    for peaks, scores in zip(all_hand_peaks, hands_scores):
+    for peaks, scores in zip(all_hand_peaks, hands_scores, strict=False):
         peaks = np.array(peaks)
         for ie, e in enumerate(edges):
             x1, y1 = peaks[e[0]]
@@ -80,8 +81,7 @@ def draw_handpose(canvas, all_hand_peaks, hands_scores):
                     canvas,
                     (x1, y1),
                     (x2, y2),
-                    matplotlib.colors.hsv_to_rgb([ie / float(len(edges)), 1.0, 1.0])
-                    * 255,
+                    matplotlib.colors.hsv_to_rgb([ie / float(len(edges)), 1.0, 1.0]) * 255,
                     thickness=2,
                 )
 
@@ -120,9 +120,7 @@ def draw_roi_mask(mask, all_points, H, W):
     max_x = np.max(all_points[:, 0])
     min_y = np.min(all_points[:, 1])
     max_y = np.max(all_points[:, 1])
-    points = np.array(
-        [(min_x, min_y), (min_x, max_y), (max_x, max_y), (max_x, min_y)], dtype=np.int32
-    )
+    points = np.array([(min_x, min_y), (min_x, max_y), (max_x, max_y), (max_x, min_y)], dtype=np.int32)
     if min_x > 0 and min_y > 0 and max_x < W and max_y < H:
         cv2.fillPoly(mask, [points], color=(255, 255, 255))
     return mask
@@ -159,9 +157,7 @@ def pose_estimate(image):
         bodies = dict(candidate=body, subset=score)
         pose = dict(bodies=bodies, hands=hands, faces=faces)
 
-        return draw_pose(
-            pose, H, W, hands_scores=[subset[:, 92:113], subset[:, 113:]]
-        ), draw_mask(pose, H, W)
+        return draw_pose(pose, H, W, hands_scores=[subset[:, 92:113], subset[:, 113:]]), draw_mask(pose, H, W)
 
 
 def generate_mask_and_pose_video_streams(id):
@@ -181,12 +177,8 @@ def generate_mask_and_pose_video_streams(id):
 
         fourcc = "mp4v"
         fourcc_code = cv2.VideoWriter_fourcc(*fourcc)  # Codec (e.g., 'mp4v', 'XVID')
-        video_writer1 = cv2.VideoWriter(
-            temp_file_mask, fourcc_code, fps, (width, height)
-        )
-        video_writer2 = cv2.VideoWriter(
-            temp_file_pose, fourcc_code, fps, (width, height)
-        )
+        video_writer1 = cv2.VideoWriter(temp_file_mask, fourcc_code, fps, (width, height))
+        video_writer2 = cv2.VideoWriter(temp_file_pose, fourcc_code, fps, (width, height))
 
         while True:
             ret, frame = cap.read()
@@ -232,12 +224,8 @@ def generate_mask_and_pose_video_files(id):
 
         fourcc = "mp4v"
         fourcc_code = cv2.VideoWriter_fourcc(*fourcc)  # Codec (e.g., 'mp4v', 'XVID')
-        video_writer1 = cv2.VideoWriter(
-            temp_file_mask, fourcc_code, fps, (width, height)
-        )
-        video_writer2 = cv2.VideoWriter(
-            temp_file_pose, fourcc_code, fps, (width, height)
-        )
+        video_writer1 = cv2.VideoWriter(temp_file_mask, fourcc_code, fps, (width, height))
+        video_writer2 = cv2.VideoWriter(temp_file_pose, fourcc_code, fps, (width, height))
 
         while True:
             ret, frame = cap.read()

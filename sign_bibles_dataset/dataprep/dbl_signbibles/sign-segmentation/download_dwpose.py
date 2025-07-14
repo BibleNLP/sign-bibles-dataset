@@ -1,6 +1,7 @@
-import requests
 import shutil
 from pathlib import Path
+
+import requests
 
 
 def download_file(url: str, local_path: Path):
@@ -31,9 +32,7 @@ dwpose_root = root_dir / "DWPose"
 # Download each file to the proper local path under DWPose/
 for file_path in files:
     url = f"{base_url}/{file_path}"
-    relative_subpath = Path(
-        *file_path.split("/")[2:]
-    )  # skip ControlNet-v1-1-nightly/annotator
+    relative_subpath = Path(*file_path.split("/")[2:])  # skip ControlNet-v1-1-nightly/annotator
     local_path = dwpose_root / "annotator" / relative_subpath
     download_file(url, local_path)
 

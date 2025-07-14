@@ -9,9 +9,7 @@ with open(JSON_PATH, encoding="utf-8") as f:
     grouped_data = json.load(f)
 
 # Flatten with pandas.json_normalize
-df = pd.json_normalize(
-    grouped_data, record_path="videos", meta=["language_code", "version_name", "dbl_id"]
-)
+df = pd.json_normalize(grouped_data, record_path="videos", meta=["language_code", "version_name", "dbl_id"])
 
 # Optional: reorder columns
 # df = df[["language_code", "version_name", "dbl_id", "mp4_path", "bible_passage", "ebible_vref_indices"]]

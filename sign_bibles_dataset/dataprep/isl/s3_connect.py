@@ -1,5 +1,6 @@
-import os
 import io
+import os
+
 import boto3
 import botocore
 from dotenv import load_dotenv
@@ -70,8 +71,7 @@ class S3_connection:
         original_files = [
             obj["Key"]
             for obj in all_objects
-            if obj["Key"].startswith("Original/")
-            and (obj["Key"].endswith(".MP4") or obj["Key"].endswith(".mp4"))
+            if obj["Key"].startswith("Original/") and (obj["Key"].endswith(".MP4") or obj["Key"].endswith(".mp4"))
         ]
         print(f"Total number of videos in Original: {len(original_files)}")
         return original_files

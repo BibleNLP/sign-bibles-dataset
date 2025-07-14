@@ -4,9 +4,9 @@ import time
 from pathlib import Path
 
 import requests
-from dbl_utils import DownloadLog, S3Storage, validate_mp4
 
 from sign_bibles_dataset.dataprep.dbl_signbibles.dbl_sign.dbl_manifest_generator import refresh_manifest
+from sign_bibles_dataset.dataprep.dbl_signbibles.dbl_sign.dbl_utils import DownloadLog, S3Storage, validate_mp4
 
 
 class HeadlessProgress:
@@ -301,7 +301,7 @@ def download_manifest_files(manifest_path, base_dir="downloads", auth=None, file
             progress_window.complete()
 
         except Exception as e:
-            error_msg = f"An error occurred: {str(e)}"
+            error_msg = f"An error occurred: {e!s}"
             print(error_msg)  # Print to console as well
             progress_window.update_status(error_msg)
             progress_window.complete()

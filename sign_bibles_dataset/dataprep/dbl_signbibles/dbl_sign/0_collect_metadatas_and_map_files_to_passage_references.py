@@ -1,6 +1,6 @@
+import json
 import xml.etree.ElementTree as ET
 from pathlib import Path
-import json
 
 BASE_DIR = Path(
     "/opt/home/cleong/projects/semantic_and_visual_similarity/nas_data/DBL_Deaf_Bibles/sign-bibles-dataset-script-downloads"
@@ -88,9 +88,7 @@ def collect_video_metadata(base_dir: Path):
                     # exit()
 
                 else:
-                    print(
-                        f"[WARNING] File listed in metadata but not found: {filename} in {version_dir}"
-                    )
+                    print(f"[WARNING] File listed in metadata but not found: {filename} in {version_dir}")
 
     return results
 

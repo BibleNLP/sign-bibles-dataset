@@ -3,34 +3,24 @@
 Run the sign language video processing pipeline with GUI progress display.
 """
 
-import sys
 import argparse
+import sys
 
 
 def main():
     """Main function to run the processing pipeline with GUI."""
-    parser = argparse.ArgumentParser(
-        description="Process sign language videos with GUI progress display"
-    )
-    parser.add_argument(
-        "--num-videos", type=int, default=1, help="Number of videos to download"
-    )
-    parser.add_argument(
-        "--language", type=str, default="sqs", help="Language code to filter by"
-    )
+    parser = argparse.ArgumentParser(description="Process sign language videos with GUI progress display")
+    parser.add_argument("--num-videos", type=int, default=1, help="Number of videos to download")
+    parser.add_argument("--language", type=str, default="sqs", help="Language code to filter by")
     parser.add_argument("--project", type=str, help="Project name to filter by")
-    parser.add_argument(
-        "--output-dir", type=str, default="output", help="Output directory"
-    )
-    parser.add_argument(
-        "--clean", action="store_true", help="Clean previous outputs before processing"
-    )
+    parser.add_argument("--output-dir", type=str, default="output", help="Output directory")
+    parser.add_argument("--clean", action="store_true", help="Clean previous outputs before processing")
     args = parser.parse_args()
 
     # Clean previous outputs if requested
     if args.clean:
-        import shutil
         import os
+        import shutil
 
         # Convert relative output directory to absolute path if needed
         output_dir = args.output_dir
@@ -46,9 +36,7 @@ def main():
             language_code = args.language if args.language else "sqs"
 
             # First, try the specific language segments directory
-            segments_dir = os.path.join(
-                output_dir, "downloads", "downloads", language_code, "segments"
-            )
+            segments_dir = os.path.join(output_dir, "downloads", "downloads", language_code, "segments")
             if os.path.exists(segments_dir):
                 print(f"Cleaning segments directory: {segments_dir}")
                 # Remove all files in the segments directory
@@ -59,22 +47,15 @@ def main():
                             os.remove(file_path)
                             print(f"Removed: {file}")
                     except Exception as e:
-                        print(f"Error removing {file}: {str(e)}")
+                        print(f"Error removing {file}: {e!s}")
 
             # Also check for any other language directories that might exist
             downloads_dir = os.path.join(output_dir, "downloads", "downloads")
             if os.path.exists(downloads_dir):
                 for lang_dir in os.listdir(downloads_dir):
-                    lang_segments_dir = os.path.join(
-                        downloads_dir, lang_dir, "segments"
-                    )
-                    if (
-                        os.path.exists(lang_segments_dir)
-                        and lang_segments_dir != segments_dir
-                    ):
-                        print(
-                            f"Cleaning additional segments directory: {lang_segments_dir}"
-                        )
+                    lang_segments_dir = os.path.join(downloads_dir, lang_dir, "segments")
+                    if os.path.exists(lang_segments_dir) and lang_segments_dir != segments_dir:
+                        print(f"Cleaning additional segments directory: {lang_segments_dir}")
                         for file in os.listdir(lang_segments_dir):
                             file_path = os.path.join(lang_segments_dir, file)
                             try:
@@ -82,7 +63,7 @@ def main():
                                     os.remove(file_path)
                                     print(f"Removed: {file}")
                             except Exception as e:
-                                print(f"Error removing {file}: {str(e)}")
+                                print(f"Error removing {file}: {e!s}")
 
             # Clean processed directory
             processed_dir = os.path.join(output_dir, "processed")

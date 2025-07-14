@@ -1,10 +1,10 @@
-import tkinter as tk
-from tkinter import ttk
+import os
+import queue
 import threading
 import time
-import queue
-import os
+import tkinter as tk
 from datetime import datetime
+from tkinter import ttk
 
 
 class ProgressGUI:
@@ -23,9 +23,7 @@ class ProgressGUI:
         header_frame.grid(row=0, column=0, sticky="ew", padx=10, pady=5)
 
         # Add title
-        title_label = ttk.Label(
-            header_frame, text="Sign Bible Video Processing", font=("Arial", 16, "bold")
-        )
+        title_label = ttk.Label(header_frame, text="Sign Bible Video Processing", font=("Arial", 16, "bold"))
         title_label.pack(side=tk.LEFT, padx=5)
 
         # Add current time display
@@ -50,16 +48,12 @@ class ProgressGUI:
         self.overall_progress.grid(row=1, column=0, sticky="ew", padx=5, pady=2)
 
         # Current operation
-        self.current_op_label = ttk.Label(
-            progress_frame, text="Current operation: None"
-        )
+        self.current_op_label = ttk.Label(progress_frame, text="Current operation: None")
         self.current_op_label.grid(row=2, column=0, sticky="w", padx=5, pady=2)
 
         # Current operation progress
         self.op_progress_var = tk.DoubleVar(value=0)
-        self.op_progress_label = ttk.Label(
-            progress_frame, text="Operation progress: 0%"
-        )
+        self.op_progress_label = ttk.Label(progress_frame, text="Operation progress: 0%")
         self.op_progress_label.grid(row=3, column=0, sticky="w", padx=5, pady=2)
         self.op_progress = ttk.Progressbar(
             progress_frame,
@@ -83,9 +77,7 @@ class ProgressGUI:
         self.log_text.grid(row=0, column=0, sticky="nsew", padx=5, pady=5)
 
         # Add a scrollbar to the log text
-        log_scrollbar = ttk.Scrollbar(
-            log_frame, orient="vertical", command=self.log_text.yview
-        )
+        log_scrollbar = ttk.Scrollbar(log_frame, orient="vertical", command=self.log_text.yview)
         log_scrollbar.grid(row=0, column=1, sticky="ns")
         self.log_text.configure(yscrollcommand=log_scrollbar.set)
 
@@ -103,9 +95,7 @@ class ProgressGUI:
         self.pause_resume_button.pack(side=tk.LEFT, padx=5)
 
         # Cancel button
-        self.cancel_button = ttk.Button(
-            button_frame, text="Cancel", command=self.cancel_processing
-        )
+        self.cancel_button = ttk.Button(button_frame, text="Cancel", command=self.cancel_processing)
         self.cancel_button.pack(side=tk.RIGHT, padx=5)
 
         # Status variables

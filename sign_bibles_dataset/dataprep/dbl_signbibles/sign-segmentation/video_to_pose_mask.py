@@ -1,13 +1,14 @@
-import sys
+import argparse
 import os
 import subprocess
+import sys
+
+import cv2
+import matplotlib.colors
+import numpy as np
 import torch
 from annotator.dwpose import DWposeDetector, util
 from annotator.dwpose.wholebody import Wholebody
-import matplotlib.colors
-import cv2
-import numpy as np
-import argparse
 
 # Add the dwpose directory to the Python path
 dwpose_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "dwpose")
@@ -60,7 +61,7 @@ def draw_handpose(canvas, all_hand_peaks, hands_scores):
     ]
 
     eps = 0.01
-    for peaks, scores in zip(all_hand_peaks, hands_scores):
+    for peaks, scores in zip(all_hand_peaks, hands_scores, strict=False):
         peaks = np.array(peaks)
         for ie, e in enumerate(edges):
             x1, y1 = peaks[e[0]]
@@ -74,8 +75,7 @@ def draw_handpose(canvas, all_hand_peaks, hands_scores):
                     canvas,
                     (x1, y1),
                     (x2, y2),
-                    matplotlib.colors.hsv_to_rgb([ie / float(len(edges)), 1.0, 1.0])
-                    * 255,
+                    matplotlib.colors.hsv_to_rgb([ie / float(len(edges)), 1.0, 1.0]) * 255,
                     thickness=2,
                 )
 
@@ -146,9 +146,7 @@ def draw_roi_mask(mask, all_points, H, W):
     max_x = np.max(all_points[:, 0])
     min_y = np.min(all_points[:, 1])
     max_y = np.max(all_points[:, 1])
-    points = np.array(
-        [(min_x, min_y), (min_x, max_y), (max_x, max_y), (max_x, min_y)], dtype=np.int32
-    )
+    points = np.array([(min_x, min_y), (min_x, max_y), (max_x, max_y), (max_x, min_y)], dtype=np.int32)
     cv2.fillPoly(mask, [points], color=(255, 255, 255))
     return mask
 
@@ -195,9 +193,7 @@ def pose_estimate(oriImg):
             face_scores = subset[0, 24:92].copy()  # Get face keypoint scores
             # Normalize scores to 0-1 range and ensure they're above minimum threshold
             face_scores = np.clip((face_scores - 0.3) / 0.7, 0, 1)  # Map 0.3-1.0 to 0-1
-            face_scores = np.where(
-                face_scores < 0.2, 0, face_scores
-            )  # Set very low scores to 0
+            face_scores = np.where(face_scores < 0.2, 0, face_scores)  # Set very low scores to 0
 
         # Draw pose and mask
         pose_img = draw_pose(

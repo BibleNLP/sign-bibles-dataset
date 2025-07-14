@@ -1,5 +1,6 @@
-import os
 import argparse
+import os
+
 from huggingface_hub import hf_hub_download, login
 
 
@@ -24,7 +25,7 @@ def download_file(repo_id, filename, local_path):
             return False
         return True
     except Exception as e:
-        print(f"Error downloading {filename}: {str(e)}")
+        print(f"Error downloading {filename}: {e!s}")
         return False
 
 

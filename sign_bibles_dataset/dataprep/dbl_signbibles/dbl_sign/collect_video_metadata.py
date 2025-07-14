@@ -1,7 +1,7 @@
+import argparse
+import json
 import xml.etree.ElementTree as ET
 from pathlib import Path
-import json
-import argparse
 
 
 def parse_metadata(xml_path: Path):
@@ -74,12 +74,8 @@ def collect_grouped_metadata(base_dir: Path):
 
 
 def main():
-    parser = argparse.ArgumentParser(
-        description="Associate sign Bible videos with their scripture passages."
-    )
-    parser.add_argument(
-        "base_dir", type=Path, help="Base directory containing language subfolders"
-    )
+    parser = argparse.ArgumentParser(description="Associate sign Bible videos with their scripture passages.")
+    parser.add_argument("base_dir", type=Path, help="Base directory containing language subfolders")
     parser.add_argument(
         "--output-json",
         type=Path,

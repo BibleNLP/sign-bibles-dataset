@@ -5,8 +5,8 @@ This module provides logging functionality for the segmentation processing pipel
 It creates and manages a run_log.txt file that contains detailed error messages and processing information.
 """
 
-import os
 import datetime
+import os
 import traceback
 from enum import Enum
 
@@ -29,6 +29,7 @@ class ProcessingLogger:
 
         Args:
             log_file_path (str): Path to the log file
+
         """
         self.log_file_path = log_file_path
         self.log_dir = os.path.dirname(log_file_path)
@@ -41,11 +42,9 @@ class ProcessingLogger:
         """Clear the log file at the beginning of a new run."""
         try:
             with open(self.log_file_path, "w") as f:
-                f.write(
-                    f"=== New Processing Run Started at {datetime.datetime.now()} ===\n\n"
-                )
+                f.write(f"=== New Processing Run Started at {datetime.datetime.now()} ===\n\n")
         except Exception as e:
-            print(f"Failed to clear log file: {str(e)}")
+            print(f"Failed to clear log file: {e!s}")
 
     def log(self, message, level=LogLevel.INFO, segment_name=None, exception=None):
         """
@@ -56,6 +55,7 @@ class ProcessingLogger:
             level (LogLevel): The severity level of the log
             segment_name (str, optional): The name of the segment being processed
             exception (Exception, optional): Exception object if an error occurred
+
         """
         try:
             timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -76,7 +76,7 @@ class ProcessingLogger:
             elif level == LogLevel.WARNING:
                 print(f"WARNING{segment_info}: {message}")
         except Exception as e:
-            print(f"Failed to write to log file: {str(e)}")
+            print(f"Failed to write to log file: {e!s}")
 
     def log_info(self, message, segment_name=None):
         """Log an informational message."""
@@ -103,6 +103,7 @@ class ProcessingLogger:
             method (str): The segmentation method that failed
             error_msg (str): Description of the error
             exception (Exception, optional): The exception that was raised
+
         """
         message = f"Segmentation failed using {method}: {error_msg}"
         self.log_error(message, segment_name, exception)
@@ -115,6 +116,7 @@ class ProcessingLogger:
             segment_name (str): Name of the segment being processed
             error_msg (str): Description of the error
             exception (Exception, optional): The exception that was raised
+
         """
         message = f"FFmpeg processing error: {error_msg}"
         self.log_error(message, segment_name, exception)
@@ -127,6 +129,7 @@ class ProcessingLogger:
             segment_name (str): Name of the segment being processed
             method (str): The segmentation method used
             output_path (str): Path to the output segmentation file
+
         """
         message = f"Successfully created segmentation using {method}: {output_path}"
         self.log_info(message, segment_name)

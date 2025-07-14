@@ -1,11 +1,12 @@
+import io
 import os
+import pickle
+import queue
 import tkinter as tk
 from tkinter import ttk
-import queue
-import pickle
+
 import boto3
 from botocore.exceptions import ClientError
-import io
 
 
 class DownloadLog:
@@ -92,15 +93,11 @@ class DownloadProgressWindow:
         main_frame.pack(fill=tk.BOTH, expand=True, padx=20, pady=20)
 
         # Status label with modern font
-        self.status_label = ttk.Label(
-            main_frame, text="Initializing...", wraplength=660, style="Status.TLabel"
-        )
+        self.status_label = ttk.Label(main_frame, text="Initializing...", wraplength=660, style="Status.TLabel")
         self.status_label.pack(pady=(0, 15))
 
         # Overall progress frame
-        progress_frame = ttk.LabelFrame(
-            main_frame, text="Overall Progress (0/0)", padding=15
-        )
+        progress_frame = ttk.LabelFrame(main_frame, text="Overall Progress (0/0)", padding=15)
         progress_frame.pack(fill=tk.X, pady=(0, 15))
         self.progress_frame = progress_frame
 
@@ -124,9 +121,7 @@ class DownloadProgressWindow:
         )
         self.file_progress.pack()
 
-        self.file_label = ttk.Label(
-            file_frame, text="", wraplength=660, style="File.TLabel"
-        )
+        self.file_label = ttk.Label(file_frame, text="", wraplength=660, style="File.TLabel")
         self.file_label.pack(pady=(10, 0))
 
         # Message queue for thread-safe updates
@@ -255,9 +250,7 @@ class S3Storage:
                     self._uploaded += bytes_amount
                     if progress_window and self._total_bytes > 0:
                         percentage = (self._uploaded * 100) / self._total_bytes
-                        progress_window.update_file_progress(
-                            percentage, f"Uploading to S3: {s3_key}"
-                        )
+                        progress_window.update_file_progress(percentage, f"Uploading to S3: {s3_key}")
 
             # Upload the file with progress tracking
             total_bytes = len(file_data)
@@ -267,9 +260,7 @@ class S3Storage:
             file_obj = io.BytesIO(file_data)
 
             # Upload with progress callback
-            self.s3_client.upload_fileobj(
-                file_obj, self.bucket_name, s3_key, Callback=progress_tracker
-            )
+            self.s3_client.upload_fileobj(file_obj, self.bucket_name, s3_key, Callback=progress_tracker)
 
             # Verify the upload was successful
             try:

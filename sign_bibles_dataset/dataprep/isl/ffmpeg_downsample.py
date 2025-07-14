@@ -1,5 +1,6 @@
 import io
 import os
+
 import ffmpeg
 
 
@@ -15,9 +16,7 @@ def downsample_video(video_stream):
             preset="ultrafast",
             crf=28,
         )
-        .run_async(
-            pipe_stdin=True, pipe_stdout=True, pipe_stderr=True, overwrite_output=True
-        )
+        .run_async(pipe_stdin=True, pipe_stdout=True, pipe_stderr=True, overwrite_output=True)
     )
     out, _ = process.communicate(input=video_stream.read())
 
@@ -40,6 +39,7 @@ def downsample_video_ondisk(input_path, output_path):
     Args:
         input_path (str): Path to the input video file.
         output_path (str): Path to save the downsampled video (should end with .mp4).
+
     """
     try:
         process = (

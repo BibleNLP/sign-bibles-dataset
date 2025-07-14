@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 import argparse
 import json
-import pandas as pd
 import re
 from pathlib import Path
+
+import pandas as pd
 from tqdm import tqdm
 
 tqdm.pandas()
@@ -22,9 +23,7 @@ def get_possible_asl_lex_matches(bible_text_list, asl_lex_vocab):
         word = word.lower()
         for asl_lex_word in asl_lex_vocab:
             # check for exact match or word followed by underscore + number
-            if asl_lex_word == word or re.fullmatch(
-                rf"{re.escape(word)}_\d+", asl_lex_word
-            ):
+            if asl_lex_word == word or re.fullmatch(rf"{re.escape(word)}_\d+", asl_lex_word):
                 # print(word, asl_lex_word)
                 asl_lex_possible_matches.add(asl_lex_word)
     return asl_lex_possible_matches
@@ -32,9 +31,7 @@ def get_possible_asl_lex_matches(bible_text_list, asl_lex_vocab):
 
 def main():
     parser = argparse.ArgumentParser(description="Read JSON and CSV files into memory.")
-    parser.add_argument(
-        "json_path", help="Path to the JSON file with updated Bible verse info"
-    )
+    parser.add_argument("json_path", help="Path to the JSON file with updated Bible verse info")
     parser.add_argument("csv_path", help="Path to the asllex_signdata.csv file")
     args = parser.parse_args()
 
@@ -49,9 +46,7 @@ def main():
     )
     ase_df = signbible_df[signbible_df["language_code"] == "ase"]
 
-    print(
-        "Here are the portions which have language code ase, aka American Sign Language"
-    )
+    print("Here are the portions which have language code ase, aka American Sign Language")
     print(ase_df.head())
     print(ase_df.info())
     # ase_df = ase_df.head()
@@ -76,9 +71,7 @@ def main():
     print(ase_df["bible_text"])
 
     ase_df["asllex_gloss_candidates"] = ase_df["bible_text"].progress_apply(
-        lambda x: get_possible_asl_lex_matches(x, asl_lex_vocab)
-        if isinstance(x, list)
-        else set()
+        lambda x: get_possible_asl_lex_matches(x, asl_lex_vocab) if isinstance(x, list) else set()
     )
     print(ase_df["asllex_gloss_candidates"])
     output_path = "ase_augmented_with_gloss_candidates.json"

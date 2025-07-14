@@ -7,8 +7,8 @@ from pathlib import Path
 
 import cv2
 import easyocr
-from tqdm import tqdm
 import torch
+from tqdm import tqdm
 
 
 def extract_frames(
@@ -28,9 +28,7 @@ def extract_frames(
     end = min(max_frame if max_frame is not None else total_frames, total_frames)
 
     if start >= end:
-        raise ValueError(
-            f"Invalid frame range: min_frame={min_frame}, max_frame={max_frame}, total={total_frames}"
-        )
+        raise ValueError(f"Invalid frame range: min_frame={min_frame}, max_frame={max_frame}, total={total_frames}")
 
     cap.set(cv2.CAP_PROP_POS_FRAMES, start)
 
@@ -76,15 +74,11 @@ def run_ocr_on_frames(frame_paths: list[Path]):
         }
 
 
-def process_video(
-    video_path: Path, frame_skip: int, min_frame: int, max_frame: int | None
-) -> list[dict]:
+def process_video(video_path: Path, frame_skip: int, min_frame: int, max_frame: int | None) -> list[dict]:
     with tempfile.TemporaryDirectory() as tmpdir:
         tmp_path = Path(tmpdir)
         print(f"Extracting frames to temporary directory: {tmp_path}")
-        frame_paths = extract_frames(
-            video_path, tmp_path, frame_skip, min_frame, max_frame
-        )
+        frame_paths = extract_frames(video_path, tmp_path, frame_skip, min_frame, max_frame)
         print(f"Extracted {len(frame_paths)} frames.")
         return list(run_ocr_on_frames(frame_paths))
 
@@ -114,11 +108,7 @@ def main():
     args = parser.parse_args()
 
     print(torch.cuda.is_available())
-    print(
-        torch.cuda.get_device_name(0)
-        if torch.cuda.is_available()
-        else "No GPU detected"
-    )
+    print(torch.cuda.get_device_name(0) if torch.cuda.is_available() else "No GPU detected")
 
     if not args.video.exists():
         parser.error(f"Video file not found: {args.video}")
@@ -149,9 +139,7 @@ def main():
             print(f"[WARNING]: {out_path} exists: skipping!")
         else:
             print(f"Writing OCR results to {out_path}")
-            out_path.write_text(
-                json.dumps(ocr_data, indent=2, ensure_ascii=False), encoding="utf-8"
-            )
+            out_path.write_text(json.dumps(ocr_data, indent=2, ensure_ascii=False), encoding="utf-8")
 
 
 if __name__ == "__main__":

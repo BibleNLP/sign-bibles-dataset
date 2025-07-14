@@ -3,13 +3,16 @@
 Utility functions for working with WebDataset format for sign language videos.
 """
 
-import os
 import json
+import os
 import tempfile
-import webdataset as wds
-from torch.utils.data import DataLoader
+
 import cv2
 import numpy as np
+from torch.utils.data import DataLoader
+
+import webdataset as wds
+# TODO: update to match changes in prepare_webdataset.py
 
 
 def load_webdataset(path, batch_size=1, shuffle=False, num_workers=4):
@@ -24,6 +27,7 @@ def load_webdataset(path, batch_size=1, shuffle=False, num_workers=4):
 
     Returns:
         DataLoader for the WebDataset
+
     """
     # If path is a directory, find all .tar files
     if os.path.isdir(path):
@@ -37,15 +41,11 @@ def load_webdataset(path, batch_size=1, shuffle=False, num_workers=4):
 
     # Create dataset
     dataset = (
-        wds.WebDataset(shards)
-        .decode()
-        .to_tuple("original.mp4", "pose.mp4", "mask.mp4", "segmentation.mp4", "json")
+        wds.WebDataset(shards).decode().to_tuple("original.mp4", "pose.mp4", "mask.mp4", "segmentation.mp4", "json")
     )
 
     # Create DataLoader
-    loader = DataLoader(
-        dataset, batch_size=batch_size, shuffle=shuffle, num_workers=num_workers
-    )
+    loader = DataLoader(dataset, batch_size=batch_size, shuffle=shuffle, num_workers=num_workers)
 
     return loader
 
@@ -60,6 +60,7 @@ def extract_sample(sample, output_dir=None):
 
     Returns:
         Dictionary with paths to extracted files
+
     """
     original, pose, mask, segmentation, metadata_json = sample
 
@@ -121,6 +122,7 @@ def create_preview_video(sample, output_path, max_frames=300):
 
     Returns:
         Path to preview video
+
     """
     # Extract sample to temporary directory
     with tempfile.TemporaryDirectory() as temp_dir:
@@ -179,9 +181,7 @@ def create_preview_video(sample, output_path, max_frames=300):
             # Add labels to frames
             for i, key in enumerate(caps.keys()):
                 frame = frames[key].copy()
-                cv2.putText(
-                    frame, key, (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2
-                )
+                cv2.putText(frame, key, (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
                 combined_frame[:, i * width : (i + 1) * width] = frame
 
             # Write frame
@@ -205,6 +205,7 @@ def list_webdataset_contents(path):
 
     Returns:
         List of dictionaries with sample information
+
     """
     # If path is a directory, find all .tar files
     if os.path.isdir(path):
@@ -251,24 +252,16 @@ def list_webdataset_contents(path):
 if __name__ == "__main__":
     import argparse
 
-    parser = argparse.ArgumentParser(
-        description="WebDataset utilities for sign language videos"
-    )
+    parser = argparse.ArgumentParser(description="WebDataset utilities for sign language videos")
     subparsers = parser.add_subparsers(dest="command", help="Command to run")
 
     # List command
     list_parser = subparsers.add_parser("list", help="List contents of a WebDataset")
-    list_parser.add_argument(
-        "path", help="Path to WebDataset shard or directory containing shards"
-    )
+    list_parser.add_argument("path", help="Path to WebDataset shard or directory containing shards")
 
     # Extract command
-    extract_parser = subparsers.add_parser(
-        "extract", help="Extract samples from a WebDataset"
-    )
-    extract_parser.add_argument(
-        "path", help="Path to WebDataset shard or directory containing shards"
-    )
+    extract_parser = subparsers.add_parser("extract", help="Extract samples from a WebDataset")
+    extract_parser.add_argument("path", help="Path to WebDataset shard or directory containing shards")
     extract_parser.add_argument("--output-dir", help="Directory to extract files to")
     extract_parser.add_argument(
         "--key",
@@ -276,15 +269,9 @@ if __name__ == "__main__":
     )
 
     # Preview command
-    preview_parser = subparsers.add_parser(
-        "preview", help="Create preview videos from a WebDataset"
-    )
-    preview_parser.add_argument(
-        "path", help="Path to WebDataset shard or directory containing shards"
-    )
-    preview_parser.add_argument(
-        "--output-dir", help="Directory to save preview videos to"
-    )
+    preview_parser = subparsers.add_parser("preview", help="Create preview videos from a WebDataset")
+    preview_parser.add_argument("path", help="Path to WebDataset shard or directory containing shards")
+    preview_parser.add_argument("--output-dir", help="Directory to save preview videos to")
     preview_parser.add_argument(
         "--key",
         help="Key of sample to preview (if not specified, previews first sample)",
@@ -307,13 +294,8 @@ if __name__ == "__main__":
             print(f"  Components: {', '.join(sample['components'])}")
             if "segment_name" in sample["metadata"]:
                 print(f"  Segment: {sample['metadata']['segment_name']}")
-            if (
-                "language_code" in sample["metadata"]
-                and "project_name" in sample["metadata"]
-            ):
-                print(
-                    f"  Source: {sample['metadata']['language_code']}/{sample['metadata']['project_name']}"
-                )
+            if "language_code" in sample["metadata"] and "project_name" in sample["metadata"]:
+                print(f"  Source: {sample['metadata']['language_code']}/{sample['metadata']['project_name']}")
             print()
 
     elif args.command == "extract":
@@ -327,9 +309,7 @@ if __name__ == "__main__":
         # Extract samples
         for i, sample in enumerate(loader):
             # Unpack batch
-            original, pose, mask, segmentation, metadata_json = [
-                item[0] for item in sample
-            ]
+            original, pose, mask, segmentation, metadata_json = [item[0] for item in sample]
             metadata = json.loads(metadata_json)
             key = metadata.get("segment_name", f"sample_{i}")
 
@@ -339,9 +319,7 @@ if __name__ == "__main__":
 
             # Extract sample
             sample_output_dir = os.path.join(output_dir, key)
-            extracted_files = extract_sample(
-                (original, pose, mask, segmentation, metadata_json), sample_output_dir
-            )
+            extracted_files = extract_sample((original, pose, mask, segmentation, metadata_json), sample_output_dir)
 
             print(f"Extracted sample {key} to {sample_output_dir}")
             for file_type, file_path in extracted_files.items():
@@ -362,9 +340,7 @@ if __name__ == "__main__":
         # Create preview videos
         for i, sample in enumerate(loader):
             # Unpack batch
-            original, pose, mask, segmentation, metadata_json = [
-                item[0] for item in sample
-            ]
+            original, pose, mask, segmentation, metadata_json = [item[0] for item in sample]
             metadata = json.loads(metadata_json)
             key = metadata.get("segment_name", f"sample_{i}")
 

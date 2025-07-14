@@ -1,14 +1,14 @@
+import json
 import os
 import re
-import json
-import sys
 import shutil
+import sys
 
-from nextcloud_connect import NextCloud_connection
+from bible_text_access import get_verses
+from dwpose_processing import generate_mask_and_pose_video_files
 from ffmpeg_downsample import downsample_video_ondisk
 from mediapipe_trim import trim_off_storyboard
-from dwpose_processing import generate_mask_and_pose_video_files
-from bible_text_access import get_verses
+from nextcloud_connect import NextCloud_connection
 
 
 def process_video(id, remote_path, nxt_cld_conn, output_path):
@@ -42,12 +42,8 @@ def process_video(id, remote_path, nxt_cld_conn, output_path):
             "source": f"{ref} of https://www.youtube.com/@islv-holybible",
             "license": "CC-BY-SA",
             "bible-ref": ref,
-            "transcripts": [
-                {"text": get_verses(ref), "language": "English", "ISO 639-1": "en"}
-            ],
-            "glosses": [
-                {"text": [(0, 0, "nil")], "language": "English", "ISO 639-1": "en"}
-            ],
+            "transcripts": [{"text": get_verses(ref), "language": "English", "ISO 639-1": "en"}],
+            "glosses": [{"text": [(0, 0, "nil")], "language": "English", "ISO 639-1": "en"}],
         }
         # print(f"{metadata['bible-ref']} ---> {metadata['transcripts'][0]['text']}")
         with open(f"{id}.json", "w") as f:
@@ -100,12 +96,8 @@ def process_video_onmount(id, orig_path, processed_path):
             "source": f"{ref} of https://www.youtube.com/@islv-holybible",
             "license": "CC-BY-SA",
             "bible-ref": ref,
-            "transcripts": [
-                {"text": get_verses(ref), "language": "English", "ISO 639-1": "en"}
-            ],
-            "glosses": [
-                {"text": [(0, 0, "nil")], "language": "English", "ISO 639-1": "en"}
-            ],
+            "transcripts": [{"text": get_verses(ref), "language": "English", "ISO 639-1": "en"}],
+            "glosses": [{"text": [(0, 0, "nil")], "language": "English", "ISO 639-1": "en"}],
         }
         with open(f"{id}.json", "w") as f:
             json.dump(metadata, f, indent=4, sort_keys=True)

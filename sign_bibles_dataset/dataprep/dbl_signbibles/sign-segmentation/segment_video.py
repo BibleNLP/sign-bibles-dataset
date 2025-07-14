@@ -1,12 +1,12 @@
+import argparse
 import os
 import subprocess
+import tempfile
+from pathlib import Path
+
+import boto3
 import cv2
 import pympi
-import argparse
-import boto3
-from pathlib import Path
-import tempfile
-
 
 MIN_SEGMENT_DURATION_MS = 5000
 GAP_SEGMENT_DURATION_MS = 15000
@@ -46,9 +46,7 @@ def get_annotations(eaf_file: Path):
     eaf = pympi.Elan.Eaf(str(eaf_file))
     print("Available tiers:", list(eaf.get_tier_names()))
     return sorted(
-        eaf.get_annotation_data_for_tier("SENTENCE")
-        if "SENTENCE" in eaf.get_tier_names()
-        else [],
+        eaf.get_annotation_data_for_tier("SENTENCE") if "SENTENCE" in eaf.get_tier_names() else [],
         key=lambda x: x[0],
     )
 
@@ -204,9 +202,7 @@ def process_input(input_source):
                 for page in paginator.paginate(Bucket=bucket_name, Prefix=key):
                     for obj in page.get("Contents", []):
                         if obj["Key"].endswith((".mp4", ".avi", ".mov")):
-                            local_path = os.path.join(
-                                temp_dir, os.path.basename(obj["Key"])
-                            )
+                            local_path = os.path.join(temp_dir, os.path.basename(obj["Key"]))
                             if download_from_s3(bucket_name, obj["Key"], local_path):
                                 print(f"\nProcessing {obj['Key']}...")
                                 process_video(local_path)
@@ -237,9 +233,7 @@ def process_input(input_source):
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(
-        description="Process video files for sign language segmentation"
-    )
+    parser = argparse.ArgumentParser(description="Process video files for sign language segmentation")
     parser.add_argument(
         "input",
         help="Input source: can be a file path, directory path, or S3 URL (s3://bucket-name/key)",

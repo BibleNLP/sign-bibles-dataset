@@ -1,6 +1,7 @@
-import pandas as pd
-from pathlib import Path
 import argparse
+from pathlib import Path
+
+import pandas as pd
 
 
 def deduplicate_ocr_csvs(directory: Path, dry_run: bool = False) -> None:
@@ -27,14 +28,10 @@ def deduplicate_ocr_csvs(directory: Path, dry_run: bool = False) -> None:
             output_path = csv_file.with_name(csv_file.stem + ".textchanges.csv")
 
             if dry_run:
-                print(
-                    f"[DRY RUN] Would write: {output_path.relative_to(directory)} ({len(filtered_df)} rows)"
-                )
+                print(f"[DRY RUN] Would write: {output_path.relative_to(directory)} ({len(filtered_df)} rows)")
             else:
                 filtered_df[["frame_index", "text"]].to_csv(output_path, index=False)
-                print(
-                    f"Filtered: {csv_file.relative_to(directory)} -> {output_path.relative_to(directory)}"
-                )
+                print(f"Filtered: {csv_file.relative_to(directory)} -> {output_path.relative_to(directory)}")
                 count_filtered += 1
 
         except Exception as e:
@@ -51,9 +48,7 @@ def deduplicate_ocr_csvs(directory: Path, dry_run: bool = False) -> None:
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(
-        description="Deduplicate .ocr.csv files by keeping only changed 'text' values."
-    )
+    parser = argparse.ArgumentParser(description="Deduplicate .ocr.csv files by keeping only changed 'text' values.")
     parser.add_argument("directory", type=Path, help="Directory to search recursively.")
     parser.add_argument(
         "--dry-run",

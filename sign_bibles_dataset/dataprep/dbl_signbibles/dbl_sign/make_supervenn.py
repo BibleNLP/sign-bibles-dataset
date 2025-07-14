@@ -1,7 +1,8 @@
-from pathlib import Path
 import argparse
-from supervenn import supervenn
+from pathlib import Path
+
 import matplotlib.pyplot as plt
+from supervenn import supervenn
 from tqdm import tqdm
 
 
@@ -28,21 +29,15 @@ def read_sets_from_folder(folder_path: Path):
         if line_count is None:
             line_count = current_line_count
         elif current_line_count != line_count:
-            raise ValueError(
-                f"Inconsistent line count in {file_path}: expected {line_count}, got {current_line_count}"
-            )
+            raise ValueError(f"Inconsistent line count in {file_path}: expected {line_count}, got {current_line_count}")
 
     return sets, labels
 
 
 def main():
-    parser = argparse.ArgumentParser(
-        description="Generate Supervenn of nonempty line indices from a folder of files."
-    )
+    parser = argparse.ArgumentParser(description="Generate Supervenn of nonempty line indices from a folder of files.")
     parser.add_argument("folder", type=str, help="Path to folder with input files")
-    parser.add_argument(
-        "--output", type=str, default="supervenn.png", help="Output image filename"
-    )
+    parser.add_argument("--output", type=str, default="supervenn.png", help="Output image filename")
 
     args = parser.parse_args()
     folder = Path(args.folder)

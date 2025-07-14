@@ -1,12 +1,13 @@
 #!/usr/bin/env nix-shell
 #!nix-shell -i python -p "python3.withPackages (p: with p; [ (opencv4.override { enableGtk3 = true; }) pytesseract numpy ])"
 
-import cv2
-import pytesseract
+import argparse
 import subprocess
 from pathlib import Path
-import argparse
+
+import cv2
 import pandas as pd
+import pytesseract
 from tqdm import tqdm
 
 
@@ -36,9 +37,7 @@ def get_roi_coordinates(frame_shape, position="top_right", roi_fraction=(0.2, 0.
         raise ValueError(f"Unsupported ROI position: {position}")
 
 
-def process_video(
-    video_path, output_dir: Path, visualize: bool, roi_position="top_right"
-):
+def process_video(video_path, output_dir: Path, visualize: bool, roi_position="top_right"):
     output_dir.mkdir(exist_ok=True, parents=True)
     previous_text = None
     timestamps = []
@@ -80,16 +79,14 @@ def process_video(
 
             if visualize:
                 cv2.imwrite(
-                    output_dir
-                    / f"TextChange_roi{roi_position}_frame{frame_index}_timestamp{timestamp:.2f}.png",
+                    output_dir / f"TextChange_roi{roi_position}_frame{frame_index}_timestamp{timestamp:.2f}.png",
                     frame,
                 )
 
         if frame_index % 100 == 0 and visualize:
             timestamp = cap.get(cv2.CAP_PROP_POS_MSEC) / 1000
             cv2.imwrite(
-                output_dir
-                / f"Video_frame_roi_{roi_position}_frame{frame_index}_timestamp{timestamp:.2f}.png",
+                output_dir / f"Video_frame_roi_{roi_position}_frame{frame_index}_timestamp{timestamp:.2f}.png",
                 frame,
             )
 
@@ -102,9 +99,7 @@ def process_video(
     frame_indices.append(cap.get(cv2.CAP_PROP_FRAME_COUNT))
     print("Timestamps for cuts:", timestamps)
 
-    timestamps_df = pd.DataFrame(
-        {"timestamp": timestamps, "text": texts, "frame_index": frame_indices}
-    )
+    timestamps_df = pd.DataFrame({"timestamp": timestamps, "text": texts, "frame_index": frame_indices})
 
     return timestamps_df
 
@@ -136,9 +131,7 @@ def cut_video(video_path, timestamps_df, output_dir):
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(
-        description="Segment a video based on text changes."
-    )
+    parser = argparse.ArgumentParser(description="Segment a video based on text changes.")
     parser.add_argument(
         "video_path",
         type=Path,
@@ -186,9 +179,7 @@ if __name__ == "__main__":
 
         csv_path = video_output_dir / f"{video_path.stem}.text_change_timestamps.csv"
         if not csv_path.is_file():
-            timestamps_df = process_video(
-                video_path, video_output_dir, args.visualize, roi_position=args.roi
-            )
+            timestamps_df = process_video(video_path, video_output_dir, args.visualize, roi_position=args.roi)
             timestamps_df.to_csv(
                 csv_path,
                 index=False,

@@ -1,10 +1,9 @@
 import json
 import re
 
-
 bible_json = "./WEB_bible.json"
 
-with open(bible_json, "r", encoding="utf-8") as fp:
+with open(bible_json, encoding="utf-8") as fp:
     bible_dict = json.load(fp)
 
 ref_pattern = re.compile(r"(\w+) (\d+):(.*)")

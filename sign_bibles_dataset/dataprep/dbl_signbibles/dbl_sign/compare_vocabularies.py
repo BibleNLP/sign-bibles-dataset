@@ -1,16 +1,15 @@
 #!/usr/bin/env python3
 
 import argparse
-import pandas as pd
 from pathlib import Path
+
+import pandas as pd
 
 
 def get_csv_vocab(csv_path: Path, column: str) -> set:
     df = pd.read_csv(csv_path)
     if column not in df.columns:
-        raise ValueError(
-            f"Column '{column}' not found in {csv_path}. Available columns: {list(df.columns)}"
-        )
+        raise ValueError(f"Column '{column}' not found in {csv_path}. Available columns: {list(df.columns)}")
     return set(df[column].dropna().astype(str).str.upper().unique())
 
 
@@ -19,10 +18,8 @@ def tokenize(text: str) -> set:
     return set(word.strip('.,;:!?"“”‘’()[]{}') for word in words if word.strip())
 
 
-def compare_and_write(
-    text_path: Path, vocab: set, start: int, end: int, out_path: Path = None
-):
-    with open(text_path, "r", encoding="utf-8") as f:
+def compare_and_write(text_path: Path, vocab: set, start: int, end: int, out_path: Path = None):
+    with open(text_path, encoding="utf-8") as f:
         lines = f.readlines()
 
     if end is None:
@@ -48,16 +45,10 @@ def compare_and_write(
 
 
 def main():
-    parser = argparse.ArgumentParser(
-        description="Compare CSV vocabulary to each Bible verse (line) individually."
-    )
+    parser = argparse.ArgumentParser(description="Compare CSV vocabulary to each Bible verse (line) individually.")
     parser.add_argument("csv_path", type=Path, help="Path to the CSV file")
-    parser.add_argument(
-        "csv_column", help="Column name in the CSV file to extract vocabulary from"
-    )
-    parser.add_argument(
-        "text_path", type=Path, help="Path to the plain text file (one verse per line)"
-    )
+    parser.add_argument("csv_column", help="Column name in the CSV file to extract vocabulary from")
+    parser.add_argument("text_path", type=Path, help="Path to the plain text file (one verse per line)")
     parser.add_argument(
         "--start",
         type=int,

@@ -1,7 +1,8 @@
-import cv2
-import numpy as np
 import os
 import subprocess
+
+import cv2
+import numpy as np
 from autodistill_yolov8 import YOLOv8
 
 
@@ -36,9 +37,7 @@ class HandFaceDetector:
 def process_video(video_path, output_dir):
     """Process a video file using YOLOv8 for detection."""
     # Initialize the model with the local path
-    model_path = os.path.join(
-        os.path.dirname(__file__), "models", "yolov8_hand_face-seg.pt"
-    )
+    model_path = os.path.join(os.path.dirname(__file__), "models", "yolov8_hand_face-seg.pt")
     model = HandFaceDetector(model_path)
 
     # Open the video file

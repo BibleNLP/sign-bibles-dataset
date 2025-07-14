@@ -1,12 +1,11 @@
-import gradio as gr
-import pandas as pd
 from pathlib import Path
+
+import gradio as gr
 import numpy as np  # Import numpy for np.nan
+import pandas as pd
 
 # --- Configuration ---
-directory = Path(
-    "/data/petabyte/cleong/data/DBL_Deaf_Bibles/sign-bibles-dataset-script-downloads/ase"
-).resolve()
+directory = Path("/data/petabyte/cleong/data/DBL_Deaf_Bibles/sign-bibles-dataset-script-downloads/ase").resolve()
 csv_files = sorted(directory.rglob("*.ocr.textchanges.csv"))
 current_file_index = 0  # To keep track of the currently loaded file
 
@@ -109,9 +108,7 @@ def load_csv_from_dropdown(file_path_str):
 
     selected_path = Path(file_path_str)  # The dropdown passes the string representation
 
-    if (
-        not selected_path.exists()
-    ):  # Basic check if the original textchanges file actually exists
+    if not selected_path.exists():  # Basic check if the original textchanges file actually exists
         return (
             pd.DataFrame(),
             "Selected file not found.",
@@ -190,9 +187,7 @@ def go_to_specific_index(index_input_str):
         target_index -= 1  # Adjust for 0-based indexing
         return load_csv_from_index(target_index)
     except ValueError:
-        current_file_path_str = (
-            str(csv_files[current_file_index]) if csv_files else None
-        )
+        current_file_path_str = str(csv_files[current_file_index]) if csv_files else None
         dropdown_choices = [str(f) for f in csv_files]
         return (
             pd.DataFrame(),
@@ -229,9 +224,7 @@ def reset_current_file_to_original():
             gr.Dropdown(value=str(original_textchanges_path), choices=dropdown_choices),
         )
     except Exception as e:
-        status_message = (
-            f"Error reloading original {original_textchanges_path.name}: {e}"
-        )
+        status_message = f"Error reloading original {original_textchanges_path.name}: {e}"
         return (
             pd.DataFrame(),  # Return empty df on severe error
             status_message,
@@ -246,9 +239,7 @@ with gr.Blocks() as demo:
     # File Navigation Row
     with gr.Row():
         dropdown = gr.Dropdown(
-            choices=[
-                str(f) for f in csv_files
-            ],  # Choices remain the .ocr.textchanges.csv paths
+            choices=[str(f) for f in csv_files],  # Choices remain the .ocr.textchanges.csv paths
             label="Select CSV File",
             scale=3,
         )
@@ -259,9 +250,7 @@ with gr.Blocks() as demo:
     with gr.Row():
         index_input = gr.Textbox(
             label="Go to File Index (1-based)",
-            placeholder=f"Enter a number between 1 and {len(csv_files)}"
-            if csv_files
-            else "No files found",
+            placeholder=f"Enter a number between 1 and {len(csv_files)}" if csv_files else "No files found",
         )
         go_to_index_button = gr.Button("Go to Index")
 
@@ -275,9 +264,7 @@ with gr.Blocks() as demo:
 
     # --- Event Listeners ---
 
-    dropdown.change(
-        fn=load_csv_from_dropdown, inputs=dropdown, outputs=[table, status, dropdown]
-    )
+    dropdown.change(fn=load_csv_from_dropdown, inputs=dropdown, outputs=[table, status, dropdown])
 
     previous_button.click(
         fn=go_previous,

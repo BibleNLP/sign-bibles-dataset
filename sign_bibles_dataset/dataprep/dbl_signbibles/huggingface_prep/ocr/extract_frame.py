@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 
-import cv2
-from pathlib import Path
 import argparse
-import tempfile
 import sys
+import tempfile
+from pathlib import Path
+
+import cv2
 
 
 def extract_frame_to_temp(video_path: Path, frame_index: int) -> Path:
@@ -18,9 +19,7 @@ def extract_frame_to_temp(video_path: Path, frame_index: int) -> Path:
         total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
         if frame_index >= total_frames or frame_index < 0:
             cap.release()
-            sys.exit(
-                f"Error: Frame index {frame_index} out of range (total frames: {total_frames})"
-            )
+            sys.exit(f"Error: Frame index {frame_index} out of range (total frames: {total_frames})")
 
         cap.set(cv2.CAP_PROP_POS_FRAMES, frame_index)
         ret, frame = cap.read()

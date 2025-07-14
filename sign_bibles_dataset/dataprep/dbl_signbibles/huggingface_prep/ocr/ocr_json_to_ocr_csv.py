@@ -1,7 +1,8 @@
-import pandas as pd
+import argparse
 import json
 from pathlib import Path
-import argparse
+
+import pandas as pd
 
 
 def convert_ocr_json_to_csv(directory: Path, dry_run: bool = False) -> None:
@@ -20,18 +21,14 @@ def convert_ocr_json_to_csv(directory: Path, dry_run: bool = False) -> None:
 
             df = pd.DataFrame(data)
 
-            csv_path = json_file.with_suffix(
-                ".csv"
-            )  # replaces just the .json file par, so .ocr.csv now
+            csv_path = json_file.with_suffix(".csv")  # replaces just the .json file par, so .ocr.csv now
             if dry_run:
                 print(
                     f"[DRY RUN] Would convert: {json_file.relative_to(directory)} -> {csv_path.relative_to(directory)}"
                 )
             else:
                 df.to_csv(csv_path, index=False)
-                print(
-                    f"Converted: {json_file.relative_to(directory)} -> {csv_path.relative_to(directory)}"
-                )
+                print(f"Converted: {json_file.relative_to(directory)} -> {csv_path.relative_to(directory)}")
                 count_converted += 1
 
         except Exception as e:

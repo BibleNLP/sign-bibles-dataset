@@ -1,13 +1,12 @@
+import io
 import json
 import os
-import io
-from dotenv import load_dotenv
 
-from s3_connect import S3_connection
+from dotenv import load_dotenv
+from dwpose_processing import generate_mask_and_pose_video_streams
 from ffmpeg_downsample import downsample_video
 from mediapipe_trim import trim_off_storyboard
-from dwpose_processing import generate_mask_and_pose_video_streams
-
+from s3_connect import S3_connection
 
 # Load environment variables from .env
 load_dotenv()

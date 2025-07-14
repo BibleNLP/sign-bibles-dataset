@@ -1,11 +1,10 @@
 import argparse
+
 import numpy as np
 
 
 def main():
-    parser = argparse.ArgumentParser(
-        description="Load and print contents of a .npz file"
-    )
+    parser = argparse.ArgumentParser(description="Load and print contents of a .npz file")
     parser.add_argument("npz_path", type=str, help="Path to the .npz file")
     args = parser.parse_args()
 
