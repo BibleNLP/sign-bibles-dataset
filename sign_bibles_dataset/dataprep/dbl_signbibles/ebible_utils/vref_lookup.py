@@ -154,7 +154,7 @@ def citation_to_text_and_vrefs(
     expanded = expand_compound_citations(normalized)
     vrefs = parse_citation_string(expanded, vref_map)
     verses = [bible_verses[i] for i in vrefs if 0 <= i < len(bible_verses)]
-    return "".join(verses), vrefs
+    return " ".join(verses), vrefs
 
 
 def load_usfm_book_map(csv_path: str) -> dict[str, str]:
