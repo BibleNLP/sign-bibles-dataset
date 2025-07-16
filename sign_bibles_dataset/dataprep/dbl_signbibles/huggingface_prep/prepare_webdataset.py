@@ -414,7 +414,9 @@ def process_without_gui(args):
     bible_verses = load_bible_lines(ebible_corpus_path / "corpus" / f"{args.ebible_version}.txt")
     ebible_translations_df = pd.read_csv(ebible_corpus_path / "metadata" / "translations.csv")
 
-    logger.info(f"Loaded {len(vref_map)} vrefs, {len(bible_verses)} verses, {len(ebible_translations_df)} translations")
+    logger.info(
+        f"eBible Corpus: Loaded {len(vref_map)} vrefs, {len(bible_verses)} verses, {len(ebible_translations_df)} translations"
+    )
 
     language_code, translation_id = args.ebible_version.split("-")
     ebible_version_metadata = search_ebible_translations(language_code, translation_id, ebible_translations_df)

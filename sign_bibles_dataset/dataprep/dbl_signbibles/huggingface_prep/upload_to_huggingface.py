@@ -1,206 +1,161 @@
 #!/usr/bin/env python3
-"""
-Upload WebDataset to HuggingFace datasets.
-"""
+"""Upload WebDataset to HuggingFace datasets."""
 
 import argparse
+import json
 import os
-import shutil
-import tempfile
+from pathlib import Path
 
 from huggingface_hub import HfApi, upload_folder
+from huggingface_hub.utils import HfHubHTTPError
+from requests.exceptions import HTTPError
 from tqdm import tqdm
 
 import webdataset as wds
+from sign_bibles_dataset.dataprep.dbl_signbibles.huggingface_prep.build_dataset_card import (
+    build_dataset_card_markdown_and_yaml,
+)
 
 
-def create_dataset_card(webdataset_path, output_path, dataset_name, language_codes=None):
-    """
-    Create a dataset card for HuggingFace.
+def create_dataset_card(
+    webdataset_path: str,
+    output_path: str,
+    dataset_name: str,
+    language_codes: list[str] | None = None,
+) -> str:
+    """Create and write dataset card file based on ALL shard metadata."""
+    shards = find_shards_recursive(webdataset_path)
+    total_samples = 0
+    languages = set()
+    projects = set()
 
-    Args:
-        webdataset_path: Path to WebDataset shards
-        output_path: Path to save dataset card
-        dataset_name: Name of the dataset
-        language_codes: List of language codes in the dataset
+    print(f"Found {len(shards)} shards. Parsing all for metadata...")
 
-    """
-    # If path is a directory, find all .tar files
-    if os.path.isdir(webdataset_path):
-        shards = [os.path.join(webdataset_path, f) for f in os.listdir(webdataset_path) if f.endswith(".tar")]
-        shards.sort()
-    else:
-        shards = [webdataset_path]
+    for shard in tqdm(shards, desc="Parsing shard metadata"):
+        sample_count, shard_languages, shard_projects = parse_shard_metadata(shard)
+        total_samples += sample_count
+        languages.update(shard_languages)
+        projects.update(shard_projects)
 
+    if language_codes:
+        languages.update(language_codes)
+
+    card_text = build_dataset_card_markdown_and_yaml(
+        dataset_name=dataset_name,
+        shard_count=len(shards),
+        total_sample_count=total_samples,
+        languages=languages,
+        projects=projects,
+    )
+
+    with open(output_path, "w", encoding="utf-8") as f:
+        f.write(card_text)
+
+    print(f"✅ Dataset card written to {output_path}")
+    return output_path
+
+
+def find_shards_recursive(root_path: str | Path) -> list[str]:
+    """Recursively find all .tar shards in the directory."""
+    root = Path(root_path)
+    shards = sorted(str(p) for p in root.rglob("*.tar"))
     if not shards:
-        raise ValueError(f"No WebDataset shards found at {webdataset_path}")
+        raise ValueError(f"No WebDataset shards found at {root}")
+    return shards
 
-    # Get sample count
+
+def parse_shard_metadata(shard_path: str) -> tuple[int, set[str], set[str]]:
+    """Parse first shard to count samples, languages, and project names."""
     sample_count = 0
     languages = set()
     projects = set()
 
-    # Examine first shard to get metadata
-    print(f"Reading metadata from shard: {shards[0]}")
+    # print(f"Reading metadata from shard: {shard_path}")
 
-    # Use a direct file path approach instead of URL-like path
-    dataset = wds.WebDataset(shards[0], shardshuffle=False).decode()
-
+    dataset = wds.WebDataset(shard_path, shardshuffle=False).decode()
     for sample in dataset:
         sample_count += 1
-
-        # Parse metadata if available
         if "json" in sample:
-            # metadata = json.loads(sample["json"])
             metadata = sample["json"]
-            # print(json.dumps(metadata, indent=2))
+            if isinstance(metadata, bytes):
+                metadata = json.loads(metadata)
             if "language" in metadata:
-                # print(metadata["language"])
-                languages.add(metadata["language"]["ISO639-3"])
+                languages.add(metadata["language"].get("ISO639-3", "unknown"))
             if "project_name" in metadata:
                 projects.add(metadata["project_name"])
 
-    # Add language codes if provided
-    if language_codes:
-        languages.update(language_codes)
-    # Create dataset card
-    card = f"""---
-language:
-{chr(10).join(f"- {lang}" for lang in sorted(languages))}
-license: cc-by-sa-4.0
-datasets:
-- {dataset_name}
----
-
-# {dataset_name}
-
-**This dataset is still being generated and currently includes only test files**
-
-This dataset contains sign language videos from the Digital Bible Library (DBL), processed for machine learning applications. The dataset is licensed under the Creative Commons Attribution-ShareAlike 4.0 International License (CC BY-SA 4.0).
-
-## Dataset Description
-
-- **Size**: {len(shards)} shards, approximately {sample_count * len(shards)} samples
-- **Languages**: {", ".join(sorted(languages))}
-- **Projects**: {", ".join(sorted(projects))}
-- **License**: [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/)
-
-## Dataset Structure
-
-Each sample in the dataset contains:
-- `.original.mp4`: Original video segment
-- `.pose.mp4`: Video with pose keypoints visualization
-- `.mask.mp4`: Video with segmentation masks
-- `.segmentation.mp4`: Video with combined segmentation
-- `.json`: Metadata including copyright (from rights_holder), license, and source (from url) information
-
-## Usage
-
-```python
-from datasets import load_dataset
-import json
-
-# Load dataset from Hugging Face Hub
-dataset = load_dataset("bible-nlp/sign-bibles")
-
-# Iterate through samples
-for sample in dataset["train"]:
-    # Access components
-    original_video = sample["original.mp4"]
-    metadata = sample["segment_metadata"]
-```
-
-## License and Attribution
-
-This dataset is derived from the Digital Bible Library (DBL) sign language content.
-Each sample includes copyright and license information in its metadata.
-
-The dataset is provided under a CC BY-SA 4.0 license, which allows for:
-- Sharing: Copy and redistribute the material in any medium or format
-- Adaptation: Remix, transform, and build upon the material
-
-Under the following terms:
-- Attribution: You must give appropriate credit, provide a link to the license, and indicate if changes were made
-- ShareAlike: If you remix, transform, or build upon the material, you must distribute your contributions under the same license as the original
-
-Please refer to the individual sample metadata for specific attribution requirements.
-"""
-
-    # Write to file
-    with open(output_path, "w", encoding="utf-8") as f:
-        f.write(card)
-
-    return output_path
+    return sample_count, languages, projects
 
 
-def upload_to_huggingface(webdataset_path, dataset_name, token=None):
+def find_manifest(webdataset_path: str | Path) -> Path | None:
+    """Look for manifest.json in webdataset_path or its parent directory."""
+    webdataset_path = Path(webdataset_path).resolve()
+    locations = [webdataset_path / "manifest.json", webdataset_path.parent / "manifest.json"]
+    for manifest in locations:
+        if manifest.exists():
+            return manifest
+    return None
+
+
+def upload_to_huggingface(webdataset_path: str | Path, dataset_name: str, token: str | None = None) -> None:
     """
-    Upload WebDataset shards to HuggingFace.
+    Upload WebDataset shards (directly, preserving folders) to HuggingFace.
 
     Args:
-        webdataset_path: Path to WebDataset shards
-        dataset_name: Name of the dataset on HuggingFace
+        webdataset_path: Directory with WebDataset shards
+        dataset_name: HuggingFace dataset repo
         token: HuggingFace API token
-
     """
-    print(f"Uploading WebDataset from {webdataset_path} to {dataset_name}")
+    webdataset_path = Path(webdataset_path).resolve()
+    print(f"Uploading from {webdataset_path} to HuggingFace repo {dataset_name}")
 
-    # Create temporary directory for dataset
-    with tempfile.TemporaryDirectory() as tmp_dir:
-        # Copy shards to temporary directory
-        if os.path.isdir(webdataset_path):
-            # Get absolute path to avoid path issues
-            webdataset_path = os.path.abspath(webdataset_path)
-            shards = [os.path.join(webdataset_path, f) for f in os.listdir(webdataset_path) if f.endswith(".tar")]
-            shards.sort()
-        else:
-            # Get absolute path to avoid path issues
-            shards = [os.path.abspath(webdataset_path)]
+    shards = list(webdataset_path.rglob("*.tar"))
+    if not shards:
+        raise ValueError(f"No shards found in {webdataset_path}")
 
-        if not shards:
-            raise ValueError(f"No WebDataset shards found at {webdataset_path}")
+    print(f"Found {len(shards)} shards. Uploading in-place, preserving folders...")
 
-        print(f"Copying {len(shards)} shards to temporary directory...")
-        for i, shard in enumerate(tqdm(shards)):
-            print(f"Copying shard {i + 1}/{len(shards)}: {shard}")
-            shutil.copy(shard, os.path.join(tmp_dir, f"shard_{i:05d}.tar"))
+    # Create README.md in-place
+    readme_path = webdataset_path / "README.md"
+    create_dataset_card(webdataset_path, readme_path, dataset_name)
 
-        # Copy manifest.json if it exists
-        project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-        manifest_path = os.path.join(project_root, "output", "manifest.json")
-        if os.path.exists(manifest_path):
-            print("Copying manifest.json to upload directory...")
-            shutil.copy(manifest_path, os.path.join(tmp_dir, "manifest.json"))
-        else:
-            print(f"Warning: manifest.json not found at {manifest_path}")
+    subfolder_names = [f.name for f in webdataset_path.iterdir() if f.is_dir()]
 
-        # Create dataset card
-        readme_path = os.path.join(tmp_dir, "README.md")
-        create_dataset_card(webdataset_path, readme_path, dataset_name)
+    # Copy manifest.json in-place if available
+    # manifest_path = find_manifest(webdataset_path)
+    # if manifest_path:
+    #     print(f"Copying manifest.json to {webdataset_path}")
+    #     (webdataset_path / "manifest.json").write_bytes(manifest_path.read_bytes())
+    # else:
+    #     print("⚠️ No manifest.json found, skipping.")
 
-        # Upload to HuggingFace
-        print(f"Uploading to HuggingFace dataset: {dataset_name}")
-        api = HfApi(token=token)
+    print(f"Uploading to HuggingFace Hub as {dataset_name}")
+    api = HfApi(token=token)
 
-        try:
-            # Upload files
-            upload_folder(
-                folder_path=tmp_dir,
-                repo_id=dataset_name,
-                repo_type="dataset",
-                token=token,
-                ignore_patterns=["*.pyc", "__pycache__", ".git*"],
-                commit_message="Upload dataset files",
-            )
-            print(f"Successfully uploaded to HuggingFace: {dataset_name}")
-        except Exception as e:
-            print(f"Error uploading to HuggingFace: {e}")
-            print("\nTroubleshooting tips:")
-            print("1. Check if your token has write access to the repository")
-            print("2. Verify that you have the correct organization name in the dataset_name")
-            print("3. Try logging in with 'huggingface-cli login' before running this script")
-            print("4. Check your internet connection")
-            raise
+    try:
+        upload_folder(
+            folder_path=str(webdataset_path),
+            repo_id=dataset_name,
+            repo_type="dataset",
+            token=token,
+            ignore_patterns=["*.pyc", "__pycache__", ".git*"],
+            commit_message="Upload dataset files",
+            # delete_patterns=[
+            #     f"{subfolder_name}/*.tar" for subfolder_name in subfolder_names
+            # ],  # Overwrite any tar files already there, but leave other languages alone
+        )
+        print(f"✅ Successfully uploaded to {dataset_name}")
+    except (HTTPError, HfHubHTTPError) as e:
+        print(f"❌ HTTP error during upload: {e}")
+        print("✔️ Suggestions:")
+        print("- Check your HuggingFace token permissions")
+        print("- Verify the dataset/organization name")
+        print("- Confirm your network connection")
+        raise
+    except ValueError as e:
+        print(f"❌ ValueError: {e}")
+        print("✔️ Suggestion: double-check your input arguments.")
+        raise
 
 
 def main():
@@ -222,26 +177,6 @@ def main():
     if not token:
         # Try system environment variable
         token = os.environ.get("HUGGINGFACE_TOKEN")
-
-        # Try user environment variable if system one is not available
-        if not token:
-            try:
-                import subprocess
-
-                result = subprocess.run(
-                    [
-                        "powershell",
-                        "-Command",
-                        "[Environment]::GetEnvironmentVariable('HUGGINGFACE_TOKEN', 'User')",
-                    ],
-                    capture_output=True,
-                    text=True,
-                )
-                if result.returncode == 0 and result.stdout.strip():
-                    token = result.stdout.strip()
-            except Exception as e:
-                print(f"Warning: Error accessing user environment variables: {e}")
-
     if not token:
         print("Warning: No HuggingFace API token provided. You may need to login interactively.")
 
@@ -251,4 +186,5 @@ def main():
 
 if __name__ == "__main__":
     main()
-# cd /opt/home/cleong/projects/semantic_and_visual_similarity/sign-bibles-dataset && conda activate /opt/home/cleong/envs/sign-bibles-dataset && python dataprep/DBL-signbibles/huggingface-prep/upload_to_huggingface.py webdataset bible-nlp/sign-bibles
+
+# cd /opt/home/cleong/projects/semantic_and_visual_similarity/sign-bibles-dataset && conda activate /opt/home/cleong/envs/sign-bibles-dataset && python sign_bibles_dataset/dataprep/dbl_signbibles/huggingface_prep/upload_to_huggingface.py webdataset bible-nlp/sign-bibles
