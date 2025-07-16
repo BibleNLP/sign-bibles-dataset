@@ -4,6 +4,8 @@ import re
 from pathlib import Path
 
 BOOK_MAP_PATH = Path(__file__).parent / "data" / "usfm_book_identifiers.csv"
+# For convenience, originally from the ebible corpus
+BUNDLED_BIBLE_PATH = Path(__file__).parent / "data" / "eng-engbsb.txt"
 
 
 def load_vref_map(vref_path: str) -> dict[str, int]:
@@ -14,6 +16,15 @@ def load_vref_map(vref_path: str) -> dict[str, int]:
 def load_bible_lines(bible_path: str) -> list[str]:
     with open(bible_path, encoding="utf-8") as f:
         return [line.strip() for line in f]
+
+
+def get_bible_verse_by_vref_index(vref_index: int, bible_path: Path | None = None) -> str:
+    if bible_path is None:
+        bible_path = BUNDLED_BIBLE_PATH
+    bible_lines = load_bible_lines(bible_path)
+    if not 0 < vref_index < len(bible_lines):
+        return ""
+    return bible_lines[vref_index]
 
 
 def expand_compound_citations(citation: str) -> str:
