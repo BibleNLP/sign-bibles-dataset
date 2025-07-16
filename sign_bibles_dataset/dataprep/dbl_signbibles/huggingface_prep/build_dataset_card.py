@@ -36,6 +36,19 @@ def get_configs_block(languages: list[str]) -> str:
     return "\n".join(lines)
 
 
+def get_tags_block():
+    tags_block = """tags:
+- video
+- bible
+- translation
+- multilingual
+- religious-text
+- parallel-corpus
+- low-resource-languages"""
+
+    return tags_block
+
+
 def build_dataset_card_markdown_and_yaml(
     dataset_name: str,
     shard_count: int,
@@ -54,6 +67,7 @@ language:
 license: cc-by-sa-4.0
 datasets:
 - {dataset_name}
+{get_tags_block()}
 ---
 
 # {dataset_name}
