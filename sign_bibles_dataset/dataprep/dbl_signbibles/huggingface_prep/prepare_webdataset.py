@@ -4,7 +4,7 @@ Prepare sign language videos for HuggingFace datasets.
 This script:
 * Downloads videos from DBL-sign
 * Packages everything into WebDataset format
-
+* Puts each language in its own subfolder in the webdataset
 
 # TODO: Add autosegmenter .eaf file instead, though maybe clean them up to remove paths. (need pympi-ling)
 # TODO: size-based sharding, try for not too big?
@@ -83,20 +83,41 @@ def setup_logger(log_file_path: str) -> logging.Logger:
     return logger
 
 
-logger = setup_logger("./output/run_log.txt")
+LOG_FILE_PATH = Path("./output/run_log.txt")
+logger = setup_logger(LOG_FILE_PATH.resolve())
 logger.info(f"Command: {' '.join(sys.argv)}")
 
 
 class WebDatasetCreator:
-    """Class to handle creating WebDataset format."""
+    """Class to handle creating WebDataset format with subfolders per language."""
 
     def __init__(self, output_dir: str | Path = "webdataset"):
         self.output_dir = Path(output_dir)
         self.output_dir.mkdir(parents=True, exist_ok=True)
 
     def create_webdataset(self, samples_info: list[dict[str, Any]], shard_size: int = 1000) -> list[str]:
-        shards = self._split_into_shards(samples_info, shard_size)
-        return self._write_shards(shards)
+        # Group by language_code first
+        language_groups = self._group_by_language(samples_info)
+        all_shard_paths = []
+
+        for language_code, samples in language_groups.items():
+            logger.info(f"Processing language {language_code} with {len(samples)} samples.")
+            shards = self._split_into_shards(samples, shard_size)
+
+            language_output_dir = self.output_dir / language_code
+            language_output_dir.mkdir(parents=True, exist_ok=True)
+
+            shard_paths = self._write_shards(shards, language_output_dir)
+            all_shard_paths.extend(shard_paths)
+
+        return all_shard_paths
+
+    def _group_by_language(self, samples_info: list[dict[str, Any]]) -> dict[str, list[dict[str, Any]]]:
+        language_groups = {}
+        for sample in samples_info:
+            language_code = sample["language"]["ISO639-3"]
+            language_groups.setdefault(language_code, []).append(sample)
+        return language_groups
 
     def _split_into_shards(self, samples_info: list[dict[str, Any]], shard_size: int) -> list[list[dict[str, Any]]]:
         shards = []
@@ -104,11 +125,11 @@ class WebDatasetCreator:
             shards.append(samples_info[i : i + shard_size])
         return shards
 
-    def _write_shards(self, shards: list[list[dict[str, Any]]]) -> list[str]:
+    def _write_shards(self, shards: list[list[dict[str, Any]]], output_dir: Path) -> list[str]:
         shard_paths = []
 
-        for shard_index, shard in enumerate(tqdm(shards, desc="Writing Shards")):
-            shard_path = self.output_dir / f"shard_{shard_index:05d}.tar"
+        for shard_index, shard in enumerate(tqdm(shards, desc=f"Writing shards in {output_dir.name}")):
+            shard_path = output_dir / f"shard_{shard_index:05d}.tar"
             with tarfile.open(shard_path, "w") as tar:
                 for video_info in shard:
                     sample = self._build_sample(video_info, shard_index)
@@ -122,7 +143,6 @@ class WebDatasetCreator:
     def _build_sample(self, video_info: dict[str, Any], shard_index: int) -> dict[str, Any]:
         sample = {}
 
-        # Prepare sample name
         metadata = video_info.copy()
         language_code = metadata["language"]["ISO639-3"]
         project_name = metadata["project_name"]
@@ -132,14 +152,9 @@ class WebDatasetCreator:
         sample_name = f"{language_code}_{project_slug}_{original_name}"
         sample["__key__"] = sample_name
 
-        # Actual disk files
         video_path = Path(metadata["filename_path"])
-
-        # Files inside tar: renamed
         sample["files"] = {f"{sample_name}.mp4": video_path}
 
-        # Optional pose files
-        # add metadata information for each of the pose files
         metadata["pose"] = {}
         dw_pose = video_path.with_suffix(".pose-dwpose.npz")
         if dw_pose.exists():
@@ -153,14 +168,11 @@ class WebDatasetCreator:
             metadata["pose"]["mediapipe"] = desired_name
             sample["files"][desired_name] = mediapipe_pose
 
-        # don't actually add the paths to the final json
         del metadata["path"]
         del metadata["filename_path"]
 
-        # overwrite filename
         metadata["filename"] = f"{sample_name}.mp4"
 
-        # JSON metadata
         json_data = json.dumps(metadata)
         sample["json_data"] = json_data
         sample["json_filename"] = f"{sample_name}.json"
@@ -168,13 +180,11 @@ class WebDatasetCreator:
         return sample
 
     def _add_sample_to_tar(self, tar: tarfile.TarFile, sample: dict[str, Any], sample_name: str):
-        # Add JSON metadata
         encoded = sample["json_data"].encode("utf-8")
         info = tarfile.TarInfo(sample["json_filename"])
         info.size = len(encoded)
         tar.addfile(info, io.BytesIO(encoded))
 
-        # Add actual files
         for tar_filename, src_path in sample["files"].items():
             src_path = Path(src_path)
             if not src_path.is_file():
@@ -186,7 +196,6 @@ class WebDatasetCreator:
                 tar.addfile(info, f)
 
     def _slugify(self, text: str) -> str:
-        """Simplify project name into safe filename slug."""
         text = text.lower()
         text = re.sub(r"[^\w\s-]", "", text)
         text = re.sub(r"[\s_-]+", "_", text)
@@ -213,7 +222,7 @@ def parse_metadata_to_bible_ref(xml_path: Path, filename):
                     src = content.attrib.get("src", "").strip()
                     xml_filename = Path(src).name
                     file_to_passage[xml_filename] = passage
-        logger.debug("File to Bible Passage Map:\n", json.dumps(file_to_passage, indent=2))
+
         passage_found = file_to_passage.get(filename, "")
         logger.debug(f"Found Passage {passage_found} for filename {filename}")
         return passage_found
@@ -283,10 +292,10 @@ def search_ebible_translations(
         & (ebible_translations_df["translationId"] == translation_id)
     ]
     if result.empty:
-        logger.warn(f"No results found for ({language_code}, {translation_id})")
+        logger.debug(f"No results found for ({language_code}, {translation_id})")  # expected, many don't have it
         return None
     elif len(result) > 1:
-        logger.warn(f"Warning: Multiple results found for ({language_code}, {translation_id}), returning the first.")
+        logger.warning(f"Warning: Multiple results found for ({language_code}, {translation_id}), returning the first.")
 
     return result.iloc[0].to_dict()
 
@@ -357,13 +366,13 @@ def build_transcripts(
             )
 
         # Optional: biblenlp-vref can be merged from all segments if needed
-        biblenlp_vrefs = sorted(set(v for t in transcripts for v in t["biblenlp-vref"]))
+        biblenlp_vrefs = sorted({v for t in transcripts for v in t["biblenlp-vref"]})
 
     else:
         logger.debug(f"No fine-grained transcript for {video_path.name}, using fallback single transcript.")
         verse_text, vref_indices = citation_to_text_and_vrefs(bible_ref, vref_map, bible_verses)
         if not verse_text:
-            logger.warn(f"No verses found for {video_path} reference {bible_ref}, returning empty lists")
+            logger.warning(f"No verses found for {video_path} reference {bible_ref}, returning empty lists")
             return [], vref_indices
 
         transcripts.append(
@@ -385,7 +394,6 @@ def build_transcripts(
 
 def process_without_gui(args):
     """Process videos without GUI updates using pathlib for filesystem operations."""
-
     # === Step 0: Initialize Paths ===
     output_dir = Path(args.output_dir)
     downloads_dir = output_dir / "downloads"
@@ -465,7 +473,7 @@ def process_without_gui(args):
         json.dump({"samples": enriched_video_info_list}, f, indent=2)
 
     logger.info(f"Processing complete! Manifest saved to {manifest_path.resolve()}")
-    logger.info(f"Done, see {logger.log_file_path} for logs")
+    logger.info(f"Done, see {LOG_FILE_PATH.resolve()} for logs")
 
 
 def main():
@@ -512,3 +520,7 @@ if __name__ == "__main__":
     main()
 # cd "/opt/home/cleong/projects/semantic_and_visual_similarity/sign-bibles-dataset" && conda activate /opt/home/cleong/envs/sign-bibles-dataset && python /opt/home/cleong/projects/semantic_and_visual_similarity/sign-bibles-dataset/dataprep/DBL-signbibles/huggingface-prep/prepare_webdataset.py --output-dir . --language-code esl
 # cd "/opt/home/cleong/projects/semantic_and_visual_similarity/sign-bibles-dataset" && conda activate /opt/home/cleong/envs/sign-bibles-dataset && python /opt/home/cleong/projects/semantic_and_visual_similarity/sign-bibles-dataset/dataprep/DBL-signbibles/huggingface-prep/prepare_webdataset.py --output-dir . --language-code sqs --language-code esl --num-videos 10000000000000
+
+
+# upload a project
+# cd "/opt/home/cleong/projects/semantic_and_visual_similarity/sign-bibles-dataset" && python /opt/home/cleong/projects/semantic_and_visual_similarity/sign-bibles-dataset/sign_bibles_dataset/dataprep/dbl_signbibles/huggingface_prep/prepare_webdataset.py --output-dir . --project-name "Chronological Bible Translation in American Sign Language (119 Introductions and Passages)" --num-videos 5000000
