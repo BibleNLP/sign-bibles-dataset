@@ -182,3 +182,19 @@ output/
 */input/
 */output/
 
+downloads/**
+*.csv
+*.zip
+downloads
+sign-bibles-dataset
+*.mp4
+*.png
+*.json
+*.tar
+*.npz
+
+**/DWPose/*
+**/ebible/*
+**/webdataset/*
+webdataset
+*.tar.zst
