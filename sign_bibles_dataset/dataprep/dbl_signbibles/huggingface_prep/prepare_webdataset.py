@@ -101,7 +101,7 @@ class WebDatasetCreator:
         all_shard_paths = []
 
         for language_code, samples in language_groups.items():
-            logger.info(f"Processing language {language_code} with {len(samples)} samples.")
+            logger.info(f"Processing language {language_code} with {len(samples)} samples, shard size = {shard_size}")
             shards = self._split_into_shards(samples, shard_size)
 
             language_output_dir = self.output_dir / language_code
@@ -510,7 +510,7 @@ def main():
     parser.add_argument(
         "--shard-size",
         type=int,
-        default=10,
+        default=5,  # we were getting some big ones
         help="Number of samples per WebDataset shard",
     )
     args = parser.parse_args()
