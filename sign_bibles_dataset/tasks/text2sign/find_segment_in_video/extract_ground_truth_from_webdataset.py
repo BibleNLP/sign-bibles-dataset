@@ -3,7 +3,7 @@ from collections import defaultdict
 from pathlib import Path
 
 import pandas as pd
-from datasets import load_dataset
+from datasets import get_dataset_config_names, load_dataset
 from tqdm import tqdm
 
 from sign_bibles_dataset.dataprep.dbl_signbibles.ebible_utils.vref_lookup import get_bible_verse_by_vref_index
@@ -24,8 +24,9 @@ def extract_queries(language_subset: str, sample_count: int) -> pd.DataFrame:
             for transcript in transcripts:
                 start_frame = transcript["start_frame"]
                 end_frame = transcript["end_frame"]
-                for vref_index in transcript["biblenlp-vref"]:
+                for seg_idx, vref_index in enumerate(transcript["biblenlp-vref"]):
                     verse_text = get_bible_verse_by_vref_index(vref_index)
+                    queries["seg_idx"].append(seg_idx)
                     queries["query_text"].append(verse_text)
                     queries["video_id"].append(sample["__key__"])
                     queries["start_frame"].append(start_frame)
@@ -46,15 +47,22 @@ def main(language_subset: str, sample_count: int, output_path: Path):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Extract Sign Bibles queries from Huggingface dataset.")
-    parser.add_argument("--language-subset", type=str, default="esl", help="Language subset to download (default: esl)")
-    parser.add_argument("--sample-count", type=int, default=5, help="Number of samples to parse (default: 5)")
+    parser.add_argument(
+        "--language-subset", type=str, help="Language subset to download (default: None, does all of them)"
+    )
+    parser.add_argument("--sample-count", type=int, default=20, help="Number of samples to parse (default: 5)")
     parser.add_argument(
         "--output-path", type=Path, help="Path to output CSV. Default: {language_subset}_{sample_count}_queries.csv"
     )
 
     args = parser.parse_args()
 
-    # Set default output path if not provided
-    output_path = args.output_path or Path(f"{args.language_subset}_{args.sample_count}_queries.csv")
+    configs = get_dataset_config_names("bible-nlp/sign-bibles")
+    print(f"Available configs: {configs}")
 
-    main(language_subset=args.language_subset, sample_count=args.sample_count, output_path=output_path)
+    for language_subset in configs:
+        print(f"Extracting from subset {language_subset}")
+        # Set default output path if not provided
+        output_path = args.output_path or Path(f"{language_subset}_{args.sample_count}_queries.csv")
+
+        main(language_subset=language_subset, sample_count=args.sample_count, output_path=output_path)
