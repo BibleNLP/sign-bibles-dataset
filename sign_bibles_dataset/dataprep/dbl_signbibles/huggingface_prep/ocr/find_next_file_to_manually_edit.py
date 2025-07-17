@@ -143,3 +143,11 @@ if __name__ == "__main__":
 
     # Call the main processing function with the provided directory
     process_first_ocr_textchanges_csv(args.directory)
+
+# workflow:
+# first go through all the ocr files, manually correcting
+# conda activate /opt/home/cleong/envs/sign-bibles-dataset && python /opt/home/cleong/projects/semantic_and_visual_similarity/sign-bibles-dataset/sign_bibles_dataset/dataprep/dbl_signbibles/huggingface_prep/ocr/find_next_file_to_manually_edit.py "/opt/home/cleong/projects/semantic_and_visual_similarity/sign-bibles-dataset/downloads/ase/Chronological Bible Translation in American Sign Language (119 Introductions and Passages)"
+# then add thumbnails
+# # python /opt/home/cleong/projects/semantic_and_visual_similarity/sign-bibles-dataset/sign_bibles_dataset/dataprep/dbl_signbibles/huggingface_prep/ocr/extract_thumbnails_from_manualedit.py "/opt/home/cleong/projects/semantic_and_visual_similarity/sign-bibles-dataset/downloads/ase/Chronological Bible Translation in American Sign Language (119 Introductions and Passages)"
+# then preview with
+# streamlit run /opt/home/cleong/projects/semantic_and_visual_similarity/sign-bibles-dataset/sign_bibles_dataset/dataprep/dbl_signbibles/huggingface_prep/ocr/view_manualedit_frames.py
