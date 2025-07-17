@@ -53,10 +53,10 @@ class DBLSignDownloader:
             return self.generate_fresh_manifest()
 
         # Check if manifest is older than 24 hours
-        manifest_age = time.time() - self.manifest_path.stat().st_mtime
-        if manifest_age > 86400:  # 24 hours in seconds
-            print("Manifest is older than 24 hours. Generating a fresh one...")
-            return self.generate_fresh_manifest()
+        # manifest_age = time.time() - self.manifest_path.stat().st_mtime
+        # if manifest_age > 86400000:  # 24 hours in seconds... times 1000
+        #     print("Manifest is older than 24*1000 hours. Generating a fresh one...")
+        #     return self.generate_fresh_manifest()
 
         print("Loading existing manifest...")
         with open(self.manifest_path, encoding="utf-8") as f:
