@@ -49,26 +49,23 @@ def align_predictions_and_refs(preds: dict, refs: dict, k: int):
     )
 
 
-def main():
-    parser = argparse.ArgumentParser(description="Evaluate ranked predictions using TorchMetrics")
-    parser.add_argument("ground_truth_csv", type=Path, help="CSV with seg_idx and query_text")
-    parser.add_argument("predictions_csv", type=Path, help="CSV with query_text,rank,seg_idx")
-    parser.add_argument("--ks", type=int, nargs="+", default=[1, 5, 10])
-    parser.add_argument("--output_csv", type=Path, default="evaluation_results.csv", help="Where to save results")
+def evaluate_prediction(
+    ground_truth_csv_path: Path, predictions_csv_path: Path, ks: list | None = None
+) -> pd.DataFrame:
+    if ks is None:
+        ks = [1, 5, 10]
 
-    args = parser.parse_args()
-
-    gt_df = pd.read_csv(args.ground_truth_csv)
+    gt_df = pd.read_csv(ground_truth_csv_path)
     refs = prepare_references(gt_df)
-    max_k = max(args.ks)
-    print(f"K values: {args.ks}, Max K: {max_k}")
-    preds = load_predictions(args.predictions_csv, max_k)
+    max_k = max(ks)
+    print(f"K values: {ks}, Max K: {max_k}")
+    preds = load_predictions(predictions_csv_path, max_k)
 
     scores, targets, query_ids = align_predictions_and_refs(preds, refs, max_k)
 
     # Initialize metrics
     metrics = {}
-    for k in args.ks:
+    for k in ks:
         metrics[f"precision_at_{k}"] = RetrievalPrecision(top_k=k)
         metrics[f"recall_at_{k}"] = RetrievalRecall(top_k=k)
 
@@ -79,10 +76,23 @@ def main():
     # Evaluate
     metric_results = {}
     for metric_name, metric in metrics.items():
-        # returns a single-element tensor
+        # returns a single-element tensor so we gotta call item()
         metric_results[metric_name] = metric(scores, targets, indexes=query_ids).item()
-    # Save results
+
     results_df = pd.DataFrame([metric_results])
+    return results_df
+
+
+def main():
+    parser = argparse.ArgumentParser(description="Evaluate ranked predictions using TorchMetrics")
+    parser.add_argument("ground_truth_csv", type=Path, help="CSV with seg_idx and query_text")
+    parser.add_argument("predictions_csv", type=Path, help="CSV with query_text,rank,seg_idx")
+    parser.add_argument("--ks", type=int, nargs="+", default=[1, 5, 10])
+    parser.add_argument("--output_csv", type=Path, default="evaluation_results.csv", help="Where to save results")
+
+    args = parser.parse_args()
+
+    results_df = evaluate_prediction(args.ground_truth_csv, args.predictions_csv, args.ks)
 
     results_df.to_csv(args.output_csv, index=False)
     print(results_df)

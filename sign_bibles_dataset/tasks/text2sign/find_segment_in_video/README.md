@@ -1,4 +1,10 @@
-"Pick the right segment" task, the simplest of the retrieval tasks. Given a text query and a number of segments within one video, which one is the right segment?
+WIP: Evaluation code not finished!
+
+Description: 
+"Predict the right segment boundaries" task, where the segment start and end frames are not given and must be predicted. 
 
 # Prediction format: 
-TODO 
+Predictions should be in the form:
+video_id,query_text,start_frame,end_frame
+
+

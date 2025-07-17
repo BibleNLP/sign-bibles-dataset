@@ -48,7 +48,9 @@ def main(language_subset: str, sample_count: int, output_path: Path):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Extract Sign Bibles queries from Huggingface dataset.")
     parser.add_argument(
-        "--language-subset", type=str, help="Language subset to download (default: None, does all of them)"
+        "--language-subset",
+        type=str,
+        help="Language subset to download (default: all configs)",
     )
     parser.add_argument("--sample-count", type=int, default=20, help="Number of samples to parse (default: 5)")
     parser.add_argument(
@@ -57,8 +59,11 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    configs = get_dataset_config_names("bible-nlp/sign-bibles")
-    print(f"Available configs: {configs}")
+    if args.language_subset is not None:
+        configs = [args.language_subset]
+    else:
+        configs = get_dataset_config_names("bible-nlp/sign-bibles")
+        print(f"Available configs: {configs}")
 
     for language_subset in configs:
         print(f"Extracting from subset {language_subset}")
