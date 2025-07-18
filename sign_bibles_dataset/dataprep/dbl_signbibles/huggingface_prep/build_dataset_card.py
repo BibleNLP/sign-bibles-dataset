@@ -1,3 +1,4 @@
+# TODO: add tasks like in https://huggingface.co/datasets/lmms-lab/LLaVA-Video-178K/blob/main/README.md or https://huggingface.co/datasets/racineai/OGC_MEGA_MultiDomain_DocRetrieval/blob/main/README.md or https://huggingface.co/datasets/PKU-Alignment/align-anything/blob/main/README.md, maybe also text-to-video like https://huggingface.co/datasets/nkp37/OpenVid-1M
 def get_usage() -> str:
     usage_str = """## Usage (In Progress, untested)
 
@@ -25,13 +26,12 @@ for sample in dataset["train"]:
     return usage_str
 
 
-def get_configs_block(languages: list[str]) -> str:
+def get_configs_block(configs: list[tuple[str, str]]) -> str:
     """Generate a YAML block listing configurations per language."""
-
-    lines = ["configs:", "  - config_name: all", "    data_files: '*/*.tar'", "    default: true"]
-
-    for lang in languages:
-        lines.append(f"  - config_name: {lang}\n    data_files: {lang}/*.tar")
+    lines = ["configs:", "  - config_name: all", "    data_files: '*/*/*.tar'", "    default: true"]
+    print(configs)
+    for config_name, pattern in list(configs):
+        lines.append(f"  - config_name: {config_name.replace('/', '_')}\n    data_files: {pattern}")
 
     return "\n".join(lines)
 
@@ -55,13 +55,14 @@ def build_dataset_card_markdown_and_yaml(
     total_sample_count: int,
     languages: set[str],
     projects: set[str],
+    configs: set[tuple[str, str]],
 ) -> str:
     """Build the dataset card string from metadata."""
     languages_block = "\n".join(f"- {lang}" for lang in sorted(languages))
     projects_list = ", ".join(sorted(projects))
 
     card = f"""---
-{get_configs_block(languages)}
+{get_configs_block(configs=configs)}
 language:
 {languages_block}
 license: cc-by-sa-4.0
@@ -86,10 +87,12 @@ This dataset contains sign language videos from the Digital Bible Library (DBL),
 ## Dataset Structure
 
 Each sample contains:
-* ["filename"] the original video
-* ["pose"]["mediapipe"]: Mediapipe holistic keypoints, created with [Pose Format](https://github.com/sign-language-processing/pose)
-* ["pose"]["dwpose"]: [DWPose outputs](https://github.com/IDEA-Research/DWPose/tree/onnx/ControlNet-v1-1-nightly/annotator/dwpose), saved as compressed npz files.
-* ["transcripts"]: Bible verses from the eBible corpus, as well as [vref indices](https://github.com/BibleNLP/ebible/blob/main/metadata/vref.txt). For some videos, more fine-grained annotations are available.
+* ["mp4"] the original video
+* ["json"] Metadata, including bible reference, copyright information, language information.
+* ["transcripts.json"]: Bible verses from the eBible corpus, as well as [vref indices](https://github.com/BibleNLP/ebible/blob/main/metadata/vref.txt). For some videos, more fine-grained annotations are available with start/end frames for certain sections
+* ["pose-mediapipe.pose"]: Mediapipe holistic keypoints, created with [Pose Format](https://github.com/sign-language-processing/pose)
+* ["pose-dwpose.npz"]: [DWPose outputs](https://github.com/IDEA-Research/DWPose/tree/onnx/ControlNet-v1-1-nightly/annotator/dwpose), saved as compressed npz files.
+
 
 {get_usage()}
 
