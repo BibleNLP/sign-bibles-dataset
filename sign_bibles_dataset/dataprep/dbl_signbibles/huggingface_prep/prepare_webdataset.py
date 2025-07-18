@@ -175,18 +175,27 @@ class WebDatasetCreator:
         video_path = Path(metadata["filename_path"])
         sample["files"] = {f"{sample_name}.mp4": video_path}
 
+        # EAF files from the autosegmenter
+        eaf_file = video_path.with_suffix(".eaf")
+        if eaf_file.exists():
+            desired_name = f"{sample_name}.eaf"
+            sample["files"][desired_name] = eaf_file
+
+        # JSON version for convenience
+        segments_json_path = video_path.with_suffix(".autosegmented_segments.json")
+        if segments_json_path.exists():
+            desired_name = f"{sample_name}.autosegmented_segments.json"
+            sample["files"][desired_name] = segments_json_path
+
         # Pose files
-        metadata["pose"] = {}
         dw_pose = video_path.with_suffix(".pose-dwpose.npz")
         if dw_pose.exists():
             desired_name = f"{sample_name}.pose-dwpose.npz"
-            metadata["pose"]["dwpose"] = desired_name
             sample["files"][desired_name] = dw_pose
 
         mediapipe_pose = video_path.with_suffix(".pose")
         if mediapipe_pose.exists():
             desired_name = f"{sample_name}.pose-mediapipe.pose"
-            metadata["pose"]["mediapipe"] = desired_name
             sample["files"][desired_name] = mediapipe_pose
 
         # Remove heavy fields
