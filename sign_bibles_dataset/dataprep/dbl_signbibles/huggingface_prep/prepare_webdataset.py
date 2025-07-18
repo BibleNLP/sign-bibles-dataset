@@ -141,8 +141,8 @@ class WebDatasetCreator:
 
     def _write_shards(self, shards: list[list[dict[str, Any]]], output_dir: Path) -> list[str]:
         shard_paths = []
-
-        for shard_index, shard in enumerate(tqdm(shards, desc=f"Writing shards in {output_dir.name}")):
+        logger.debug(f"Writing {len(shards)} to {output_dir}")
+        for shard_index, shard in enumerate(tqdm(shards, desc="Writing shards")):
             shard_path = output_dir / f"shard_{shard_index:05d}.tar"
             with tarfile.open(shard_path, "w") as tar:
                 for video_info in shard:
@@ -194,7 +194,7 @@ class WebDatasetCreator:
         metadata.pop("text", None)
 
         # Extract transcripts
-        transcripts = metadata.pop("transcripts_file", None)
+        transcripts = metadata.pop("transcripts", None)
         if transcripts:
             transcripts_filename = f"{sample_name}.transcripts.json"
             sample["files"][transcripts_filename] = self._save_transcripts(transcripts, transcripts_filename)
@@ -204,6 +204,7 @@ class WebDatasetCreator:
         # metadata["filename"] = f"{sample_name}.mp4" # don't need filename in metadata!
         metadata.pop("path", None)
         metadata.pop("filename_path", None)
+        metadata.pop("transcripts_file", None)  # don't need a filename in the metadata
         metadata.pop("transcripts", None)  # don't store this in the metadata anymore
         metadata.pop("pose", None)  # don't need filenames in the metadata, it's in the sample
         metadata.pop("filename", None)  # don't need filenames in the metadata, it's in the sample
