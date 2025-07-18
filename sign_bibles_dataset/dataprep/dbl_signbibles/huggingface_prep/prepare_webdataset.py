@@ -29,6 +29,7 @@ This script:
 
 """
 
+from collections import Counter
 import argparse
 import io
 import json
@@ -140,6 +141,13 @@ class WebDatasetCreator:
 
         return shard_paths
 
+    def _save_transcripts(self, transcripts: list, filename: str) -> Path:
+        """Save transcripts to a temp location for tar writing."""
+        temp_path = Path("/tmp") / filename
+        with temp_path.open("w", encoding="utf-8") as f:
+            json.dump(transcripts, f, ensure_ascii=False)
+        return temp_path
+
     def _build_sample(self, video_info: dict[str, Any], shard_index: int) -> dict[str, Any]:
         sample = {}
 
@@ -148,13 +156,13 @@ class WebDatasetCreator:
         project_name = metadata["project_name"]
         project_slug = self._slugify(project_name)
         original_name = Path(metadata["filename"]).stem
-
         sample_name = f"{language_code}_{project_slug}_{original_name}"
         sample["__key__"] = sample_name
 
         video_path = Path(metadata["filename_path"])
         sample["files"] = {f"{sample_name}.mp4": video_path}
 
+        # Pose files
         metadata["pose"] = {}
         dw_pose = video_path.with_suffix(".pose-dwpose.npz")
         if dw_pose.exists():
@@ -168,11 +176,23 @@ class WebDatasetCreator:
             metadata["pose"]["mediapipe"] = desired_name
             sample["files"][desired_name] = mediapipe_pose
 
-        del metadata["path"]
-        del metadata["filename_path"]
+        # Remove heavy fields
+        metadata.pop("biblenlp-vref", None)
+        metadata.pop("text", None)
 
+        # Extract transcripts
+        transcripts = metadata.pop("transcripts_file", None)
+        if transcripts:
+            transcripts_filename = f"{sample_name}.transcripts.json"
+            sample["files"][transcripts_filename] = self._save_transcripts(transcripts, transcripts_filename)
+            metadata["transcripts_file"] = transcripts_filename
+
+        # Clean up
         metadata["filename"] = f"{sample_name}.mp4"
+        metadata.pop("path", None)
+        metadata.pop("filename_path", None)
 
+        # Store metadata
         json_data = json.dumps(metadata)
         sample["json_data"] = json_data
         sample["json_filename"] = f"{sample_name}.json"
@@ -466,8 +486,15 @@ def process_without_gui(args):
     logger.info(f"=== Creating WebDataset with {len(enriched_video_info_list)} samples ===")
     creator = WebDatasetCreator(webdataset_dir)
     shard_paths = creator.create_webdataset(enriched_video_info_list, shard_size=args.shard_size)
+    # Get parent folders for all shards
+    parent_folders = [str(Path(shard_path).parent.resolve()) for shard_path in shard_paths]
 
-    logger.info(f"Created {len(shard_paths)} shards in {webdataset_dir.resolve()}")
+    # Count occurrences
+    folder_counts = Counter(parent_folders)
+
+    logger.info(f"Created {len(shard_paths)} shards in {webdataset_dir.resolve()}, including the following subfolders:")
+    for folder, count in folder_counts.items():
+        logger.info(f"* {folder} — {count} shard(s)")
 
     # === Step 5: Save Manifest ===
     logger.info("=== Saving Manifest ===")
