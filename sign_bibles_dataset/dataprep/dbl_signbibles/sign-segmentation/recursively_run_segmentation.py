@@ -9,9 +9,11 @@ from sign_language_segmentation.bin import segment_pose
 from tqdm import tqdm
 
 
-def find_pose_files(root_dir: Path):
+def find_pose_files(search_path: Path):
     """Recursively find all .pose files under root_dir."""
-    return list(root_dir.rglob("*.pose"))
+    if search_path.is_file() and search_path.name.endswith(".pose"):
+        return [search_path]
+    return list(search_path.rglob("*.pose"))
 
 
 def has_eaf(pose_file: Path) -> bool:
@@ -42,7 +44,9 @@ def process_pose_file(pose_file: Path, model: str, verbose=False):
 
 def main():
     parser = argparse.ArgumentParser(description="Batch segmentation of pose files to EAF files.")
-    parser.add_argument("root_dir", type=Path, help="Root directory to search for .pose files")
+    parser.add_argument(
+        "search_path", type=Path, help="Root directory to search for .pose files, or path to a .pose file"
+    )
     parser.add_argument("--model", default="model_E4s-1.pth", help="Path to model (default model_E1s-1.pth)")
     parser.add_argument("--verbose", action="store_true")
 
@@ -50,9 +54,9 @@ def main():
 
     logging.basicConfig(level=logging.INFO)
 
-    pose_files = find_pose_files(args.root_dir)
+    pose_files = find_pose_files(args.search_path)
 
-    logging.info(f"Found {len(pose_files)} pose files under {args.root_dir}")
+    logging.info(f"Found {len(pose_files)} pose files under {args.search_path}")
 
     skipped, processed = 0, 0
 
