@@ -48,6 +48,7 @@ def main():
         "search_path", type=Path, help="Root directory to search for .pose files, or path to a .pose file"
     )
     parser.add_argument("--model", default="model_E4s-1.pth", help="Path to model (default model_E1s-1.pth)")
+    parser.add_argument("--overwrite", action="store_true")
     parser.add_argument("--verbose", action="store_true")
 
     args = parser.parse_args()
@@ -61,7 +62,7 @@ def main():
     skipped, processed = 0, 0
 
     for pose_file in tqdm(pose_files, desc="Segmenting"):
-        if has_eaf(pose_file):
+        if has_eaf(pose_file) and not args.overwrite:
             skipped += 1
             continue
         try:
