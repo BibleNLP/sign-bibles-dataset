@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Upload WebDataset to HuggingFace datasets."""
 
+from collections import defaultdict
 import argparse
 import json
 import os
@@ -16,27 +17,17 @@ from sign_bibles_dataset.dataprep.dbl_signbibles.huggingface_prep.build_dataset_
     build_dataset_card_markdown_and_yaml,
 )
 
-# TODO: add tasks like in https://huggingface.co/datasets/lmms-lab/LLaVA-Video-178K/blob/main/README.md or https://huggingface.co/datasets/racineai/OGC_MEGA_MultiDomain_DocRetrieval/blob/main/README.md or https://huggingface.co/datasets/PKU-Alignment/align-anything/blob/main/README.md, maybe also text-to-video like https://huggingface.co/datasets/nkp37/OpenVid-1M
-
-
-def find_shards_recursive(root_path: str | Path) -> list[str]:
-    """Recursively find all .tar shards in the directory."""
-    root = Path(root_path)
-    shards = sorted(str(p) for p in root.rglob("*.tar"))
-    if not shards:
-        raise ValueError(f"No WebDataset shards found at {root}")
-    return shards
-
 
 def find_shards_by_subfolder(root_path: str | Path) -> dict[str, list[Path]]:
-    """Find all .tar shards grouped by their immediate subfolder."""
+    """Group shards by their full relative subfolder (language/project)."""
     root = Path(root_path)
-    shards_by_folder = {}
+    shards_by_folder = defaultdict(list)
     for shard in root.rglob("*.tar"):
-        subfolder = shard.parent.name
-        shards_by_folder.setdefault(subfolder, []).append(shard)
+        relative_folder = shard.parent.relative_to(root).as_posix()  # language/project
+        shards_by_folder[relative_folder].append(shard)
+
     if not shards_by_folder:
-        raise ValueError(f"No shards found in {root}")
+        raise ValueError(f"No shards found in {root.resolve()}")
     return shards_by_folder
 
 
@@ -45,50 +36,54 @@ def load_cached_stats(stats_path: Path, shard_count: int, subfolder_count: int) 
         return None
     with open(stats_path) as f:
         cached = json.load(f)
+
     if cached.get("shard_count") == shard_count and cached.get("subfolder_count") == subfolder_count:
         print(f"✅ Using cached stats from {stats_path}")
         return cached
-    print("⚠️ Cache is outdated, will recompute stats.")
+
+    print(f"⚠️ Cached stats outdated (found {stats_path}), recomputing.")
     return None
 
 
 def compute_stats_by_sampling(shards_by_folder: dict[str, list[Path]], sample_count: int | None = 1) -> dict:
-    """
-    Estimate dataset stats by sampling shards per subfolder.
-
-    Args:
-        shards_by_folder: Mapping of subfolder name to list of shard Paths.
-        sample_count: Number of shards to sample per subfolder.
-                      If None, use all shards.
-
-    """
     total_samples = 0
     languages, projects = set(), set()
-    language_stats = {}
+    stats_per_folder = {}
+    configs = set()
 
-    for subfolder, shards in tqdm(shards_by_folder.items(), desc="Sampling shards by subfolder"):
-        language_stats[subfolder] = {"shard_count": len(shards)}
+    for folder, shards in tqdm(shards_by_folder.items(), desc="Sampling shards"):
+        lang = Path(folder).parts[0]
+        project = Path(folder).parts[1] if len(Path(folder).parts) > 1 else "unknown"
+
+        configs.add((lang, f"{lang}/*/*.tar"))
+        configs.add((folder, f"{folder}/*.tar"))
+
+        languages.add(lang)
+        projects.add(project)
+
         sample_shards = shards if sample_count is None else shards[:sample_count]
-        subfolder_sample_total, sampled_shards = 0, 0
+        folder_samples = 0
 
-        for shard in tqdm(sample_shards, desc=f"Subfolder: {subfolder}", disable=len(sample_shards) <= 1):
+        for shard in tqdm(sample_shards, desc=f"Sampling {folder}", leave=False):
             count, langs, projs = parse_shard_metadata(str(shard))
-            subfolder_sample_total += count
+            folder_samples += count
             languages.update(langs)
             projects.update(projs)
-            sampled_shards += 1
 
-        if sampled_shards > 0:
-            estimated_total = (subfolder_sample_total / sampled_shards) * len(shards)
-            total_samples += estimated_total
+        estimated = (folder_samples / len(sample_shards)) * len(shards) if sample_shards else 0
+        total_samples += estimated
 
-        language_stats[subfolder]["estimated_samples"] = estimated_total
+        stats_per_folder[folder] = {
+            "shard_count": len(shards),
+            "estimated_samples": int(estimated),
+        }
 
     return {
         "total_samples_estimated": int(total_samples),
         "languages": sorted(languages),
         "projects": sorted(projects),
-        "stats_per_language": language_stats,
+        "stats_per_folder": stats_per_folder,
+        "configs": sorted(configs),
     }
 
 
@@ -115,68 +110,43 @@ def parse_shard_metadata(shard_path: str) -> tuple[int, set[str], set[str]]:
     return sample_count, languages, projects
 
 
-def find_manifest(webdataset_path: str | Path) -> Path | None:
-    """Look for manifest.json in webdataset_path or its parent directory."""
-    webdataset_path = Path(webdataset_path).resolve()
-    locations = [
-        webdataset_path / "manifest.json",
-        webdataset_path.parent / "manifest.json",
-        # Path.cwd() / "manifest.json",
-    ]
-    for manifest in locations:
-        if manifest.exists():
-            print(f"Found manifest at {manifest}")
-            return manifest
-    return None
-
-
 def create_dataset_card(
-    webdataset_path: str,
-    output_path: str,
-    dataset_name: str,
-    language_codes: list[str] | None = None,
+    webdataset_path: str, output_path: str, dataset_name: str, language_codes: list[str] | None = None
 ) -> str:
     webdataset_path = Path(webdataset_path)
     shards_by_folder = find_shards_by_subfolder(webdataset_path)
 
-    total_shards = sum(len(s) for s in shards_by_folder.values())
+    total_shards = sum(len(shards) for shards in shards_by_folder.values())
     total_subfolders = len(shards_by_folder)
     stats_cache_path = webdataset_path / "dataset_stats.json"
 
     cached = load_cached_stats(stats_cache_path, total_shards, total_subfolders)
 
     if cached:
-        total_samples = cached["total_samples_estimated"]
-        languages = set(cached["languages"])
-        projects = set(cached["projects"])
+        stats = cached
     else:
         stats = compute_stats_by_sampling(shards_by_folder)
-        total_samples = stats["total_samples_estimated"]
-        languages = set(stats["languages"])
-        projects = set(stats["projects"])
-
-        # cache new stats
-        cache_data = {
-            "subfolder_count": total_subfolders,
-            "shard_count": total_shards,
-            "total_samples_estimated": total_samples,
-            "languages": sorted(languages),
-            "projects": sorted(projects),
-            "stats_by_language": stats["stats_per_language"],
-        }
-        with open(stats_cache_path, "w") as f:
-            json.dump(cache_data, f, indent=2)
+        stats.update(
+            {
+                "shard_count": total_shards,
+                "subfolder_count": total_subfolders,
+            }
+        )
+        with stats_cache_path.open("w") as f:
+            json.dump(stats, f, indent=2)
         print(f"✅ Cached stats saved to {stats_cache_path}")
 
+    languages = set(stats["languages"])
     if language_codes:
         languages.update(language_codes)
 
     card_text = build_dataset_card_markdown_and_yaml(
         dataset_name=dataset_name,
         shard_count=total_shards,
-        total_sample_count=total_samples,
+        total_sample_count=stats["total_samples_estimated"],
         languages=languages,
-        projects=projects,
+        projects=stats["projects"],
+        configs=stats["configs"],
     )
     with open(output_path, "w", encoding="utf-8") as f:
         f.write(card_text)
@@ -201,13 +171,6 @@ def upload_to_huggingface(webdataset_path: str | Path, dataset_name: str, token:
     shards = list(webdataset_path.rglob("*.tar"))
     if not shards:
         raise ValueError(f"No shards found in {webdataset_path}")
-
-    # manifest_path = find_manifest(webdataset_path)
-    # if manifest_path is not None:
-    #     with open(manifest_path) as mf:
-    #         manifest = json.load(mf)
-    # else:
-    #     manifest = None
 
     print(f"Found {len(shards)} shards. Uploading in-place, preserving folders...")
 
