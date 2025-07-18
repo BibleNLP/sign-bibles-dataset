@@ -96,20 +96,33 @@ class WebDatasetCreator:
         self.output_dir = Path(output_dir)
         self.output_dir.mkdir(parents=True, exist_ok=True)
 
+    def _group_by_project(self, samples_info):
+        groups = {}
+        for sample in samples_info:
+            project_slug = self._slugify(sample["project_name"])
+            groups.setdefault(project_slug, []).append(sample)
+        return groups
+
     def create_webdataset(self, samples_info: list[dict[str, Any]], shard_size: int = 1000) -> list[str]:
         # Group by language_code first
         language_groups = self._group_by_language(samples_info)
         all_shard_paths = []
 
         for language_code, samples in language_groups.items():
-            logger.info(f"Processing language {language_code} with {len(samples)} samples, shard size = {shard_size}")
-            shards = self._split_into_shards(samples, shard_size)
+            # Further group by project_name within language
+            project_groups = self._group_by_project(samples)
 
-            language_output_dir = self.output_dir / language_code
-            language_output_dir.mkdir(parents=True, exist_ok=True)
+            for project_slug, project_samples in project_groups.items():
+                logger.info(
+                    f"Processing language {language_code}, project {project_slug}, {len(project_samples)} samples"
+                )
+                shards = self._split_into_shards(project_samples, shard_size)
 
-            shard_paths = self._write_shards(shards, language_output_dir)
-            all_shard_paths.extend(shard_paths)
+                project_output_dir = self.output_dir / language_code / project_slug
+                project_output_dir.mkdir(parents=True, exist_ok=True)
+
+                shard_paths = self._write_shards(shards, project_output_dir)
+                all_shard_paths.extend(shard_paths)
 
         return all_shard_paths
 
@@ -185,12 +198,15 @@ class WebDatasetCreator:
         if transcripts:
             transcripts_filename = f"{sample_name}.transcripts.json"
             sample["files"][transcripts_filename] = self._save_transcripts(transcripts, transcripts_filename)
-            metadata["transcripts_file"] = transcripts_filename
+            # metadata["transcripts_file"] = transcripts_filename # don't need the filename in the metadata!
 
         # Clean up
-        metadata["filename"] = f"{sample_name}.mp4"
+        # metadata["filename"] = f"{sample_name}.mp4" # don't need filename in metadata!
         metadata.pop("path", None)
         metadata.pop("filename_path", None)
+        metadata.pop("transcripts", None)  # don't store this in the metadata anymore
+        metadata.pop("pose", None)  # don't need filenames in the metadata, it's in the sample
+        metadata.pop("filename", None)  # don't need filenames in the metadata, it's in the sample
 
         # Store metadata
         json_data = json.dumps(metadata)
