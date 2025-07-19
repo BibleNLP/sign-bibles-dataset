@@ -57,6 +57,7 @@ def compute_stats_by_sampling(shards_by_folder: dict[str, list[Path]], sample_co
 
         configs.add((lang, f"{lang}/*/*.tar"))
         configs.add((folder, f"{folder}/*.tar"))
+        configs.add((f"{folder}_small", f"{folder}/shard_00000.tar"))
 
         languages.add(lang)
         projects.add(project)
