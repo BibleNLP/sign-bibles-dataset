@@ -1,6 +1,8 @@
 from pathlib import Path
 import argparse
 
+import io
+from pose_format import Pose
 import pandas as pd
 from datasets import Video, get_dataset_config_names, load_dataset
 from tqdm import tqdm
@@ -22,17 +24,26 @@ def iterate_over_dataset(language_subset: str, sample_count: int) -> pd.DataFram
         sample_key = sample["__key__"]
         # load metadata
         metadata = sample["json"]
-        total_frames = metadata["total_frames"]
+        total_frames = metadata["total_frames"]  # total frame count of the video
+
+        # load Pose format. Normally it expects a file buffer, so..
+        pose = Pose.read(io.BytesIO(sample["pose-mediapipe.pose"]))
+        print("Pose Format (https://github.com/sign-language-processing/pose)")
+        print(pose)
+
+        # DWPose
+        dwpose = sample["pose-dwpose.npz"]
+        print("DWPose Format")
+        print(type(dwpose))
 
         # load video
         video = sample["mp4"]
         print(type(video))  # bytes
-        first_frame = video.get_frame_at(0)
+        first_frame = video.get_frame_at(0)  # torchcodec Frame type
         print(type(first_frame))
-
         print(first_frame.data.shape)
 
-        # load transcripts
+        # load transcripts and get start/end frames for a segment
         if "transcripts.json" in sample:
             transcripts = sample["transcripts.json"]
             print(f"Transcripts for {sample_key}")
