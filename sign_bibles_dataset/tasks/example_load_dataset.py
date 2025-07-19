@@ -1,13 +1,14 @@
-from pathlib import Path
 import argparse
-
 import io
-from pose_format import Pose
+import json
+from pathlib import Path
+
 import pandas as pd
 from datasets import Video, get_dataset_config_names, load_dataset
-from tqdm import tqdm
-from PIL import Image
+from pose_format import Pose
 from torchvision.io import write_png
+from tqdm import tqdm
+
 # requires torchcodec, torchvision
 
 
@@ -24,6 +25,7 @@ def iterate_over_dataset(language_subset: str, sample_count: int) -> pd.DataFram
         sample_key = sample["__key__"]
         # load metadata
         metadata = sample["json"]
+        print(json.dumps(metadata, indent=2))
         total_frames = metadata["total_frames"]  # total frame count of the video
 
         # load Pose format. Normally it expects a file buffer, so..
@@ -34,7 +36,7 @@ def iterate_over_dataset(language_subset: str, sample_count: int) -> pd.DataFram
         # DWPose
         dwpose = sample["pose-dwpose.npz"]
         print("DWPose Format")
-        print(type(dwpose))
+        print(type(dwpose))  # dictionary with "frames" as the key, sometimes also "confidences"
 
         # load video
         video = sample["mp4"]
@@ -59,11 +61,11 @@ def iterate_over_dataset(language_subset: str, sample_count: int) -> pd.DataFram
 
                 start_out_path = f"{sample_key}_{start_frame_index}.png"
                 print(f"Writing to {Path(start_out_path).resolve()}")
-                write_png(start_frame, start_out_path)
+                # write_png(start_frame, start_out_path)
 
                 end_out_path = f"{sample_key}_{end_frame_index}.png"
                 print(f"Writing to {Path(end_out_path).resolve()}")
-                write_png(end_frame, end_out_path)
+                # write_png(end_frame, end_out_path)
 
 
 def main(

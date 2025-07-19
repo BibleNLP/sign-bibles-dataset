@@ -1,5 +1,4 @@
 import argparse
-import json
 from collections import defaultdict
 from pathlib import Path
 
@@ -19,21 +18,10 @@ def extract_queries(language_subset: str, sample_count: int) -> pd.DataFrame:
     queries = defaultdict(list)
 
     for sample in tqdm(ds.take(sample_count), desc="Parsing samples"):
-        print(sample.keys())
-
-        for key, value in sample.items():
-            print(f"{key}: {type(value)}, {len(value)} len value")
-
-        print(json.dumps(sample["json"], indent=2))
-        if "transcripts.json" not in sample:
-            print("No transcripts in ", sample["__key__"])
-
-        else:
+        if "transcripts.json" in sample:
             transcripts = sample["transcripts.json"]
-            print(f"{len(transcripts)} transcripts in ", sample["__key__"])
             total_frames = sample["json"]["total_frames"]
             for transcript in transcripts:
-                print(transcript)
                 start_frame = transcript["start_frame"]
                 end_frame = transcript["end_frame"]
                 for seg_idx, vref_index in enumerate(transcript["biblenlp-vref"]):
@@ -46,7 +34,6 @@ def extract_queries(language_subset: str, sample_count: int) -> pd.DataFrame:
                     queries["total_frames"].append(total_frames)
 
     queries_df = pd.DataFrame(queries)
-    print(f"Extracted {len(queries_df)} queries.")
     return queries_df
 
 
