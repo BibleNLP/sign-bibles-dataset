@@ -1,0 +1,2001 @@
+seg_idx,query_text,video_id,start_frame,end_frame,total_frames
+0,It is a silly place.,video_01,0,100,10000
+1,The Castle Aaargh!,video_01,100,200,10000
+2,Always look on the bright side of life.,video_01,200,300,10000
+3,Your mother was a hamster!,video_01,300,400,10000
+4,It is a silly place.,video_01,400,500,10000
+5,I'm not dead yet!,video_01,500,600,10000
+6,The Castle Aaargh!,video_01,600,700,10000
+7,We want a shrubbery!,video_01,700,800,10000
+8,Nobody expects the Spanish Inquisition!,video_01,800,900,10000
+9,What is the airspeed velocity of an unladen swallow?,video_01,900,1000,10000
+10,I'm not dead yet!,video_01,1000,1100,10000
+11,Always look on the bright side of life.,video_01,1100,1200,10000
+12,Strange women lying in ponds distributing swords is no basis for a system of government!,video_01,1200,1300,10000
+13,I'm not dead yet!,video_01,1300,1400,10000
+14,You must cut down the mightiest tree in the forest with... a herring!,video_01,1400,1500,10000
+15,Strange women lying in ponds distributing swords is no basis for a system of government!,video_01,1500,1600,10000
+16,Your mother was a hamster!,video_01,1600,1700,10000
+17,You must cut down the mightiest tree in the forest with... a herring!,video_01,1700,1800,10000
+18,This parrot is no more!,video_01,1800,1900,10000
+19,The Castle Aaargh!,video_01,1900,2000,10000
+20,It's just a flesh wound.,video_01,2000,2100,10000
+21,We want a shrubbery!,video_01,2100,2200,10000
+22,Nobody expects the Spanish Inquisition!,video_01,2200,2300,10000
+23,The Castle Aaargh!,video_01,2300,2400,10000
+24,We want a shrubbery!,video_01,2400,2500,10000
+25,It is a silly place.,video_01,2500,2600,10000
+26,We want a shrubbery!,video_01,2600,2700,10000
+27,Bring out your dead!,video_01,2700,2800,10000
+28,The Castle Aaargh!,video_01,2800,2900,10000
+29,Strange women lying in ponds distributing swords is no basis for a system of government!,video_01,2900,3000,10000
+30,I'm not dead yet!,video_01,3000,3100,10000
+31,Your mother was a hamster!,video_01,3100,3200,10000
+32,Bring out your dead!,video_01,3200,3300,10000
+33,I fart in your general direction!,video_01,3300,3400,10000
+34,Now go away or I shall taunt you a second time!,video_01,3400,3500,10000
+35,Nobody expects the Spanish Inquisition!,video_01,3500,3600,10000
+36,It is a silly place.,video_01,3600,3700,10000
+37,Your mother was a hamster!,video_01,3700,3800,10000
+38,You must cut down the mightiest tree in the forest with... a herring!,video_01,3800,3900,10000
+39,I'm not dead yet!,video_01,3900,4000,10000
+40,I fart in your general direction!,video_01,4000,4100,10000
+41,We want a shrubbery!,video_01,4100,4200,10000
+42,We want a shrubbery!,video_01,4200,4300,10000
+43,We want a shrubbery!,video_01,4300,4400,10000
+44,Nobody expects the Spanish Inquisition!,video_01,4400,4500,10000
+45,Strange women lying in ponds distributing swords is no basis for a system of government!,video_01,4500,4600,10000
+46,You must cut down the mightiest tree in the forest with... a herring!,video_01,4600,4700,10000
+47,Always look on the bright side of life.,video_01,4700,4800,10000
+48,I fart in your general direction!,video_01,4800,4900,10000
+49,I'm not dead yet!,video_01,4900,5000,10000
+50,Your mother was a hamster!,video_01,5000,5100,10000
+51,We are the knights who say... Ni!,video_01,5100,5200,10000
+52,Bring out your dead!,video_01,5200,5300,10000
+53,Bring out your dead!,video_01,5300,5400,10000
+54,Bring out your dead!,video_01,5400,5500,10000
+55,Always look on the bright side of life.,video_01,5500,5600,10000
+56,I'm not dead yet!,video_01,5600,5700,10000
+57,Bring out your dead!,video_01,5700,5800,10000
+58,Bring out your dead!,video_01,5800,5900,10000
+59,I fart in your general direction!,video_01,5900,6000,10000
+60,This parrot is no more!,video_01,6000,6100,10000
+61,Always look on the bright side of life.,video_01,6100,6200,10000
+62,Bring out your dead!,video_01,6200,6300,10000
+63,The Castle Aaargh!,video_01,6300,6400,10000
+64,It's just a flesh wound.,video_01,6400,6500,10000
+65,I'm not dead yet!,video_01,6500,6600,10000
+66,What is the airspeed velocity of an unladen swallow?,video_01,6600,6700,10000
+67,We want a shrubbery!,video_01,6700,6800,10000
+68,The Castle Aaargh!,video_01,6800,6900,10000
+69,You must cut down the mightiest tree in the forest with... a herring!,video_01,6900,7000,10000
+70,This parrot is no more!,video_01,7000,7100,10000
+71,Your mother was a hamster!,video_01,7100,7200,10000
+72,Always look on the bright side of life.,video_01,7200,7300,10000
+73,This parrot is no more!,video_01,7300,7400,10000
+74,It's just a flesh wound.,video_01,7400,7500,10000
+75,This parrot is no more!,video_01,7500,7600,10000
+76,Now go away or I shall taunt you a second time!,video_01,7600,7700,10000
+77,It is a silly place.,video_01,7700,7800,10000
+78,I'm not dead yet!,video_01,7800,7900,10000
+79,It is a silly place.,video_01,7900,8000,10000
+80,Nobody expects the Spanish Inquisition!,video_01,8000,8100,10000
+81,Bring out your dead!,video_01,8100,8200,10000
+82,It is a silly place.,video_01,8200,8300,10000
+83,Your mother was a hamster!,video_01,8300,8400,10000
+84,Bring out your dead!,video_01,8400,8500,10000
+85,I fart in your general direction!,video_01,8500,8600,10000
+86,This parrot is no more!,video_01,8600,8700,10000
+87,This parrot is no more!,video_01,8700,8800,10000
+88,I'm not dead yet!,video_01,8800,8900,10000
+89,We want a shrubbery!,video_01,8900,9000,10000
+90,Nobody expects the Spanish Inquisition!,video_01,9000,9100,10000
+91,We are the knights who say... Ni!,video_01,9100,9200,10000
+92,I'm not dead yet!,video_01,9200,9300,10000
+93,Bring out your dead!,video_01,9300,9400,10000
+94,Your mother was a hamster!,video_01,9400,9500,10000
+95,I'm not dead yet!,video_01,9500,9600,10000
+96,What is the airspeed velocity of an unladen swallow?,video_01,9600,9700,10000
+97,What is the airspeed velocity of an unladen swallow?,video_01,9700,9800,10000
+98,We are the knights who say... Ni!,video_01,9800,9900,10000
+99,You must cut down the mightiest tree in the forest with... a herring!,video_01,9900,10000,10000
+0,It is a silly place.,video_02,0,100,10000
+1,The Castle Aaargh!,video_02,100,200,10000
+2,Always look on the bright side of life.,video_02,200,300,10000
+3,Your mother was a hamster!,video_02,300,400,10000
+4,It is a silly place.,video_02,400,500,10000
+5,I'm not dead yet!,video_02,500,600,10000
+6,The Castle Aaargh!,video_02,600,700,10000
+7,We want a shrubbery!,video_02,700,800,10000
+8,Nobody expects the Spanish Inquisition!,video_02,800,900,10000
+9,What is the airspeed velocity of an unladen swallow?,video_02,900,1000,10000
+10,I'm not dead yet!,video_02,1000,1100,10000
+11,Always look on the bright side of life.,video_02,1100,1200,10000
+12,Strange women lying in ponds distributing swords is no basis for a system of government!,video_02,1200,1300,10000
+13,I'm not dead yet!,video_02,1300,1400,10000
+14,You must cut down the mightiest tree in the forest with... a herring!,video_02,1400,1500,10000
+15,Strange women lying in ponds distributing swords is no basis for a system of government!,video_02,1500,1600,10000
+16,Your mother was a hamster!,video_02,1600,1700,10000
+17,You must cut down the mightiest tree in the forest with... a herring!,video_02,1700,1800,10000
+18,This parrot is no more!,video_02,1800,1900,10000
+19,The Castle Aaargh!,video_02,1900,2000,10000
+20,It's just a flesh wound.,video_02,2000,2100,10000
+21,We want a shrubbery!,video_02,2100,2200,10000
+22,Nobody expects the Spanish Inquisition!,video_02,2200,2300,10000
+23,The Castle Aaargh!,video_02,2300,2400,10000
+24,We want a shrubbery!,video_02,2400,2500,10000
+25,It is a silly place.,video_02,2500,2600,10000
+26,We want a shrubbery!,video_02,2600,2700,10000
+27,Bring out your dead!,video_02,2700,2800,10000
+28,The Castle Aaargh!,video_02,2800,2900,10000
+29,Strange women lying in ponds distributing swords is no basis for a system of government!,video_02,2900,3000,10000
+30,I'm not dead yet!,video_02,3000,3100,10000
+31,Your mother was a hamster!,video_02,3100,3200,10000
+32,Bring out your dead!,video_02,3200,3300,10000
+33,I fart in your general direction!,video_02,3300,3400,10000
+34,Now go away or I shall taunt you a second time!,video_02,3400,3500,10000
+35,Nobody expects the Spanish Inquisition!,video_02,3500,3600,10000
+36,It is a silly place.,video_02,3600,3700,10000
+37,Your mother was a hamster!,video_02,3700,3800,10000
+38,You must cut down the mightiest tree in the forest with... a herring!,video_02,3800,3900,10000
+39,I'm not dead yet!,video_02,3900,4000,10000
+40,I fart in your general direction!,video_02,4000,4100,10000
+41,We want a shrubbery!,video_02,4100,4200,10000
+42,We want a shrubbery!,video_02,4200,4300,10000
+43,We want a shrubbery!,video_02,4300,4400,10000
+44,Nobody expects the Spanish Inquisition!,video_02,4400,4500,10000
+45,Strange women lying in ponds distributing swords is no basis for a system of government!,video_02,4500,4600,10000
+46,You must cut down the mightiest tree in the forest with... a herring!,video_02,4600,4700,10000
+47,Always look on the bright side of life.,video_02,4700,4800,10000
+48,I fart in your general direction!,video_02,4800,4900,10000
+49,I'm not dead yet!,video_02,4900,5000,10000
+50,Your mother was a hamster!,video_02,5000,5100,10000
+51,We are the knights who say... Ni!,video_02,5100,5200,10000
+52,Bring out your dead!,video_02,5200,5300,10000
+53,Bring out your dead!,video_02,5300,5400,10000
+54,Bring out your dead!,video_02,5400,5500,10000
+55,Always look on the bright side of life.,video_02,5500,5600,10000
+56,I'm not dead yet!,video_02,5600,5700,10000
+57,Bring out your dead!,video_02,5700,5800,10000
+58,Bring out your dead!,video_02,5800,5900,10000
+59,I fart in your general direction!,video_02,5900,6000,10000
+60,This parrot is no more!,video_02,6000,6100,10000
+61,Always look on the bright side of life.,video_02,6100,6200,10000
+62,Bring out your dead!,video_02,6200,6300,10000
+63,The Castle Aaargh!,video_02,6300,6400,10000
+64,It's just a flesh wound.,video_02,6400,6500,10000
+65,I'm not dead yet!,video_02,6500,6600,10000
+66,What is the airspeed velocity of an unladen swallow?,video_02,6600,6700,10000
+67,We want a shrubbery!,video_02,6700,6800,10000
+68,The Castle Aaargh!,video_02,6800,6900,10000
+69,You must cut down the mightiest tree in the forest with... a herring!,video_02,6900,7000,10000
+70,This parrot is no more!,video_02,7000,7100,10000
+71,Your mother was a hamster!,video_02,7100,7200,10000
+72,Always look on the bright side of life.,video_02,7200,7300,10000
+73,This parrot is no more!,video_02,7300,7400,10000
+74,It's just a flesh wound.,video_02,7400,7500,10000
+75,This parrot is no more!,video_02,7500,7600,10000
+76,Now go away or I shall taunt you a second time!,video_02,7600,7700,10000
+77,It is a silly place.,video_02,7700,7800,10000
+78,I'm not dead yet!,video_02,7800,7900,10000
+79,It is a silly place.,video_02,7900,8000,10000
+80,Nobody expects the Spanish Inquisition!,video_02,8000,8100,10000
+81,Bring out your dead!,video_02,8100,8200,10000
+82,It is a silly place.,video_02,8200,8300,10000
+83,Your mother was a hamster!,video_02,8300,8400,10000
+84,Bring out your dead!,video_02,8400,8500,10000
+85,I fart in your general direction!,video_02,8500,8600,10000
+86,This parrot is no more!,video_02,8600,8700,10000
+87,This parrot is no more!,video_02,8700,8800,10000
+88,I'm not dead yet!,video_02,8800,8900,10000
+89,We want a shrubbery!,video_02,8900,9000,10000
+90,Nobody expects the Spanish Inquisition!,video_02,9000,9100,10000
+91,We are the knights who say... Ni!,video_02,9100,9200,10000
+92,I'm not dead yet!,video_02,9200,9300,10000
+93,Bring out your dead!,video_02,9300,9400,10000
+94,Your mother was a hamster!,video_02,9400,9500,10000
+95,I'm not dead yet!,video_02,9500,9600,10000
+96,What is the airspeed velocity of an unladen swallow?,video_02,9600,9700,10000
+97,What is the airspeed velocity of an unladen swallow?,video_02,9700,9800,10000
+98,We are the knights who say... Ni!,video_02,9800,9900,10000
+99,You must cut down the mightiest tree in the forest with... a herring!,video_02,9900,10000,10000
+0,It is a silly place.,video_03,0,100,10000
+1,The Castle Aaargh!,video_03,100,200,10000
+2,Always look on the bright side of life.,video_03,200,300,10000
+3,Your mother was a hamster!,video_03,300,400,10000
+4,It is a silly place.,video_03,400,500,10000
+5,I'm not dead yet!,video_03,500,600,10000
+6,The Castle Aaargh!,video_03,600,700,10000
+7,We want a shrubbery!,video_03,700,800,10000
+8,Nobody expects the Spanish Inquisition!,video_03,800,900,10000
+9,What is the airspeed velocity of an unladen swallow?,video_03,900,1000,10000
+10,I'm not dead yet!,video_03,1000,1100,10000
+11,Always look on the bright side of life.,video_03,1100,1200,10000
+12,Strange women lying in ponds distributing swords is no basis for a system of government!,video_03,1200,1300,10000
+13,I'm not dead yet!,video_03,1300,1400,10000
+14,You must cut down the mightiest tree in the forest with... a herring!,video_03,1400,1500,10000
+15,Strange women lying in ponds distributing swords is no basis for a system of government!,video_03,1500,1600,10000
+16,Your mother was a hamster!,video_03,1600,1700,10000
+17,You must cut down the mightiest tree in the forest with... a herring!,video_03,1700,1800,10000
+18,This parrot is no more!,video_03,1800,1900,10000
+19,The Castle Aaargh!,video_03,1900,2000,10000
+20,It's just a flesh wound.,video_03,2000,2100,10000
+21,We want a shrubbery!,video_03,2100,2200,10000
+22,Nobody expects the Spanish Inquisition!,video_03,2200,2300,10000
+23,The Castle Aaargh!,video_03,2300,2400,10000
+24,We want a shrubbery!,video_03,2400,2500,10000
+25,It is a silly place.,video_03,2500,2600,10000
+26,We want a shrubbery!,video_03,2600,2700,10000
+27,Bring out your dead!,video_03,2700,2800,10000
+28,The Castle Aaargh!,video_03,2800,2900,10000
+29,Strange women lying in ponds distributing swords is no basis for a system of government!,video_03,2900,3000,10000
+30,I'm not dead yet!,video_03,3000,3100,10000
+31,Your mother was a hamster!,video_03,3100,3200,10000
+32,Bring out your dead!,video_03,3200,3300,10000
+33,I fart in your general direction!,video_03,3300,3400,10000
+34,Now go away or I shall taunt you a second time!,video_03,3400,3500,10000
+35,Nobody expects the Spanish Inquisition!,video_03,3500,3600,10000
+36,It is a silly place.,video_03,3600,3700,10000
+37,Your mother was a hamster!,video_03,3700,3800,10000
+38,You must cut down the mightiest tree in the forest with... a herring!,video_03,3800,3900,10000
+39,I'm not dead yet!,video_03,3900,4000,10000
+40,I fart in your general direction!,video_03,4000,4100,10000
+41,We want a shrubbery!,video_03,4100,4200,10000
+42,We want a shrubbery!,video_03,4200,4300,10000
+43,We want a shrubbery!,video_03,4300,4400,10000
+44,Nobody expects the Spanish Inquisition!,video_03,4400,4500,10000
+45,Strange women lying in ponds distributing swords is no basis for a system of government!,video_03,4500,4600,10000
+46,You must cut down the mightiest tree in the forest with... a herring!,video_03,4600,4700,10000
+47,Always look on the bright side of life.,video_03,4700,4800,10000
+48,I fart in your general direction!,video_03,4800,4900,10000
+49,I'm not dead yet!,video_03,4900,5000,10000
+50,Your mother was a hamster!,video_03,5000,5100,10000
+51,We are the knights who say... Ni!,video_03,5100,5200,10000
+52,Bring out your dead!,video_03,5200,5300,10000
+53,Bring out your dead!,video_03,5300,5400,10000
+54,Bring out your dead!,video_03,5400,5500,10000
+55,Always look on the bright side of life.,video_03,5500,5600,10000
+56,I'm not dead yet!,video_03,5600,5700,10000
+57,Bring out your dead!,video_03,5700,5800,10000
+58,Bring out your dead!,video_03,5800,5900,10000
+59,I fart in your general direction!,video_03,5900,6000,10000
+60,This parrot is no more!,video_03,6000,6100,10000
+61,Always look on the bright side of life.,video_03,6100,6200,10000
+62,Bring out your dead!,video_03,6200,6300,10000
+63,The Castle Aaargh!,video_03,6300,6400,10000
+64,It's just a flesh wound.,video_03,6400,6500,10000
+65,I'm not dead yet!,video_03,6500,6600,10000
+66,What is the airspeed velocity of an unladen swallow?,video_03,6600,6700,10000
+67,We want a shrubbery!,video_03,6700,6800,10000
+68,The Castle Aaargh!,video_03,6800,6900,10000
+69,You must cut down the mightiest tree in the forest with... a herring!,video_03,6900,7000,10000
+70,This parrot is no more!,video_03,7000,7100,10000
+71,Your mother was a hamster!,video_03,7100,7200,10000
+72,Always look on the bright side of life.,video_03,7200,7300,10000
+73,This parrot is no more!,video_03,7300,7400,10000
+74,It's just a flesh wound.,video_03,7400,7500,10000
+75,This parrot is no more!,video_03,7500,7600,10000
+76,Now go away or I shall taunt you a second time!,video_03,7600,7700,10000
+77,It is a silly place.,video_03,7700,7800,10000
+78,I'm not dead yet!,video_03,7800,7900,10000
+79,It is a silly place.,video_03,7900,8000,10000
+80,Nobody expects the Spanish Inquisition!,video_03,8000,8100,10000
+81,Bring out your dead!,video_03,8100,8200,10000
+82,It is a silly place.,video_03,8200,8300,10000
+83,Your mother was a hamster!,video_03,8300,8400,10000
+84,Bring out your dead!,video_03,8400,8500,10000
+85,I fart in your general direction!,video_03,8500,8600,10000
+86,This parrot is no more!,video_03,8600,8700,10000
+87,This parrot is no more!,video_03,8700,8800,10000
+88,I'm not dead yet!,video_03,8800,8900,10000
+89,We want a shrubbery!,video_03,8900,9000,10000
+90,Nobody expects the Spanish Inquisition!,video_03,9000,9100,10000
+91,We are the knights who say... Ni!,video_03,9100,9200,10000
+92,I'm not dead yet!,video_03,9200,9300,10000
+93,Bring out your dead!,video_03,9300,9400,10000
+94,Your mother was a hamster!,video_03,9400,9500,10000
+95,I'm not dead yet!,video_03,9500,9600,10000
+96,What is the airspeed velocity of an unladen swallow?,video_03,9600,9700,10000
+97,What is the airspeed velocity of an unladen swallow?,video_03,9700,9800,10000
+98,We are the knights who say... Ni!,video_03,9800,9900,10000
+99,You must cut down the mightiest tree in the forest with... a herring!,video_03,9900,10000,10000
+0,It is a silly place.,video_04,0,100,10000
+1,The Castle Aaargh!,video_04,100,200,10000
+2,Always look on the bright side of life.,video_04,200,300,10000
+3,Your mother was a hamster!,video_04,300,400,10000
+4,It is a silly place.,video_04,400,500,10000
+5,I'm not dead yet!,video_04,500,600,10000
+6,The Castle Aaargh!,video_04,600,700,10000
+7,We want a shrubbery!,video_04,700,800,10000
+8,Nobody expects the Spanish Inquisition!,video_04,800,900,10000
+9,What is the airspeed velocity of an unladen swallow?,video_04,900,1000,10000
+10,I'm not dead yet!,video_04,1000,1100,10000
+11,Always look on the bright side of life.,video_04,1100,1200,10000
+12,Strange women lying in ponds distributing swords is no basis for a system of government!,video_04,1200,1300,10000
+13,I'm not dead yet!,video_04,1300,1400,10000
+14,You must cut down the mightiest tree in the forest with... a herring!,video_04,1400,1500,10000
+15,Strange women lying in ponds distributing swords is no basis for a system of government!,video_04,1500,1600,10000
+16,Your mother was a hamster!,video_04,1600,1700,10000
+17,You must cut down the mightiest tree in the forest with... a herring!,video_04,1700,1800,10000
+18,This parrot is no more!,video_04,1800,1900,10000
+19,The Castle Aaargh!,video_04,1900,2000,10000
+20,It's just a flesh wound.,video_04,2000,2100,10000
+21,We want a shrubbery!,video_04,2100,2200,10000
+22,Nobody expects the Spanish Inquisition!,video_04,2200,2300,10000
+23,The Castle Aaargh!,video_04,2300,2400,10000
+24,We want a shrubbery!,video_04,2400,2500,10000
+25,It is a silly place.,video_04,2500,2600,10000
+26,We want a shrubbery!,video_04,2600,2700,10000
+27,Bring out your dead!,video_04,2700,2800,10000
+28,The Castle Aaargh!,video_04,2800,2900,10000
+29,Strange women lying in ponds distributing swords is no basis for a system of government!,video_04,2900,3000,10000
+30,I'm not dead yet!,video_04,3000,3100,10000
+31,Your mother was a hamster!,video_04,3100,3200,10000
+32,Bring out your dead!,video_04,3200,3300,10000
+33,I fart in your general direction!,video_04,3300,3400,10000
+34,Now go away or I shall taunt you a second time!,video_04,3400,3500,10000
+35,Nobody expects the Spanish Inquisition!,video_04,3500,3600,10000
+36,It is a silly place.,video_04,3600,3700,10000
+37,Your mother was a hamster!,video_04,3700,3800,10000
+38,You must cut down the mightiest tree in the forest with... a herring!,video_04,3800,3900,10000
+39,I'm not dead yet!,video_04,3900,4000,10000
+40,I fart in your general direction!,video_04,4000,4100,10000
+41,We want a shrubbery!,video_04,4100,4200,10000
+42,We want a shrubbery!,video_04,4200,4300,10000
+43,We want a shrubbery!,video_04,4300,4400,10000
+44,Nobody expects the Spanish Inquisition!,video_04,4400,4500,10000
+45,Strange women lying in ponds distributing swords is no basis for a system of government!,video_04,4500,4600,10000
+46,You must cut down the mightiest tree in the forest with... a herring!,video_04,4600,4700,10000
+47,Always look on the bright side of life.,video_04,4700,4800,10000
+48,I fart in your general direction!,video_04,4800,4900,10000
+49,I'm not dead yet!,video_04,4900,5000,10000
+50,Your mother was a hamster!,video_04,5000,5100,10000
+51,We are the knights who say... Ni!,video_04,5100,5200,10000
+52,Bring out your dead!,video_04,5200,5300,10000
+53,Bring out your dead!,video_04,5300,5400,10000
+54,Bring out your dead!,video_04,5400,5500,10000
+55,Always look on the bright side of life.,video_04,5500,5600,10000
+56,I'm not dead yet!,video_04,5600,5700,10000
+57,Bring out your dead!,video_04,5700,5800,10000
+58,Bring out your dead!,video_04,5800,5900,10000
+59,I fart in your general direction!,video_04,5900,6000,10000
+60,This parrot is no more!,video_04,6000,6100,10000
+61,Always look on the bright side of life.,video_04,6100,6200,10000
+62,Bring out your dead!,video_04,6200,6300,10000
+63,The Castle Aaargh!,video_04,6300,6400,10000
+64,It's just a flesh wound.,video_04,6400,6500,10000
+65,I'm not dead yet!,video_04,6500,6600,10000
+66,What is the airspeed velocity of an unladen swallow?,video_04,6600,6700,10000
+67,We want a shrubbery!,video_04,6700,6800,10000
+68,The Castle Aaargh!,video_04,6800,6900,10000
+69,You must cut down the mightiest tree in the forest with... a herring!,video_04,6900,7000,10000
+70,This parrot is no more!,video_04,7000,7100,10000
+71,Your mother was a hamster!,video_04,7100,7200,10000
+72,Always look on the bright side of life.,video_04,7200,7300,10000
+73,This parrot is no more!,video_04,7300,7400,10000
+74,It's just a flesh wound.,video_04,7400,7500,10000
+75,This parrot is no more!,video_04,7500,7600,10000
+76,Now go away or I shall taunt you a second time!,video_04,7600,7700,10000
+77,It is a silly place.,video_04,7700,7800,10000
+78,I'm not dead yet!,video_04,7800,7900,10000
+79,It is a silly place.,video_04,7900,8000,10000
+80,Nobody expects the Spanish Inquisition!,video_04,8000,8100,10000
+81,Bring out your dead!,video_04,8100,8200,10000
+82,It is a silly place.,video_04,8200,8300,10000
+83,Your mother was a hamster!,video_04,8300,8400,10000
+84,Bring out your dead!,video_04,8400,8500,10000
+85,I fart in your general direction!,video_04,8500,8600,10000
+86,This parrot is no more!,video_04,8600,8700,10000
+87,This parrot is no more!,video_04,8700,8800,10000
+88,I'm not dead yet!,video_04,8800,8900,10000
+89,We want a shrubbery!,video_04,8900,9000,10000
+90,Nobody expects the Spanish Inquisition!,video_04,9000,9100,10000
+91,We are the knights who say... Ni!,video_04,9100,9200,10000
+92,I'm not dead yet!,video_04,9200,9300,10000
+93,Bring out your dead!,video_04,9300,9400,10000
+94,Your mother was a hamster!,video_04,9400,9500,10000
+95,I'm not dead yet!,video_04,9500,9600,10000
+96,What is the airspeed velocity of an unladen swallow?,video_04,9600,9700,10000
+97,What is the airspeed velocity of an unladen swallow?,video_04,9700,9800,10000
+98,We are the knights who say... Ni!,video_04,9800,9900,10000
+99,You must cut down the mightiest tree in the forest with... a herring!,video_04,9900,10000,10000
+0,It is a silly place.,video_05,0,100,10000
+1,The Castle Aaargh!,video_05,100,200,10000
+2,Always look on the bright side of life.,video_05,200,300,10000
+3,Your mother was a hamster!,video_05,300,400,10000
+4,It is a silly place.,video_05,400,500,10000
+5,I'm not dead yet!,video_05,500,600,10000
+6,The Castle Aaargh!,video_05,600,700,10000
+7,We want a shrubbery!,video_05,700,800,10000
+8,Nobody expects the Spanish Inquisition!,video_05,800,900,10000
+9,What is the airspeed velocity of an unladen swallow?,video_05,900,1000,10000
+10,I'm not dead yet!,video_05,1000,1100,10000
+11,Always look on the bright side of life.,video_05,1100,1200,10000
+12,Strange women lying in ponds distributing swords is no basis for a system of government!,video_05,1200,1300,10000
+13,I'm not dead yet!,video_05,1300,1400,10000
+14,You must cut down the mightiest tree in the forest with... a herring!,video_05,1400,1500,10000
+15,Strange women lying in ponds distributing swords is no basis for a system of government!,video_05,1500,1600,10000
+16,Your mother was a hamster!,video_05,1600,1700,10000
+17,You must cut down the mightiest tree in the forest with... a herring!,video_05,1700,1800,10000
+18,This parrot is no more!,video_05,1800,1900,10000
+19,The Castle Aaargh!,video_05,1900,2000,10000
+20,It's just a flesh wound.,video_05,2000,2100,10000
+21,We want a shrubbery!,video_05,2100,2200,10000
+22,Nobody expects the Spanish Inquisition!,video_05,2200,2300,10000
+23,The Castle Aaargh!,video_05,2300,2400,10000
+24,We want a shrubbery!,video_05,2400,2500,10000
+25,It is a silly place.,video_05,2500,2600,10000
+26,We want a shrubbery!,video_05,2600,2700,10000
+27,Bring out your dead!,video_05,2700,2800,10000
+28,The Castle Aaargh!,video_05,2800,2900,10000
+29,Strange women lying in ponds distributing swords is no basis for a system of government!,video_05,2900,3000,10000
+30,I'm not dead yet!,video_05,3000,3100,10000
+31,Your mother was a hamster!,video_05,3100,3200,10000
+32,Bring out your dead!,video_05,3200,3300,10000
+33,I fart in your general direction!,video_05,3300,3400,10000
+34,Now go away or I shall taunt you a second time!,video_05,3400,3500,10000
+35,Nobody expects the Spanish Inquisition!,video_05,3500,3600,10000
+36,It is a silly place.,video_05,3600,3700,10000
+37,Your mother was a hamster!,video_05,3700,3800,10000
+38,You must cut down the mightiest tree in the forest with... a herring!,video_05,3800,3900,10000
+39,I'm not dead yet!,video_05,3900,4000,10000
+40,I fart in your general direction!,video_05,4000,4100,10000
+41,We want a shrubbery!,video_05,4100,4200,10000
+42,We want a shrubbery!,video_05,4200,4300,10000
+43,We want a shrubbery!,video_05,4300,4400,10000
+44,Nobody expects the Spanish Inquisition!,video_05,4400,4500,10000
+45,Strange women lying in ponds distributing swords is no basis for a system of government!,video_05,4500,4600,10000
+46,You must cut down the mightiest tree in the forest with... a herring!,video_05,4600,4700,10000
+47,Always look on the bright side of life.,video_05,4700,4800,10000
+48,I fart in your general direction!,video_05,4800,4900,10000
+49,I'm not dead yet!,video_05,4900,5000,10000
+50,Your mother was a hamster!,video_05,5000,5100,10000
+51,We are the knights who say... Ni!,video_05,5100,5200,10000
+52,Bring out your dead!,video_05,5200,5300,10000
+53,Bring out your dead!,video_05,5300,5400,10000
+54,Bring out your dead!,video_05,5400,5500,10000
+55,Always look on the bright side of life.,video_05,5500,5600,10000
+56,I'm not dead yet!,video_05,5600,5700,10000
+57,Bring out your dead!,video_05,5700,5800,10000
+58,Bring out your dead!,video_05,5800,5900,10000
+59,I fart in your general direction!,video_05,5900,6000,10000
+60,This parrot is no more!,video_05,6000,6100,10000
+61,Always look on the bright side of life.,video_05,6100,6200,10000
+62,Bring out your dead!,video_05,6200,6300,10000
+63,The Castle Aaargh!,video_05,6300,6400,10000
+64,It's just a flesh wound.,video_05,6400,6500,10000
+65,I'm not dead yet!,video_05,6500,6600,10000
+66,What is the airspeed velocity of an unladen swallow?,video_05,6600,6700,10000
+67,We want a shrubbery!,video_05,6700,6800,10000
+68,The Castle Aaargh!,video_05,6800,6900,10000
+69,You must cut down the mightiest tree in the forest with... a herring!,video_05,6900,7000,10000
+70,This parrot is no more!,video_05,7000,7100,10000
+71,Your mother was a hamster!,video_05,7100,7200,10000
+72,Always look on the bright side of life.,video_05,7200,7300,10000
+73,This parrot is no more!,video_05,7300,7400,10000
+74,It's just a flesh wound.,video_05,7400,7500,10000
+75,This parrot is no more!,video_05,7500,7600,10000
+76,Now go away or I shall taunt you a second time!,video_05,7600,7700,10000
+77,It is a silly place.,video_05,7700,7800,10000
+78,I'm not dead yet!,video_05,7800,7900,10000
+79,It is a silly place.,video_05,7900,8000,10000
+80,Nobody expects the Spanish Inquisition!,video_05,8000,8100,10000
+81,Bring out your dead!,video_05,8100,8200,10000
+82,It is a silly place.,video_05,8200,8300,10000
+83,Your mother was a hamster!,video_05,8300,8400,10000
+84,Bring out your dead!,video_05,8400,8500,10000
+85,I fart in your general direction!,video_05,8500,8600,10000
+86,This parrot is no more!,video_05,8600,8700,10000
+87,This parrot is no more!,video_05,8700,8800,10000
+88,I'm not dead yet!,video_05,8800,8900,10000
+89,We want a shrubbery!,video_05,8900,9000,10000
+90,Nobody expects the Spanish Inquisition!,video_05,9000,9100,10000
+91,We are the knights who say... Ni!,video_05,9100,9200,10000
+92,I'm not dead yet!,video_05,9200,9300,10000
+93,Bring out your dead!,video_05,9300,9400,10000
+94,Your mother was a hamster!,video_05,9400,9500,10000
+95,I'm not dead yet!,video_05,9500,9600,10000
+96,What is the airspeed velocity of an unladen swallow?,video_05,9600,9700,10000
+97,What is the airspeed velocity of an unladen swallow?,video_05,9700,9800,10000
+98,We are the knights who say... Ni!,video_05,9800,9900,10000
+99,You must cut down the mightiest tree in the forest with... a herring!,video_05,9900,10000,10000
+0,It is a silly place.,video_06,0,100,10000
+1,The Castle Aaargh!,video_06,100,200,10000
+2,Always look on the bright side of life.,video_06,200,300,10000
+3,Your mother was a hamster!,video_06,300,400,10000
+4,It is a silly place.,video_06,400,500,10000
+5,I'm not dead yet!,video_06,500,600,10000
+6,The Castle Aaargh!,video_06,600,700,10000
+7,We want a shrubbery!,video_06,700,800,10000
+8,Nobody expects the Spanish Inquisition!,video_06,800,900,10000
+9,What is the airspeed velocity of an unladen swallow?,video_06,900,1000,10000
+10,I'm not dead yet!,video_06,1000,1100,10000
+11,Always look on the bright side of life.,video_06,1100,1200,10000
+12,Strange women lying in ponds distributing swords is no basis for a system of government!,video_06,1200,1300,10000
+13,I'm not dead yet!,video_06,1300,1400,10000
+14,You must cut down the mightiest tree in the forest with... a herring!,video_06,1400,1500,10000
+15,Strange women lying in ponds distributing swords is no basis for a system of government!,video_06,1500,1600,10000
+16,Your mother was a hamster!,video_06,1600,1700,10000
+17,You must cut down the mightiest tree in the forest with... a herring!,video_06,1700,1800,10000
+18,This parrot is no more!,video_06,1800,1900,10000
+19,The Castle Aaargh!,video_06,1900,2000,10000
+20,It's just a flesh wound.,video_06,2000,2100,10000
+21,We want a shrubbery!,video_06,2100,2200,10000
+22,Nobody expects the Spanish Inquisition!,video_06,2200,2300,10000
+23,The Castle Aaargh!,video_06,2300,2400,10000
+24,We want a shrubbery!,video_06,2400,2500,10000
+25,It is a silly place.,video_06,2500,2600,10000
+26,We want a shrubbery!,video_06,2600,2700,10000
+27,Bring out your dead!,video_06,2700,2800,10000
+28,The Castle Aaargh!,video_06,2800,2900,10000
+29,Strange women lying in ponds distributing swords is no basis for a system of government!,video_06,2900,3000,10000
+30,I'm not dead yet!,video_06,3000,3100,10000
+31,Your mother was a hamster!,video_06,3100,3200,10000
+32,Bring out your dead!,video_06,3200,3300,10000
+33,I fart in your general direction!,video_06,3300,3400,10000
+34,Now go away or I shall taunt you a second time!,video_06,3400,3500,10000
+35,Nobody expects the Spanish Inquisition!,video_06,3500,3600,10000
+36,It is a silly place.,video_06,3600,3700,10000
+37,Your mother was a hamster!,video_06,3700,3800,10000
+38,You must cut down the mightiest tree in the forest with... a herring!,video_06,3800,3900,10000
+39,I'm not dead yet!,video_06,3900,4000,10000
+40,I fart in your general direction!,video_06,4000,4100,10000
+41,We want a shrubbery!,video_06,4100,4200,10000
+42,We want a shrubbery!,video_06,4200,4300,10000
+43,We want a shrubbery!,video_06,4300,4400,10000
+44,Nobody expects the Spanish Inquisition!,video_06,4400,4500,10000
+45,Strange women lying in ponds distributing swords is no basis for a system of government!,video_06,4500,4600,10000
+46,You must cut down the mightiest tree in the forest with... a herring!,video_06,4600,4700,10000
+47,Always look on the bright side of life.,video_06,4700,4800,10000
+48,I fart in your general direction!,video_06,4800,4900,10000
+49,I'm not dead yet!,video_06,4900,5000,10000
+50,Your mother was a hamster!,video_06,5000,5100,10000
+51,We are the knights who say... Ni!,video_06,5100,5200,10000
+52,Bring out your dead!,video_06,5200,5300,10000
+53,Bring out your dead!,video_06,5300,5400,10000
+54,Bring out your dead!,video_06,5400,5500,10000
+55,Always look on the bright side of life.,video_06,5500,5600,10000
+56,I'm not dead yet!,video_06,5600,5700,10000
+57,Bring out your dead!,video_06,5700,5800,10000
+58,Bring out your dead!,video_06,5800,5900,10000
+59,I fart in your general direction!,video_06,5900,6000,10000
+60,This parrot is no more!,video_06,6000,6100,10000
+61,Always look on the bright side of life.,video_06,6100,6200,10000
+62,Bring out your dead!,video_06,6200,6300,10000
+63,The Castle Aaargh!,video_06,6300,6400,10000
+64,It's just a flesh wound.,video_06,6400,6500,10000
+65,I'm not dead yet!,video_06,6500,6600,10000
+66,What is the airspeed velocity of an unladen swallow?,video_06,6600,6700,10000
+67,We want a shrubbery!,video_06,6700,6800,10000
+68,The Castle Aaargh!,video_06,6800,6900,10000
+69,You must cut down the mightiest tree in the forest with... a herring!,video_06,6900,7000,10000
+70,This parrot is no more!,video_06,7000,7100,10000
+71,Your mother was a hamster!,video_06,7100,7200,10000
+72,Always look on the bright side of life.,video_06,7200,7300,10000
+73,This parrot is no more!,video_06,7300,7400,10000
+74,It's just a flesh wound.,video_06,7400,7500,10000
+75,This parrot is no more!,video_06,7500,7600,10000
+76,Now go away or I shall taunt you a second time!,video_06,7600,7700,10000
+77,It is a silly place.,video_06,7700,7800,10000
+78,I'm not dead yet!,video_06,7800,7900,10000
+79,It is a silly place.,video_06,7900,8000,10000
+80,Nobody expects the Spanish Inquisition!,video_06,8000,8100,10000
+81,Bring out your dead!,video_06,8100,8200,10000
+82,It is a silly place.,video_06,8200,8300,10000
+83,Your mother was a hamster!,video_06,8300,8400,10000
+84,Bring out your dead!,video_06,8400,8500,10000
+85,I fart in your general direction!,video_06,8500,8600,10000
+86,This parrot is no more!,video_06,8600,8700,10000
+87,This parrot is no more!,video_06,8700,8800,10000
+88,I'm not dead yet!,video_06,8800,8900,10000
+89,We want a shrubbery!,video_06,8900,9000,10000
+90,Nobody expects the Spanish Inquisition!,video_06,9000,9100,10000
+91,We are the knights who say... Ni!,video_06,9100,9200,10000
+92,I'm not dead yet!,video_06,9200,9300,10000
+93,Bring out your dead!,video_06,9300,9400,10000
+94,Your mother was a hamster!,video_06,9400,9500,10000
+95,I'm not dead yet!,video_06,9500,9600,10000
+96,What is the airspeed velocity of an unladen swallow?,video_06,9600,9700,10000
+97,What is the airspeed velocity of an unladen swallow?,video_06,9700,9800,10000
+98,We are the knights who say... Ni!,video_06,9800,9900,10000
+99,You must cut down the mightiest tree in the forest with... a herring!,video_06,9900,10000,10000
+0,It is a silly place.,video_07,0,100,10000
+1,The Castle Aaargh!,video_07,100,200,10000
+2,Always look on the bright side of life.,video_07,200,300,10000
+3,Your mother was a hamster!,video_07,300,400,10000
+4,It is a silly place.,video_07,400,500,10000
+5,I'm not dead yet!,video_07,500,600,10000
+6,The Castle Aaargh!,video_07,600,700,10000
+7,We want a shrubbery!,video_07,700,800,10000
+8,Nobody expects the Spanish Inquisition!,video_07,800,900,10000
+9,What is the airspeed velocity of an unladen swallow?,video_07,900,1000,10000
+10,I'm not dead yet!,video_07,1000,1100,10000
+11,Always look on the bright side of life.,video_07,1100,1200,10000
+12,Strange women lying in ponds distributing swords is no basis for a system of government!,video_07,1200,1300,10000
+13,I'm not dead yet!,video_07,1300,1400,10000
+14,You must cut down the mightiest tree in the forest with... a herring!,video_07,1400,1500,10000
+15,Strange women lying in ponds distributing swords is no basis for a system of government!,video_07,1500,1600,10000
+16,Your mother was a hamster!,video_07,1600,1700,10000
+17,You must cut down the mightiest tree in the forest with... a herring!,video_07,1700,1800,10000
+18,This parrot is no more!,video_07,1800,1900,10000
+19,The Castle Aaargh!,video_07,1900,2000,10000
+20,It's just a flesh wound.,video_07,2000,2100,10000
+21,We want a shrubbery!,video_07,2100,2200,10000
+22,Nobody expects the Spanish Inquisition!,video_07,2200,2300,10000
+23,The Castle Aaargh!,video_07,2300,2400,10000
+24,We want a shrubbery!,video_07,2400,2500,10000
+25,It is a silly place.,video_07,2500,2600,10000
+26,We want a shrubbery!,video_07,2600,2700,10000
+27,Bring out your dead!,video_07,2700,2800,10000
+28,The Castle Aaargh!,video_07,2800,2900,10000
+29,Strange women lying in ponds distributing swords is no basis for a system of government!,video_07,2900,3000,10000
+30,I'm not dead yet!,video_07,3000,3100,10000
+31,Your mother was a hamster!,video_07,3100,3200,10000
+32,Bring out your dead!,video_07,3200,3300,10000
+33,I fart in your general direction!,video_07,3300,3400,10000
+34,Now go away or I shall taunt you a second time!,video_07,3400,3500,10000
+35,Nobody expects the Spanish Inquisition!,video_07,3500,3600,10000
+36,It is a silly place.,video_07,3600,3700,10000
+37,Your mother was a hamster!,video_07,3700,3800,10000
+38,You must cut down the mightiest tree in the forest with... a herring!,video_07,3800,3900,10000
+39,I'm not dead yet!,video_07,3900,4000,10000
+40,I fart in your general direction!,video_07,4000,4100,10000
+41,We want a shrubbery!,video_07,4100,4200,10000
+42,We want a shrubbery!,video_07,4200,4300,10000
+43,We want a shrubbery!,video_07,4300,4400,10000
+44,Nobody expects the Spanish Inquisition!,video_07,4400,4500,10000
+45,Strange women lying in ponds distributing swords is no basis for a system of government!,video_07,4500,4600,10000
+46,You must cut down the mightiest tree in the forest with... a herring!,video_07,4600,4700,10000
+47,Always look on the bright side of life.,video_07,4700,4800,10000
+48,I fart in your general direction!,video_07,4800,4900,10000
+49,I'm not dead yet!,video_07,4900,5000,10000
+50,Your mother was a hamster!,video_07,5000,5100,10000
+51,We are the knights who say... Ni!,video_07,5100,5200,10000
+52,Bring out your dead!,video_07,5200,5300,10000
+53,Bring out your dead!,video_07,5300,5400,10000
+54,Bring out your dead!,video_07,5400,5500,10000
+55,Always look on the bright side of life.,video_07,5500,5600,10000
+56,I'm not dead yet!,video_07,5600,5700,10000
+57,Bring out your dead!,video_07,5700,5800,10000
+58,Bring out your dead!,video_07,5800,5900,10000
+59,I fart in your general direction!,video_07,5900,6000,10000
+60,This parrot is no more!,video_07,6000,6100,10000
+61,Always look on the bright side of life.,video_07,6100,6200,10000
+62,Bring out your dead!,video_07,6200,6300,10000
+63,The Castle Aaargh!,video_07,6300,6400,10000
+64,It's just a flesh wound.,video_07,6400,6500,10000
+65,I'm not dead yet!,video_07,6500,6600,10000
+66,What is the airspeed velocity of an unladen swallow?,video_07,6600,6700,10000
+67,We want a shrubbery!,video_07,6700,6800,10000
+68,The Castle Aaargh!,video_07,6800,6900,10000
+69,You must cut down the mightiest tree in the forest with... a herring!,video_07,6900,7000,10000
+70,This parrot is no more!,video_07,7000,7100,10000
+71,Your mother was a hamster!,video_07,7100,7200,10000
+72,Always look on the bright side of life.,video_07,7200,7300,10000
+73,This parrot is no more!,video_07,7300,7400,10000
+74,It's just a flesh wound.,video_07,7400,7500,10000
+75,This parrot is no more!,video_07,7500,7600,10000
+76,Now go away or I shall taunt you a second time!,video_07,7600,7700,10000
+77,It is a silly place.,video_07,7700,7800,10000
+78,I'm not dead yet!,video_07,7800,7900,10000
+79,It is a silly place.,video_07,7900,8000,10000
+80,Nobody expects the Spanish Inquisition!,video_07,8000,8100,10000
+81,Bring out your dead!,video_07,8100,8200,10000
+82,It is a silly place.,video_07,8200,8300,10000
+83,Your mother was a hamster!,video_07,8300,8400,10000
+84,Bring out your dead!,video_07,8400,8500,10000
+85,I fart in your general direction!,video_07,8500,8600,10000
+86,This parrot is no more!,video_07,8600,8700,10000
+87,This parrot is no more!,video_07,8700,8800,10000
+88,I'm not dead yet!,video_07,8800,8900,10000
+89,We want a shrubbery!,video_07,8900,9000,10000
+90,Nobody expects the Spanish Inquisition!,video_07,9000,9100,10000
+91,We are the knights who say... Ni!,video_07,9100,9200,10000
+92,I'm not dead yet!,video_07,9200,9300,10000
+93,Bring out your dead!,video_07,9300,9400,10000
+94,Your mother was a hamster!,video_07,9400,9500,10000
+95,I'm not dead yet!,video_07,9500,9600,10000
+96,What is the airspeed velocity of an unladen swallow?,video_07,9600,9700,10000
+97,What is the airspeed velocity of an unladen swallow?,video_07,9700,9800,10000
+98,We are the knights who say... Ni!,video_07,9800,9900,10000
+99,You must cut down the mightiest tree in the forest with... a herring!,video_07,9900,10000,10000
+0,It is a silly place.,video_08,0,100,10000
+1,The Castle Aaargh!,video_08,100,200,10000
+2,Always look on the bright side of life.,video_08,200,300,10000
+3,Your mother was a hamster!,video_08,300,400,10000
+4,It is a silly place.,video_08,400,500,10000
+5,I'm not dead yet!,video_08,500,600,10000
+6,The Castle Aaargh!,video_08,600,700,10000
+7,We want a shrubbery!,video_08,700,800,10000
+8,Nobody expects the Spanish Inquisition!,video_08,800,900,10000
+9,What is the airspeed velocity of an unladen swallow?,video_08,900,1000,10000
+10,I'm not dead yet!,video_08,1000,1100,10000
+11,Always look on the bright side of life.,video_08,1100,1200,10000
+12,Strange women lying in ponds distributing swords is no basis for a system of government!,video_08,1200,1300,10000
+13,I'm not dead yet!,video_08,1300,1400,10000
+14,You must cut down the mightiest tree in the forest with... a herring!,video_08,1400,1500,10000
+15,Strange women lying in ponds distributing swords is no basis for a system of government!,video_08,1500,1600,10000
+16,Your mother was a hamster!,video_08,1600,1700,10000
+17,You must cut down the mightiest tree in the forest with... a herring!,video_08,1700,1800,10000
+18,This parrot is no more!,video_08,1800,1900,10000
+19,The Castle Aaargh!,video_08,1900,2000,10000
+20,It's just a flesh wound.,video_08,2000,2100,10000
+21,We want a shrubbery!,video_08,2100,2200,10000
+22,Nobody expects the Spanish Inquisition!,video_08,2200,2300,10000
+23,The Castle Aaargh!,video_08,2300,2400,10000
+24,We want a shrubbery!,video_08,2400,2500,10000
+25,It is a silly place.,video_08,2500,2600,10000
+26,We want a shrubbery!,video_08,2600,2700,10000
+27,Bring out your dead!,video_08,2700,2800,10000
+28,The Castle Aaargh!,video_08,2800,2900,10000
+29,Strange women lying in ponds distributing swords is no basis for a system of government!,video_08,2900,3000,10000
+30,I'm not dead yet!,video_08,3000,3100,10000
+31,Your mother was a hamster!,video_08,3100,3200,10000
+32,Bring out your dead!,video_08,3200,3300,10000
+33,I fart in your general direction!,video_08,3300,3400,10000
+34,Now go away or I shall taunt you a second time!,video_08,3400,3500,10000
+35,Nobody expects the Spanish Inquisition!,video_08,3500,3600,10000
+36,It is a silly place.,video_08,3600,3700,10000
+37,Your mother was a hamster!,video_08,3700,3800,10000
+38,You must cut down the mightiest tree in the forest with... a herring!,video_08,3800,3900,10000
+39,I'm not dead yet!,video_08,3900,4000,10000
+40,I fart in your general direction!,video_08,4000,4100,10000
+41,We want a shrubbery!,video_08,4100,4200,10000
+42,We want a shrubbery!,video_08,4200,4300,10000
+43,We want a shrubbery!,video_08,4300,4400,10000
+44,Nobody expects the Spanish Inquisition!,video_08,4400,4500,10000
+45,Strange women lying in ponds distributing swords is no basis for a system of government!,video_08,4500,4600,10000
+46,You must cut down the mightiest tree in the forest with... a herring!,video_08,4600,4700,10000
+47,Always look on the bright side of life.,video_08,4700,4800,10000
+48,I fart in your general direction!,video_08,4800,4900,10000
+49,I'm not dead yet!,video_08,4900,5000,10000
+50,Your mother was a hamster!,video_08,5000,5100,10000
+51,We are the knights who say... Ni!,video_08,5100,5200,10000
+52,Bring out your dead!,video_08,5200,5300,10000
+53,Bring out your dead!,video_08,5300,5400,10000
+54,Bring out your dead!,video_08,5400,5500,10000
+55,Always look on the bright side of life.,video_08,5500,5600,10000
+56,I'm not dead yet!,video_08,5600,5700,10000
+57,Bring out your dead!,video_08,5700,5800,10000
+58,Bring out your dead!,video_08,5800,5900,10000
+59,I fart in your general direction!,video_08,5900,6000,10000
+60,This parrot is no more!,video_08,6000,6100,10000
+61,Always look on the bright side of life.,video_08,6100,6200,10000
+62,Bring out your dead!,video_08,6200,6300,10000
+63,The Castle Aaargh!,video_08,6300,6400,10000
+64,It's just a flesh wound.,video_08,6400,6500,10000
+65,I'm not dead yet!,video_08,6500,6600,10000
+66,What is the airspeed velocity of an unladen swallow?,video_08,6600,6700,10000
+67,We want a shrubbery!,video_08,6700,6800,10000
+68,The Castle Aaargh!,video_08,6800,6900,10000
+69,You must cut down the mightiest tree in the forest with... a herring!,video_08,6900,7000,10000
+70,This parrot is no more!,video_08,7000,7100,10000
+71,Your mother was a hamster!,video_08,7100,7200,10000
+72,Always look on the bright side of life.,video_08,7200,7300,10000
+73,This parrot is no more!,video_08,7300,7400,10000
+74,It's just a flesh wound.,video_08,7400,7500,10000
+75,This parrot is no more!,video_08,7500,7600,10000
+76,Now go away or I shall taunt you a second time!,video_08,7600,7700,10000
+77,It is a silly place.,video_08,7700,7800,10000
+78,I'm not dead yet!,video_08,7800,7900,10000
+79,It is a silly place.,video_08,7900,8000,10000
+80,Nobody expects the Spanish Inquisition!,video_08,8000,8100,10000
+81,Bring out your dead!,video_08,8100,8200,10000
+82,It is a silly place.,video_08,8200,8300,10000
+83,Your mother was a hamster!,video_08,8300,8400,10000
+84,Bring out your dead!,video_08,8400,8500,10000
+85,I fart in your general direction!,video_08,8500,8600,10000
+86,This parrot is no more!,video_08,8600,8700,10000
+87,This parrot is no more!,video_08,8700,8800,10000
+88,I'm not dead yet!,video_08,8800,8900,10000
+89,We want a shrubbery!,video_08,8900,9000,10000
+90,Nobody expects the Spanish Inquisition!,video_08,9000,9100,10000
+91,We are the knights who say... Ni!,video_08,9100,9200,10000
+92,I'm not dead yet!,video_08,9200,9300,10000
+93,Bring out your dead!,video_08,9300,9400,10000
+94,Your mother was a hamster!,video_08,9400,9500,10000
+95,I'm not dead yet!,video_08,9500,9600,10000
+96,What is the airspeed velocity of an unladen swallow?,video_08,9600,9700,10000
+97,What is the airspeed velocity of an unladen swallow?,video_08,9700,9800,10000
+98,We are the knights who say... Ni!,video_08,9800,9900,10000
+99,You must cut down the mightiest tree in the forest with... a herring!,video_08,9900,10000,10000
+0,It is a silly place.,video_09,0,100,10000
+1,The Castle Aaargh!,video_09,100,200,10000
+2,Always look on the bright side of life.,video_09,200,300,10000
+3,Your mother was a hamster!,video_09,300,400,10000
+4,It is a silly place.,video_09,400,500,10000
+5,I'm not dead yet!,video_09,500,600,10000
+6,The Castle Aaargh!,video_09,600,700,10000
+7,We want a shrubbery!,video_09,700,800,10000
+8,Nobody expects the Spanish Inquisition!,video_09,800,900,10000
+9,What is the airspeed velocity of an unladen swallow?,video_09,900,1000,10000
+10,I'm not dead yet!,video_09,1000,1100,10000
+11,Always look on the bright side of life.,video_09,1100,1200,10000
+12,Strange women lying in ponds distributing swords is no basis for a system of government!,video_09,1200,1300,10000
+13,I'm not dead yet!,video_09,1300,1400,10000
+14,You must cut down the mightiest tree in the forest with... a herring!,video_09,1400,1500,10000
+15,Strange women lying in ponds distributing swords is no basis for a system of government!,video_09,1500,1600,10000
+16,Your mother was a hamster!,video_09,1600,1700,10000
+17,You must cut down the mightiest tree in the forest with... a herring!,video_09,1700,1800,10000
+18,This parrot is no more!,video_09,1800,1900,10000
+19,The Castle Aaargh!,video_09,1900,2000,10000
+20,It's just a flesh wound.,video_09,2000,2100,10000
+21,We want a shrubbery!,video_09,2100,2200,10000
+22,Nobody expects the Spanish Inquisition!,video_09,2200,2300,10000
+23,The Castle Aaargh!,video_09,2300,2400,10000
+24,We want a shrubbery!,video_09,2400,2500,10000
+25,It is a silly place.,video_09,2500,2600,10000
+26,We want a shrubbery!,video_09,2600,2700,10000
+27,Bring out your dead!,video_09,2700,2800,10000
+28,The Castle Aaargh!,video_09,2800,2900,10000
+29,Strange women lying in ponds distributing swords is no basis for a system of government!,video_09,2900,3000,10000
+30,I'm not dead yet!,video_09,3000,3100,10000
+31,Your mother was a hamster!,video_09,3100,3200,10000
+32,Bring out your dead!,video_09,3200,3300,10000
+33,I fart in your general direction!,video_09,3300,3400,10000
+34,Now go away or I shall taunt you a second time!,video_09,3400,3500,10000
+35,Nobody expects the Spanish Inquisition!,video_09,3500,3600,10000
+36,It is a silly place.,video_09,3600,3700,10000
+37,Your mother was a hamster!,video_09,3700,3800,10000
+38,You must cut down the mightiest tree in the forest with... a herring!,video_09,3800,3900,10000
+39,I'm not dead yet!,video_09,3900,4000,10000
+40,I fart in your general direction!,video_09,4000,4100,10000
+41,We want a shrubbery!,video_09,4100,4200,10000
+42,We want a shrubbery!,video_09,4200,4300,10000
+43,We want a shrubbery!,video_09,4300,4400,10000
+44,Nobody expects the Spanish Inquisition!,video_09,4400,4500,10000
+45,Strange women lying in ponds distributing swords is no basis for a system of government!,video_09,4500,4600,10000
+46,You must cut down the mightiest tree in the forest with... a herring!,video_09,4600,4700,10000
+47,Always look on the bright side of life.,video_09,4700,4800,10000
+48,I fart in your general direction!,video_09,4800,4900,10000
+49,I'm not dead yet!,video_09,4900,5000,10000
+50,Your mother was a hamster!,video_09,5000,5100,10000
+51,We are the knights who say... Ni!,video_09,5100,5200,10000
+52,Bring out your dead!,video_09,5200,5300,10000
+53,Bring out your dead!,video_09,5300,5400,10000
+54,Bring out your dead!,video_09,5400,5500,10000
+55,Always look on the bright side of life.,video_09,5500,5600,10000
+56,I'm not dead yet!,video_09,5600,5700,10000
+57,Bring out your dead!,video_09,5700,5800,10000
+58,Bring out your dead!,video_09,5800,5900,10000
+59,I fart in your general direction!,video_09,5900,6000,10000
+60,This parrot is no more!,video_09,6000,6100,10000
+61,Always look on the bright side of life.,video_09,6100,6200,10000
+62,Bring out your dead!,video_09,6200,6300,10000
+63,The Castle Aaargh!,video_09,6300,6400,10000
+64,It's just a flesh wound.,video_09,6400,6500,10000
+65,I'm not dead yet!,video_09,6500,6600,10000
+66,What is the airspeed velocity of an unladen swallow?,video_09,6600,6700,10000
+67,We want a shrubbery!,video_09,6700,6800,10000
+68,The Castle Aaargh!,video_09,6800,6900,10000
+69,You must cut down the mightiest tree in the forest with... a herring!,video_09,6900,7000,10000
+70,This parrot is no more!,video_09,7000,7100,10000
+71,Your mother was a hamster!,video_09,7100,7200,10000
+72,Always look on the bright side of life.,video_09,7200,7300,10000
+73,This parrot is no more!,video_09,7300,7400,10000
+74,It's just a flesh wound.,video_09,7400,7500,10000
+75,This parrot is no more!,video_09,7500,7600,10000
+76,Now go away or I shall taunt you a second time!,video_09,7600,7700,10000
+77,It is a silly place.,video_09,7700,7800,10000
+78,I'm not dead yet!,video_09,7800,7900,10000
+79,It is a silly place.,video_09,7900,8000,10000
+80,Nobody expects the Spanish Inquisition!,video_09,8000,8100,10000
+81,Bring out your dead!,video_09,8100,8200,10000
+82,It is a silly place.,video_09,8200,8300,10000
+83,Your mother was a hamster!,video_09,8300,8400,10000
+84,Bring out your dead!,video_09,8400,8500,10000
+85,I fart in your general direction!,video_09,8500,8600,10000
+86,This parrot is no more!,video_09,8600,8700,10000
+87,This parrot is no more!,video_09,8700,8800,10000
+88,I'm not dead yet!,video_09,8800,8900,10000
+89,We want a shrubbery!,video_09,8900,9000,10000
+90,Nobody expects the Spanish Inquisition!,video_09,9000,9100,10000
+91,We are the knights who say... Ni!,video_09,9100,9200,10000
+92,I'm not dead yet!,video_09,9200,9300,10000
+93,Bring out your dead!,video_09,9300,9400,10000
+94,Your mother was a hamster!,video_09,9400,9500,10000
+95,I'm not dead yet!,video_09,9500,9600,10000
+96,What is the airspeed velocity of an unladen swallow?,video_09,9600,9700,10000
+97,What is the airspeed velocity of an unladen swallow?,video_09,9700,9800,10000
+98,We are the knights who say... Ni!,video_09,9800,9900,10000
+99,You must cut down the mightiest tree in the forest with... a herring!,video_09,9900,10000,10000
+0,It is a silly place.,video_10,0,100,10000
+1,The Castle Aaargh!,video_10,100,200,10000
+2,Always look on the bright side of life.,video_10,200,300,10000
+3,Your mother was a hamster!,video_10,300,400,10000
+4,It is a silly place.,video_10,400,500,10000
+5,I'm not dead yet!,video_10,500,600,10000
+6,The Castle Aaargh!,video_10,600,700,10000
+7,We want a shrubbery!,video_10,700,800,10000
+8,Nobody expects the Spanish Inquisition!,video_10,800,900,10000
+9,What is the airspeed velocity of an unladen swallow?,video_10,900,1000,10000
+10,I'm not dead yet!,video_10,1000,1100,10000
+11,Always look on the bright side of life.,video_10,1100,1200,10000
+12,Strange women lying in ponds distributing swords is no basis for a system of government!,video_10,1200,1300,10000
+13,I'm not dead yet!,video_10,1300,1400,10000
+14,You must cut down the mightiest tree in the forest with... a herring!,video_10,1400,1500,10000
+15,Strange women lying in ponds distributing swords is no basis for a system of government!,video_10,1500,1600,10000
+16,Your mother was a hamster!,video_10,1600,1700,10000
+17,You must cut down the mightiest tree in the forest with... a herring!,video_10,1700,1800,10000
+18,This parrot is no more!,video_10,1800,1900,10000
+19,The Castle Aaargh!,video_10,1900,2000,10000
+20,It's just a flesh wound.,video_10,2000,2100,10000
+21,We want a shrubbery!,video_10,2100,2200,10000
+22,Nobody expects the Spanish Inquisition!,video_10,2200,2300,10000
+23,The Castle Aaargh!,video_10,2300,2400,10000
+24,We want a shrubbery!,video_10,2400,2500,10000
+25,It is a silly place.,video_10,2500,2600,10000
+26,We want a shrubbery!,video_10,2600,2700,10000
+27,Bring out your dead!,video_10,2700,2800,10000
+28,The Castle Aaargh!,video_10,2800,2900,10000
+29,Strange women lying in ponds distributing swords is no basis for a system of government!,video_10,2900,3000,10000
+30,I'm not dead yet!,video_10,3000,3100,10000
+31,Your mother was a hamster!,video_10,3100,3200,10000
+32,Bring out your dead!,video_10,3200,3300,10000
+33,I fart in your general direction!,video_10,3300,3400,10000
+34,Now go away or I shall taunt you a second time!,video_10,3400,3500,10000
+35,Nobody expects the Spanish Inquisition!,video_10,3500,3600,10000
+36,It is a silly place.,video_10,3600,3700,10000
+37,Your mother was a hamster!,video_10,3700,3800,10000
+38,You must cut down the mightiest tree in the forest with... a herring!,video_10,3800,3900,10000
+39,I'm not dead yet!,video_10,3900,4000,10000
+40,I fart in your general direction!,video_10,4000,4100,10000
+41,We want a shrubbery!,video_10,4100,4200,10000
+42,We want a shrubbery!,video_10,4200,4300,10000
+43,We want a shrubbery!,video_10,4300,4400,10000
+44,Nobody expects the Spanish Inquisition!,video_10,4400,4500,10000
+45,Strange women lying in ponds distributing swords is no basis for a system of government!,video_10,4500,4600,10000
+46,You must cut down the mightiest tree in the forest with... a herring!,video_10,4600,4700,10000
+47,Always look on the bright side of life.,video_10,4700,4800,10000
+48,I fart in your general direction!,video_10,4800,4900,10000
+49,I'm not dead yet!,video_10,4900,5000,10000
+50,Your mother was a hamster!,video_10,5000,5100,10000
+51,We are the knights who say... Ni!,video_10,5100,5200,10000
+52,Bring out your dead!,video_10,5200,5300,10000
+53,Bring out your dead!,video_10,5300,5400,10000
+54,Bring out your dead!,video_10,5400,5500,10000
+55,Always look on the bright side of life.,video_10,5500,5600,10000
+56,I'm not dead yet!,video_10,5600,5700,10000
+57,Bring out your dead!,video_10,5700,5800,10000
+58,Bring out your dead!,video_10,5800,5900,10000
+59,I fart in your general direction!,video_10,5900,6000,10000
+60,This parrot is no more!,video_10,6000,6100,10000
+61,Always look on the bright side of life.,video_10,6100,6200,10000
+62,Bring out your dead!,video_10,6200,6300,10000
+63,The Castle Aaargh!,video_10,6300,6400,10000
+64,It's just a flesh wound.,video_10,6400,6500,10000
+65,I'm not dead yet!,video_10,6500,6600,10000
+66,What is the airspeed velocity of an unladen swallow?,video_10,6600,6700,10000
+67,We want a shrubbery!,video_10,6700,6800,10000
+68,The Castle Aaargh!,video_10,6800,6900,10000
+69,You must cut down the mightiest tree in the forest with... a herring!,video_10,6900,7000,10000
+70,This parrot is no more!,video_10,7000,7100,10000
+71,Your mother was a hamster!,video_10,7100,7200,10000
+72,Always look on the bright side of life.,video_10,7200,7300,10000
+73,This parrot is no more!,video_10,7300,7400,10000
+74,It's just a flesh wound.,video_10,7400,7500,10000
+75,This parrot is no more!,video_10,7500,7600,10000
+76,Now go away or I shall taunt you a second time!,video_10,7600,7700,10000
+77,It is a silly place.,video_10,7700,7800,10000
+78,I'm not dead yet!,video_10,7800,7900,10000
+79,It is a silly place.,video_10,7900,8000,10000
+80,Nobody expects the Spanish Inquisition!,video_10,8000,8100,10000
+81,Bring out your dead!,video_10,8100,8200,10000
+82,It is a silly place.,video_10,8200,8300,10000
+83,Your mother was a hamster!,video_10,8300,8400,10000
+84,Bring out your dead!,video_10,8400,8500,10000
+85,I fart in your general direction!,video_10,8500,8600,10000
+86,This parrot is no more!,video_10,8600,8700,10000
+87,This parrot is no more!,video_10,8700,8800,10000
+88,I'm not dead yet!,video_10,8800,8900,10000
+89,We want a shrubbery!,video_10,8900,9000,10000
+90,Nobody expects the Spanish Inquisition!,video_10,9000,9100,10000
+91,We are the knights who say... Ni!,video_10,9100,9200,10000
+92,I'm not dead yet!,video_10,9200,9300,10000
+93,Bring out your dead!,video_10,9300,9400,10000
+94,Your mother was a hamster!,video_10,9400,9500,10000
+95,I'm not dead yet!,video_10,9500,9600,10000
+96,What is the airspeed velocity of an unladen swallow?,video_10,9600,9700,10000
+97,What is the airspeed velocity of an unladen swallow?,video_10,9700,9800,10000
+98,We are the knights who say... Ni!,video_10,9800,9900,10000
+99,You must cut down the mightiest tree in the forest with... a herring!,video_10,9900,10000,10000
+0,It is a silly place.,video_11,0,100,10000
+1,The Castle Aaargh!,video_11,100,200,10000
+2,Always look on the bright side of life.,video_11,200,300,10000
+3,Your mother was a hamster!,video_11,300,400,10000
+4,It is a silly place.,video_11,400,500,10000
+5,I'm not dead yet!,video_11,500,600,10000
+6,The Castle Aaargh!,video_11,600,700,10000
+7,We want a shrubbery!,video_11,700,800,10000
+8,Nobody expects the Spanish Inquisition!,video_11,800,900,10000
+9,What is the airspeed velocity of an unladen swallow?,video_11,900,1000,10000
+10,I'm not dead yet!,video_11,1000,1100,10000
+11,Always look on the bright side of life.,video_11,1100,1200,10000
+12,Strange women lying in ponds distributing swords is no basis for a system of government!,video_11,1200,1300,10000
+13,I'm not dead yet!,video_11,1300,1400,10000
+14,You must cut down the mightiest tree in the forest with... a herring!,video_11,1400,1500,10000
+15,Strange women lying in ponds distributing swords is no basis for a system of government!,video_11,1500,1600,10000
+16,Your mother was a hamster!,video_11,1600,1700,10000
+17,You must cut down the mightiest tree in the forest with... a herring!,video_11,1700,1800,10000
+18,This parrot is no more!,video_11,1800,1900,10000
+19,The Castle Aaargh!,video_11,1900,2000,10000
+20,It's just a flesh wound.,video_11,2000,2100,10000
+21,We want a shrubbery!,video_11,2100,2200,10000
+22,Nobody expects the Spanish Inquisition!,video_11,2200,2300,10000
+23,The Castle Aaargh!,video_11,2300,2400,10000
+24,We want a shrubbery!,video_11,2400,2500,10000
+25,It is a silly place.,video_11,2500,2600,10000
+26,We want a shrubbery!,video_11,2600,2700,10000
+27,Bring out your dead!,video_11,2700,2800,10000
+28,The Castle Aaargh!,video_11,2800,2900,10000
+29,Strange women lying in ponds distributing swords is no basis for a system of government!,video_11,2900,3000,10000
+30,I'm not dead yet!,video_11,3000,3100,10000
+31,Your mother was a hamster!,video_11,3100,3200,10000
+32,Bring out your dead!,video_11,3200,3300,10000
+33,I fart in your general direction!,video_11,3300,3400,10000
+34,Now go away or I shall taunt you a second time!,video_11,3400,3500,10000
+35,Nobody expects the Spanish Inquisition!,video_11,3500,3600,10000
+36,It is a silly place.,video_11,3600,3700,10000
+37,Your mother was a hamster!,video_11,3700,3800,10000
+38,You must cut down the mightiest tree in the forest with... a herring!,video_11,3800,3900,10000
+39,I'm not dead yet!,video_11,3900,4000,10000
+40,I fart in your general direction!,video_11,4000,4100,10000
+41,We want a shrubbery!,video_11,4100,4200,10000
+42,We want a shrubbery!,video_11,4200,4300,10000
+43,We want a shrubbery!,video_11,4300,4400,10000
+44,Nobody expects the Spanish Inquisition!,video_11,4400,4500,10000
+45,Strange women lying in ponds distributing swords is no basis for a system of government!,video_11,4500,4600,10000
+46,You must cut down the mightiest tree in the forest with... a herring!,video_11,4600,4700,10000
+47,Always look on the bright side of life.,video_11,4700,4800,10000
+48,I fart in your general direction!,video_11,4800,4900,10000
+49,I'm not dead yet!,video_11,4900,5000,10000
+50,Your mother was a hamster!,video_11,5000,5100,10000
+51,We are the knights who say... Ni!,video_11,5100,5200,10000
+52,Bring out your dead!,video_11,5200,5300,10000
+53,Bring out your dead!,video_11,5300,5400,10000
+54,Bring out your dead!,video_11,5400,5500,10000
+55,Always look on the bright side of life.,video_11,5500,5600,10000
+56,I'm not dead yet!,video_11,5600,5700,10000
+57,Bring out your dead!,video_11,5700,5800,10000
+58,Bring out your dead!,video_11,5800,5900,10000
+59,I fart in your general direction!,video_11,5900,6000,10000
+60,This parrot is no more!,video_11,6000,6100,10000
+61,Always look on the bright side of life.,video_11,6100,6200,10000
+62,Bring out your dead!,video_11,6200,6300,10000
+63,The Castle Aaargh!,video_11,6300,6400,10000
+64,It's just a flesh wound.,video_11,6400,6500,10000
+65,I'm not dead yet!,video_11,6500,6600,10000
+66,What is the airspeed velocity of an unladen swallow?,video_11,6600,6700,10000
+67,We want a shrubbery!,video_11,6700,6800,10000
+68,The Castle Aaargh!,video_11,6800,6900,10000
+69,You must cut down the mightiest tree in the forest with... a herring!,video_11,6900,7000,10000
+70,This parrot is no more!,video_11,7000,7100,10000
+71,Your mother was a hamster!,video_11,7100,7200,10000
+72,Always look on the bright side of life.,video_11,7200,7300,10000
+73,This parrot is no more!,video_11,7300,7400,10000
+74,It's just a flesh wound.,video_11,7400,7500,10000
+75,This parrot is no more!,video_11,7500,7600,10000
+76,Now go away or I shall taunt you a second time!,video_11,7600,7700,10000
+77,It is a silly place.,video_11,7700,7800,10000
+78,I'm not dead yet!,video_11,7800,7900,10000
+79,It is a silly place.,video_11,7900,8000,10000
+80,Nobody expects the Spanish Inquisition!,video_11,8000,8100,10000
+81,Bring out your dead!,video_11,8100,8200,10000
+82,It is a silly place.,video_11,8200,8300,10000
+83,Your mother was a hamster!,video_11,8300,8400,10000
+84,Bring out your dead!,video_11,8400,8500,10000
+85,I fart in your general direction!,video_11,8500,8600,10000
+86,This parrot is no more!,video_11,8600,8700,10000
+87,This parrot is no more!,video_11,8700,8800,10000
+88,I'm not dead yet!,video_11,8800,8900,10000
+89,We want a shrubbery!,video_11,8900,9000,10000
+90,Nobody expects the Spanish Inquisition!,video_11,9000,9100,10000
+91,We are the knights who say... Ni!,video_11,9100,9200,10000
+92,I'm not dead yet!,video_11,9200,9300,10000
+93,Bring out your dead!,video_11,9300,9400,10000
+94,Your mother was a hamster!,video_11,9400,9500,10000
+95,I'm not dead yet!,video_11,9500,9600,10000
+96,What is the airspeed velocity of an unladen swallow?,video_11,9600,9700,10000
+97,What is the airspeed velocity of an unladen swallow?,video_11,9700,9800,10000
+98,We are the knights who say... Ni!,video_11,9800,9900,10000
+99,You must cut down the mightiest tree in the forest with... a herring!,video_11,9900,10000,10000
+0,It is a silly place.,video_12,0,100,10000
+1,The Castle Aaargh!,video_12,100,200,10000
+2,Always look on the bright side of life.,video_12,200,300,10000
+3,Your mother was a hamster!,video_12,300,400,10000
+4,It is a silly place.,video_12,400,500,10000
+5,I'm not dead yet!,video_12,500,600,10000
+6,The Castle Aaargh!,video_12,600,700,10000
+7,We want a shrubbery!,video_12,700,800,10000
+8,Nobody expects the Spanish Inquisition!,video_12,800,900,10000
+9,What is the airspeed velocity of an unladen swallow?,video_12,900,1000,10000
+10,I'm not dead yet!,video_12,1000,1100,10000
+11,Always look on the bright side of life.,video_12,1100,1200,10000
+12,Strange women lying in ponds distributing swords is no basis for a system of government!,video_12,1200,1300,10000
+13,I'm not dead yet!,video_12,1300,1400,10000
+14,You must cut down the mightiest tree in the forest with... a herring!,video_12,1400,1500,10000
+15,Strange women lying in ponds distributing swords is no basis for a system of government!,video_12,1500,1600,10000
+16,Your mother was a hamster!,video_12,1600,1700,10000
+17,You must cut down the mightiest tree in the forest with... a herring!,video_12,1700,1800,10000
+18,This parrot is no more!,video_12,1800,1900,10000
+19,The Castle Aaargh!,video_12,1900,2000,10000
+20,It's just a flesh wound.,video_12,2000,2100,10000
+21,We want a shrubbery!,video_12,2100,2200,10000
+22,Nobody expects the Spanish Inquisition!,video_12,2200,2300,10000
+23,The Castle Aaargh!,video_12,2300,2400,10000
+24,We want a shrubbery!,video_12,2400,2500,10000
+25,It is a silly place.,video_12,2500,2600,10000
+26,We want a shrubbery!,video_12,2600,2700,10000
+27,Bring out your dead!,video_12,2700,2800,10000
+28,The Castle Aaargh!,video_12,2800,2900,10000
+29,Strange women lying in ponds distributing swords is no basis for a system of government!,video_12,2900,3000,10000
+30,I'm not dead yet!,video_12,3000,3100,10000
+31,Your mother was a hamster!,video_12,3100,3200,10000
+32,Bring out your dead!,video_12,3200,3300,10000
+33,I fart in your general direction!,video_12,3300,3400,10000
+34,Now go away or I shall taunt you a second time!,video_12,3400,3500,10000
+35,Nobody expects the Spanish Inquisition!,video_12,3500,3600,10000
+36,It is a silly place.,video_12,3600,3700,10000
+37,Your mother was a hamster!,video_12,3700,3800,10000
+38,You must cut down the mightiest tree in the forest with... a herring!,video_12,3800,3900,10000
+39,I'm not dead yet!,video_12,3900,4000,10000
+40,I fart in your general direction!,video_12,4000,4100,10000
+41,We want a shrubbery!,video_12,4100,4200,10000
+42,We want a shrubbery!,video_12,4200,4300,10000
+43,We want a shrubbery!,video_12,4300,4400,10000
+44,Nobody expects the Spanish Inquisition!,video_12,4400,4500,10000
+45,Strange women lying in ponds distributing swords is no basis for a system of government!,video_12,4500,4600,10000
+46,You must cut down the mightiest tree in the forest with... a herring!,video_12,4600,4700,10000
+47,Always look on the bright side of life.,video_12,4700,4800,10000
+48,I fart in your general direction!,video_12,4800,4900,10000
+49,I'm not dead yet!,video_12,4900,5000,10000
+50,Your mother was a hamster!,video_12,5000,5100,10000
+51,We are the knights who say... Ni!,video_12,5100,5200,10000
+52,Bring out your dead!,video_12,5200,5300,10000
+53,Bring out your dead!,video_12,5300,5400,10000
+54,Bring out your dead!,video_12,5400,5500,10000
+55,Always look on the bright side of life.,video_12,5500,5600,10000
+56,I'm not dead yet!,video_12,5600,5700,10000
+57,Bring out your dead!,video_12,5700,5800,10000
+58,Bring out your dead!,video_12,5800,5900,10000
+59,I fart in your general direction!,video_12,5900,6000,10000
+60,This parrot is no more!,video_12,6000,6100,10000
+61,Always look on the bright side of life.,video_12,6100,6200,10000
+62,Bring out your dead!,video_12,6200,6300,10000
+63,The Castle Aaargh!,video_12,6300,6400,10000
+64,It's just a flesh wound.,video_12,6400,6500,10000
+65,I'm not dead yet!,video_12,6500,6600,10000
+66,What is the airspeed velocity of an unladen swallow?,video_12,6600,6700,10000
+67,We want a shrubbery!,video_12,6700,6800,10000
+68,The Castle Aaargh!,video_12,6800,6900,10000
+69,You must cut down the mightiest tree in the forest with... a herring!,video_12,6900,7000,10000
+70,This parrot is no more!,video_12,7000,7100,10000
+71,Your mother was a hamster!,video_12,7100,7200,10000
+72,Always look on the bright side of life.,video_12,7200,7300,10000
+73,This parrot is no more!,video_12,7300,7400,10000
+74,It's just a flesh wound.,video_12,7400,7500,10000
+75,This parrot is no more!,video_12,7500,7600,10000
+76,Now go away or I shall taunt you a second time!,video_12,7600,7700,10000
+77,It is a silly place.,video_12,7700,7800,10000
+78,I'm not dead yet!,video_12,7800,7900,10000
+79,It is a silly place.,video_12,7900,8000,10000
+80,Nobody expects the Spanish Inquisition!,video_12,8000,8100,10000
+81,Bring out your dead!,video_12,8100,8200,10000
+82,It is a silly place.,video_12,8200,8300,10000
+83,Your mother was a hamster!,video_12,8300,8400,10000
+84,Bring out your dead!,video_12,8400,8500,10000
+85,I fart in your general direction!,video_12,8500,8600,10000
+86,This parrot is no more!,video_12,8600,8700,10000
+87,This parrot is no more!,video_12,8700,8800,10000
+88,I'm not dead yet!,video_12,8800,8900,10000
+89,We want a shrubbery!,video_12,8900,9000,10000
+90,Nobody expects the Spanish Inquisition!,video_12,9000,9100,10000
+91,We are the knights who say... Ni!,video_12,9100,9200,10000
+92,I'm not dead yet!,video_12,9200,9300,10000
+93,Bring out your dead!,video_12,9300,9400,10000
+94,Your mother was a hamster!,video_12,9400,9500,10000
+95,I'm not dead yet!,video_12,9500,9600,10000
+96,What is the airspeed velocity of an unladen swallow?,video_12,9600,9700,10000
+97,What is the airspeed velocity of an unladen swallow?,video_12,9700,9800,10000
+98,We are the knights who say... Ni!,video_12,9800,9900,10000
+99,You must cut down the mightiest tree in the forest with... a herring!,video_12,9900,10000,10000
+0,It is a silly place.,video_13,0,100,10000
+1,The Castle Aaargh!,video_13,100,200,10000
+2,Always look on the bright side of life.,video_13,200,300,10000
+3,Your mother was a hamster!,video_13,300,400,10000
+4,It is a silly place.,video_13,400,500,10000
+5,I'm not dead yet!,video_13,500,600,10000
+6,The Castle Aaargh!,video_13,600,700,10000
+7,We want a shrubbery!,video_13,700,800,10000
+8,Nobody expects the Spanish Inquisition!,video_13,800,900,10000
+9,What is the airspeed velocity of an unladen swallow?,video_13,900,1000,10000
+10,I'm not dead yet!,video_13,1000,1100,10000
+11,Always look on the bright side of life.,video_13,1100,1200,10000
+12,Strange women lying in ponds distributing swords is no basis for a system of government!,video_13,1200,1300,10000
+13,I'm not dead yet!,video_13,1300,1400,10000
+14,You must cut down the mightiest tree in the forest with... a herring!,video_13,1400,1500,10000
+15,Strange women lying in ponds distributing swords is no basis for a system of government!,video_13,1500,1600,10000
+16,Your mother was a hamster!,video_13,1600,1700,10000
+17,You must cut down the mightiest tree in the forest with... a herring!,video_13,1700,1800,10000
+18,This parrot is no more!,video_13,1800,1900,10000
+19,The Castle Aaargh!,video_13,1900,2000,10000
+20,It's just a flesh wound.,video_13,2000,2100,10000
+21,We want a shrubbery!,video_13,2100,2200,10000
+22,Nobody expects the Spanish Inquisition!,video_13,2200,2300,10000
+23,The Castle Aaargh!,video_13,2300,2400,10000
+24,We want a shrubbery!,video_13,2400,2500,10000
+25,It is a silly place.,video_13,2500,2600,10000
+26,We want a shrubbery!,video_13,2600,2700,10000
+27,Bring out your dead!,video_13,2700,2800,10000
+28,The Castle Aaargh!,video_13,2800,2900,10000
+29,Strange women lying in ponds distributing swords is no basis for a system of government!,video_13,2900,3000,10000
+30,I'm not dead yet!,video_13,3000,3100,10000
+31,Your mother was a hamster!,video_13,3100,3200,10000
+32,Bring out your dead!,video_13,3200,3300,10000
+33,I fart in your general direction!,video_13,3300,3400,10000
+34,Now go away or I shall taunt you a second time!,video_13,3400,3500,10000
+35,Nobody expects the Spanish Inquisition!,video_13,3500,3600,10000
+36,It is a silly place.,video_13,3600,3700,10000
+37,Your mother was a hamster!,video_13,3700,3800,10000
+38,You must cut down the mightiest tree in the forest with... a herring!,video_13,3800,3900,10000
+39,I'm not dead yet!,video_13,3900,4000,10000
+40,I fart in your general direction!,video_13,4000,4100,10000
+41,We want a shrubbery!,video_13,4100,4200,10000
+42,We want a shrubbery!,video_13,4200,4300,10000
+43,We want a shrubbery!,video_13,4300,4400,10000
+44,Nobody expects the Spanish Inquisition!,video_13,4400,4500,10000
+45,Strange women lying in ponds distributing swords is no basis for a system of government!,video_13,4500,4600,10000
+46,You must cut down the mightiest tree in the forest with... a herring!,video_13,4600,4700,10000
+47,Always look on the bright side of life.,video_13,4700,4800,10000
+48,I fart in your general direction!,video_13,4800,4900,10000
+49,I'm not dead yet!,video_13,4900,5000,10000
+50,Your mother was a hamster!,video_13,5000,5100,10000
+51,We are the knights who say... Ni!,video_13,5100,5200,10000
+52,Bring out your dead!,video_13,5200,5300,10000
+53,Bring out your dead!,video_13,5300,5400,10000
+54,Bring out your dead!,video_13,5400,5500,10000
+55,Always look on the bright side of life.,video_13,5500,5600,10000
+56,I'm not dead yet!,video_13,5600,5700,10000
+57,Bring out your dead!,video_13,5700,5800,10000
+58,Bring out your dead!,video_13,5800,5900,10000
+59,I fart in your general direction!,video_13,5900,6000,10000
+60,This parrot is no more!,video_13,6000,6100,10000
+61,Always look on the bright side of life.,video_13,6100,6200,10000
+62,Bring out your dead!,video_13,6200,6300,10000
+63,The Castle Aaargh!,video_13,6300,6400,10000
+64,It's just a flesh wound.,video_13,6400,6500,10000
+65,I'm not dead yet!,video_13,6500,6600,10000
+66,What is the airspeed velocity of an unladen swallow?,video_13,6600,6700,10000
+67,We want a shrubbery!,video_13,6700,6800,10000
+68,The Castle Aaargh!,video_13,6800,6900,10000
+69,You must cut down the mightiest tree in the forest with... a herring!,video_13,6900,7000,10000
+70,This parrot is no more!,video_13,7000,7100,10000
+71,Your mother was a hamster!,video_13,7100,7200,10000
+72,Always look on the bright side of life.,video_13,7200,7300,10000
+73,This parrot is no more!,video_13,7300,7400,10000
+74,It's just a flesh wound.,video_13,7400,7500,10000
+75,This parrot is no more!,video_13,7500,7600,10000
+76,Now go away or I shall taunt you a second time!,video_13,7600,7700,10000
+77,It is a silly place.,video_13,7700,7800,10000
+78,I'm not dead yet!,video_13,7800,7900,10000
+79,It is a silly place.,video_13,7900,8000,10000
+80,Nobody expects the Spanish Inquisition!,video_13,8000,8100,10000
+81,Bring out your dead!,video_13,8100,8200,10000
+82,It is a silly place.,video_13,8200,8300,10000
+83,Your mother was a hamster!,video_13,8300,8400,10000
+84,Bring out your dead!,video_13,8400,8500,10000
+85,I fart in your general direction!,video_13,8500,8600,10000
+86,This parrot is no more!,video_13,8600,8700,10000
+87,This parrot is no more!,video_13,8700,8800,10000
+88,I'm not dead yet!,video_13,8800,8900,10000
+89,We want a shrubbery!,video_13,8900,9000,10000
+90,Nobody expects the Spanish Inquisition!,video_13,9000,9100,10000
+91,We are the knights who say... Ni!,video_13,9100,9200,10000
+92,I'm not dead yet!,video_13,9200,9300,10000
+93,Bring out your dead!,video_13,9300,9400,10000
+94,Your mother was a hamster!,video_13,9400,9500,10000
+95,I'm not dead yet!,video_13,9500,9600,10000
+96,What is the airspeed velocity of an unladen swallow?,video_13,9600,9700,10000
+97,What is the airspeed velocity of an unladen swallow?,video_13,9700,9800,10000
+98,We are the knights who say... Ni!,video_13,9800,9900,10000
+99,You must cut down the mightiest tree in the forest with... a herring!,video_13,9900,10000,10000
+0,It is a silly place.,video_14,0,100,10000
+1,The Castle Aaargh!,video_14,100,200,10000
+2,Always look on the bright side of life.,video_14,200,300,10000
+3,Your mother was a hamster!,video_14,300,400,10000
+4,It is a silly place.,video_14,400,500,10000
+5,I'm not dead yet!,video_14,500,600,10000
+6,The Castle Aaargh!,video_14,600,700,10000
+7,We want a shrubbery!,video_14,700,800,10000
+8,Nobody expects the Spanish Inquisition!,video_14,800,900,10000
+9,What is the airspeed velocity of an unladen swallow?,video_14,900,1000,10000
+10,I'm not dead yet!,video_14,1000,1100,10000
+11,Always look on the bright side of life.,video_14,1100,1200,10000
+12,Strange women lying in ponds distributing swords is no basis for a system of government!,video_14,1200,1300,10000
+13,I'm not dead yet!,video_14,1300,1400,10000
+14,You must cut down the mightiest tree in the forest with... a herring!,video_14,1400,1500,10000
+15,Strange women lying in ponds distributing swords is no basis for a system of government!,video_14,1500,1600,10000
+16,Your mother was a hamster!,video_14,1600,1700,10000
+17,You must cut down the mightiest tree in the forest with... a herring!,video_14,1700,1800,10000
+18,This parrot is no more!,video_14,1800,1900,10000
+19,The Castle Aaargh!,video_14,1900,2000,10000
+20,It's just a flesh wound.,video_14,2000,2100,10000
+21,We want a shrubbery!,video_14,2100,2200,10000
+22,Nobody expects the Spanish Inquisition!,video_14,2200,2300,10000
+23,The Castle Aaargh!,video_14,2300,2400,10000
+24,We want a shrubbery!,video_14,2400,2500,10000
+25,It is a silly place.,video_14,2500,2600,10000
+26,We want a shrubbery!,video_14,2600,2700,10000
+27,Bring out your dead!,video_14,2700,2800,10000
+28,The Castle Aaargh!,video_14,2800,2900,10000
+29,Strange women lying in ponds distributing swords is no basis for a system of government!,video_14,2900,3000,10000
+30,I'm not dead yet!,video_14,3000,3100,10000
+31,Your mother was a hamster!,video_14,3100,3200,10000
+32,Bring out your dead!,video_14,3200,3300,10000
+33,I fart in your general direction!,video_14,3300,3400,10000
+34,Now go away or I shall taunt you a second time!,video_14,3400,3500,10000
+35,Nobody expects the Spanish Inquisition!,video_14,3500,3600,10000
+36,It is a silly place.,video_14,3600,3700,10000
+37,Your mother was a hamster!,video_14,3700,3800,10000
+38,You must cut down the mightiest tree in the forest with... a herring!,video_14,3800,3900,10000
+39,I'm not dead yet!,video_14,3900,4000,10000
+40,I fart in your general direction!,video_14,4000,4100,10000
+41,We want a shrubbery!,video_14,4100,4200,10000
+42,We want a shrubbery!,video_14,4200,4300,10000
+43,We want a shrubbery!,video_14,4300,4400,10000
+44,Nobody expects the Spanish Inquisition!,video_14,4400,4500,10000
+45,Strange women lying in ponds distributing swords is no basis for a system of government!,video_14,4500,4600,10000
+46,You must cut down the mightiest tree in the forest with... a herring!,video_14,4600,4700,10000
+47,Always look on the bright side of life.,video_14,4700,4800,10000
+48,I fart in your general direction!,video_14,4800,4900,10000
+49,I'm not dead yet!,video_14,4900,5000,10000
+50,Your mother was a hamster!,video_14,5000,5100,10000
+51,We are the knights who say... Ni!,video_14,5100,5200,10000
+52,Bring out your dead!,video_14,5200,5300,10000
+53,Bring out your dead!,video_14,5300,5400,10000
+54,Bring out your dead!,video_14,5400,5500,10000
+55,Always look on the bright side of life.,video_14,5500,5600,10000
+56,I'm not dead yet!,video_14,5600,5700,10000
+57,Bring out your dead!,video_14,5700,5800,10000
+58,Bring out your dead!,video_14,5800,5900,10000
+59,I fart in your general direction!,video_14,5900,6000,10000
+60,This parrot is no more!,video_14,6000,6100,10000
+61,Always look on the bright side of life.,video_14,6100,6200,10000
+62,Bring out your dead!,video_14,6200,6300,10000
+63,The Castle Aaargh!,video_14,6300,6400,10000
+64,It's just a flesh wound.,video_14,6400,6500,10000
+65,I'm not dead yet!,video_14,6500,6600,10000
+66,What is the airspeed velocity of an unladen swallow?,video_14,6600,6700,10000
+67,We want a shrubbery!,video_14,6700,6800,10000
+68,The Castle Aaargh!,video_14,6800,6900,10000
+69,You must cut down the mightiest tree in the forest with... a herring!,video_14,6900,7000,10000
+70,This parrot is no more!,video_14,7000,7100,10000
+71,Your mother was a hamster!,video_14,7100,7200,10000
+72,Always look on the bright side of life.,video_14,7200,7300,10000
+73,This parrot is no more!,video_14,7300,7400,10000
+74,It's just a flesh wound.,video_14,7400,7500,10000
+75,This parrot is no more!,video_14,7500,7600,10000
+76,Now go away or I shall taunt you a second time!,video_14,7600,7700,10000
+77,It is a silly place.,video_14,7700,7800,10000
+78,I'm not dead yet!,video_14,7800,7900,10000
+79,It is a silly place.,video_14,7900,8000,10000
+80,Nobody expects the Spanish Inquisition!,video_14,8000,8100,10000
+81,Bring out your dead!,video_14,8100,8200,10000
+82,It is a silly place.,video_14,8200,8300,10000
+83,Your mother was a hamster!,video_14,8300,8400,10000
+84,Bring out your dead!,video_14,8400,8500,10000
+85,I fart in your general direction!,video_14,8500,8600,10000
+86,This parrot is no more!,video_14,8600,8700,10000
+87,This parrot is no more!,video_14,8700,8800,10000
+88,I'm not dead yet!,video_14,8800,8900,10000
+89,We want a shrubbery!,video_14,8900,9000,10000
+90,Nobody expects the Spanish Inquisition!,video_14,9000,9100,10000
+91,We are the knights who say... Ni!,video_14,9100,9200,10000
+92,I'm not dead yet!,video_14,9200,9300,10000
+93,Bring out your dead!,video_14,9300,9400,10000
+94,Your mother was a hamster!,video_14,9400,9500,10000
+95,I'm not dead yet!,video_14,9500,9600,10000
+96,What is the airspeed velocity of an unladen swallow?,video_14,9600,9700,10000
+97,What is the airspeed velocity of an unladen swallow?,video_14,9700,9800,10000
+98,We are the knights who say... Ni!,video_14,9800,9900,10000
+99,You must cut down the mightiest tree in the forest with... a herring!,video_14,9900,10000,10000
+0,It is a silly place.,video_15,0,100,10000
+1,The Castle Aaargh!,video_15,100,200,10000
+2,Always look on the bright side of life.,video_15,200,300,10000
+3,Your mother was a hamster!,video_15,300,400,10000
+4,It is a silly place.,video_15,400,500,10000
+5,I'm not dead yet!,video_15,500,600,10000
+6,The Castle Aaargh!,video_15,600,700,10000
+7,We want a shrubbery!,video_15,700,800,10000
+8,Nobody expects the Spanish Inquisition!,video_15,800,900,10000
+9,What is the airspeed velocity of an unladen swallow?,video_15,900,1000,10000
+10,I'm not dead yet!,video_15,1000,1100,10000
+11,Always look on the bright side of life.,video_15,1100,1200,10000
+12,Strange women lying in ponds distributing swords is no basis for a system of government!,video_15,1200,1300,10000
+13,I'm not dead yet!,video_15,1300,1400,10000
+14,You must cut down the mightiest tree in the forest with... a herring!,video_15,1400,1500,10000
+15,Strange women lying in ponds distributing swords is no basis for a system of government!,video_15,1500,1600,10000
+16,Your mother was a hamster!,video_15,1600,1700,10000
+17,You must cut down the mightiest tree in the forest with... a herring!,video_15,1700,1800,10000
+18,This parrot is no more!,video_15,1800,1900,10000
+19,The Castle Aaargh!,video_15,1900,2000,10000
+20,It's just a flesh wound.,video_15,2000,2100,10000
+21,We want a shrubbery!,video_15,2100,2200,10000
+22,Nobody expects the Spanish Inquisition!,video_15,2200,2300,10000
+23,The Castle Aaargh!,video_15,2300,2400,10000
+24,We want a shrubbery!,video_15,2400,2500,10000
+25,It is a silly place.,video_15,2500,2600,10000
+26,We want a shrubbery!,video_15,2600,2700,10000
+27,Bring out your dead!,video_15,2700,2800,10000
+28,The Castle Aaargh!,video_15,2800,2900,10000
+29,Strange women lying in ponds distributing swords is no basis for a system of government!,video_15,2900,3000,10000
+30,I'm not dead yet!,video_15,3000,3100,10000
+31,Your mother was a hamster!,video_15,3100,3200,10000
+32,Bring out your dead!,video_15,3200,3300,10000
+33,I fart in your general direction!,video_15,3300,3400,10000
+34,Now go away or I shall taunt you a second time!,video_15,3400,3500,10000
+35,Nobody expects the Spanish Inquisition!,video_15,3500,3600,10000
+36,It is a silly place.,video_15,3600,3700,10000
+37,Your mother was a hamster!,video_15,3700,3800,10000
+38,You must cut down the mightiest tree in the forest with... a herring!,video_15,3800,3900,10000
+39,I'm not dead yet!,video_15,3900,4000,10000
+40,I fart in your general direction!,video_15,4000,4100,10000
+41,We want a shrubbery!,video_15,4100,4200,10000
+42,We want a shrubbery!,video_15,4200,4300,10000
+43,We want a shrubbery!,video_15,4300,4400,10000
+44,Nobody expects the Spanish Inquisition!,video_15,4400,4500,10000
+45,Strange women lying in ponds distributing swords is no basis for a system of government!,video_15,4500,4600,10000
+46,You must cut down the mightiest tree in the forest with... a herring!,video_15,4600,4700,10000
+47,Always look on the bright side of life.,video_15,4700,4800,10000
+48,I fart in your general direction!,video_15,4800,4900,10000
+49,I'm not dead yet!,video_15,4900,5000,10000
+50,Your mother was a hamster!,video_15,5000,5100,10000
+51,We are the knights who say... Ni!,video_15,5100,5200,10000
+52,Bring out your dead!,video_15,5200,5300,10000
+53,Bring out your dead!,video_15,5300,5400,10000
+54,Bring out your dead!,video_15,5400,5500,10000
+55,Always look on the bright side of life.,video_15,5500,5600,10000
+56,I'm not dead yet!,video_15,5600,5700,10000
+57,Bring out your dead!,video_15,5700,5800,10000
+58,Bring out your dead!,video_15,5800,5900,10000
+59,I fart in your general direction!,video_15,5900,6000,10000
+60,This parrot is no more!,video_15,6000,6100,10000
+61,Always look on the bright side of life.,video_15,6100,6200,10000
+62,Bring out your dead!,video_15,6200,6300,10000
+63,The Castle Aaargh!,video_15,6300,6400,10000
+64,It's just a flesh wound.,video_15,6400,6500,10000
+65,I'm not dead yet!,video_15,6500,6600,10000
+66,What is the airspeed velocity of an unladen swallow?,video_15,6600,6700,10000
+67,We want a shrubbery!,video_15,6700,6800,10000
+68,The Castle Aaargh!,video_15,6800,6900,10000
+69,You must cut down the mightiest tree in the forest with... a herring!,video_15,6900,7000,10000
+70,This parrot is no more!,video_15,7000,7100,10000
+71,Your mother was a hamster!,video_15,7100,7200,10000
+72,Always look on the bright side of life.,video_15,7200,7300,10000
+73,This parrot is no more!,video_15,7300,7400,10000
+74,It's just a flesh wound.,video_15,7400,7500,10000
+75,This parrot is no more!,video_15,7500,7600,10000
+76,Now go away or I shall taunt you a second time!,video_15,7600,7700,10000
+77,It is a silly place.,video_15,7700,7800,10000
+78,I'm not dead yet!,video_15,7800,7900,10000
+79,It is a silly place.,video_15,7900,8000,10000
+80,Nobody expects the Spanish Inquisition!,video_15,8000,8100,10000
+81,Bring out your dead!,video_15,8100,8200,10000
+82,It is a silly place.,video_15,8200,8300,10000
+83,Your mother was a hamster!,video_15,8300,8400,10000
+84,Bring out your dead!,video_15,8400,8500,10000
+85,I fart in your general direction!,video_15,8500,8600,10000
+86,This parrot is no more!,video_15,8600,8700,10000
+87,This parrot is no more!,video_15,8700,8800,10000
+88,I'm not dead yet!,video_15,8800,8900,10000
+89,We want a shrubbery!,video_15,8900,9000,10000
+90,Nobody expects the Spanish Inquisition!,video_15,9000,9100,10000
+91,We are the knights who say... Ni!,video_15,9100,9200,10000
+92,I'm not dead yet!,video_15,9200,9300,10000
+93,Bring out your dead!,video_15,9300,9400,10000
+94,Your mother was a hamster!,video_15,9400,9500,10000
+95,I'm not dead yet!,video_15,9500,9600,10000
+96,What is the airspeed velocity of an unladen swallow?,video_15,9600,9700,10000
+97,What is the airspeed velocity of an unladen swallow?,video_15,9700,9800,10000
+98,We are the knights who say... Ni!,video_15,9800,9900,10000
+99,You must cut down the mightiest tree in the forest with... a herring!,video_15,9900,10000,10000
+0,It is a silly place.,video_16,0,100,10000
+1,The Castle Aaargh!,video_16,100,200,10000
+2,Always look on the bright side of life.,video_16,200,300,10000
+3,Your mother was a hamster!,video_16,300,400,10000
+4,It is a silly place.,video_16,400,500,10000
+5,I'm not dead yet!,video_16,500,600,10000
+6,The Castle Aaargh!,video_16,600,700,10000
+7,We want a shrubbery!,video_16,700,800,10000
+8,Nobody expects the Spanish Inquisition!,video_16,800,900,10000
+9,What is the airspeed velocity of an unladen swallow?,video_16,900,1000,10000
+10,I'm not dead yet!,video_16,1000,1100,10000
+11,Always look on the bright side of life.,video_16,1100,1200,10000
+12,Strange women lying in ponds distributing swords is no basis for a system of government!,video_16,1200,1300,10000
+13,I'm not dead yet!,video_16,1300,1400,10000
+14,You must cut down the mightiest tree in the forest with... a herring!,video_16,1400,1500,10000
+15,Strange women lying in ponds distributing swords is no basis for a system of government!,video_16,1500,1600,10000
+16,Your mother was a hamster!,video_16,1600,1700,10000
+17,You must cut down the mightiest tree in the forest with... a herring!,video_16,1700,1800,10000
+18,This parrot is no more!,video_16,1800,1900,10000
+19,The Castle Aaargh!,video_16,1900,2000,10000
+20,It's just a flesh wound.,video_16,2000,2100,10000
+21,We want a shrubbery!,video_16,2100,2200,10000
+22,Nobody expects the Spanish Inquisition!,video_16,2200,2300,10000
+23,The Castle Aaargh!,video_16,2300,2400,10000
+24,We want a shrubbery!,video_16,2400,2500,10000
+25,It is a silly place.,video_16,2500,2600,10000
+26,We want a shrubbery!,video_16,2600,2700,10000
+27,Bring out your dead!,video_16,2700,2800,10000
+28,The Castle Aaargh!,video_16,2800,2900,10000
+29,Strange women lying in ponds distributing swords is no basis for a system of government!,video_16,2900,3000,10000
+30,I'm not dead yet!,video_16,3000,3100,10000
+31,Your mother was a hamster!,video_16,3100,3200,10000
+32,Bring out your dead!,video_16,3200,3300,10000
+33,I fart in your general direction!,video_16,3300,3400,10000
+34,Now go away or I shall taunt you a second time!,video_16,3400,3500,10000
+35,Nobody expects the Spanish Inquisition!,video_16,3500,3600,10000
+36,It is a silly place.,video_16,3600,3700,10000
+37,Your mother was a hamster!,video_16,3700,3800,10000
+38,You must cut down the mightiest tree in the forest with... a herring!,video_16,3800,3900,10000
+39,I'm not dead yet!,video_16,3900,4000,10000
+40,I fart in your general direction!,video_16,4000,4100,10000
+41,We want a shrubbery!,video_16,4100,4200,10000
+42,We want a shrubbery!,video_16,4200,4300,10000
+43,We want a shrubbery!,video_16,4300,4400,10000
+44,Nobody expects the Spanish Inquisition!,video_16,4400,4500,10000
+45,Strange women lying in ponds distributing swords is no basis for a system of government!,video_16,4500,4600,10000
+46,You must cut down the mightiest tree in the forest with... a herring!,video_16,4600,4700,10000
+47,Always look on the bright side of life.,video_16,4700,4800,10000
+48,I fart in your general direction!,video_16,4800,4900,10000
+49,I'm not dead yet!,video_16,4900,5000,10000
+50,Your mother was a hamster!,video_16,5000,5100,10000
+51,We are the knights who say... Ni!,video_16,5100,5200,10000
+52,Bring out your dead!,video_16,5200,5300,10000
+53,Bring out your dead!,video_16,5300,5400,10000
+54,Bring out your dead!,video_16,5400,5500,10000
+55,Always look on the bright side of life.,video_16,5500,5600,10000
+56,I'm not dead yet!,video_16,5600,5700,10000
+57,Bring out your dead!,video_16,5700,5800,10000
+58,Bring out your dead!,video_16,5800,5900,10000
+59,I fart in your general direction!,video_16,5900,6000,10000
+60,This parrot is no more!,video_16,6000,6100,10000
+61,Always look on the bright side of life.,video_16,6100,6200,10000
+62,Bring out your dead!,video_16,6200,6300,10000
+63,The Castle Aaargh!,video_16,6300,6400,10000
+64,It's just a flesh wound.,video_16,6400,6500,10000
+65,I'm not dead yet!,video_16,6500,6600,10000
+66,What is the airspeed velocity of an unladen swallow?,video_16,6600,6700,10000
+67,We want a shrubbery!,video_16,6700,6800,10000
+68,The Castle Aaargh!,video_16,6800,6900,10000
+69,You must cut down the mightiest tree in the forest with... a herring!,video_16,6900,7000,10000
+70,This parrot is no more!,video_16,7000,7100,10000
+71,Your mother was a hamster!,video_16,7100,7200,10000
+72,Always look on the bright side of life.,video_16,7200,7300,10000
+73,This parrot is no more!,video_16,7300,7400,10000
+74,It's just a flesh wound.,video_16,7400,7500,10000
+75,This parrot is no more!,video_16,7500,7600,10000
+76,Now go away or I shall taunt you a second time!,video_16,7600,7700,10000
+77,It is a silly place.,video_16,7700,7800,10000
+78,I'm not dead yet!,video_16,7800,7900,10000
+79,It is a silly place.,video_16,7900,8000,10000
+80,Nobody expects the Spanish Inquisition!,video_16,8000,8100,10000
+81,Bring out your dead!,video_16,8100,8200,10000
+82,It is a silly place.,video_16,8200,8300,10000
+83,Your mother was a hamster!,video_16,8300,8400,10000
+84,Bring out your dead!,video_16,8400,8500,10000
+85,I fart in your general direction!,video_16,8500,8600,10000
+86,This parrot is no more!,video_16,8600,8700,10000
+87,This parrot is no more!,video_16,8700,8800,10000
+88,I'm not dead yet!,video_16,8800,8900,10000
+89,We want a shrubbery!,video_16,8900,9000,10000
+90,Nobody expects the Spanish Inquisition!,video_16,9000,9100,10000
+91,We are the knights who say... Ni!,video_16,9100,9200,10000
+92,I'm not dead yet!,video_16,9200,9300,10000
+93,Bring out your dead!,video_16,9300,9400,10000
+94,Your mother was a hamster!,video_16,9400,9500,10000
+95,I'm not dead yet!,video_16,9500,9600,10000
+96,What is the airspeed velocity of an unladen swallow?,video_16,9600,9700,10000
+97,What is the airspeed velocity of an unladen swallow?,video_16,9700,9800,10000
+98,We are the knights who say... Ni!,video_16,9800,9900,10000
+99,You must cut down the mightiest tree in the forest with... a herring!,video_16,9900,10000,10000
+0,It is a silly place.,video_17,0,100,10000
+1,The Castle Aaargh!,video_17,100,200,10000
+2,Always look on the bright side of life.,video_17,200,300,10000
+3,Your mother was a hamster!,video_17,300,400,10000
+4,It is a silly place.,video_17,400,500,10000
+5,I'm not dead yet!,video_17,500,600,10000
+6,The Castle Aaargh!,video_17,600,700,10000
+7,We want a shrubbery!,video_17,700,800,10000
+8,Nobody expects the Spanish Inquisition!,video_17,800,900,10000
+9,What is the airspeed velocity of an unladen swallow?,video_17,900,1000,10000
+10,I'm not dead yet!,video_17,1000,1100,10000
+11,Always look on the bright side of life.,video_17,1100,1200,10000
+12,Strange women lying in ponds distributing swords is no basis for a system of government!,video_17,1200,1300,10000
+13,I'm not dead yet!,video_17,1300,1400,10000
+14,You must cut down the mightiest tree in the forest with... a herring!,video_17,1400,1500,10000
+15,Strange women lying in ponds distributing swords is no basis for a system of government!,video_17,1500,1600,10000
+16,Your mother was a hamster!,video_17,1600,1700,10000
+17,You must cut down the mightiest tree in the forest with... a herring!,video_17,1700,1800,10000
+18,This parrot is no more!,video_17,1800,1900,10000
+19,The Castle Aaargh!,video_17,1900,2000,10000
+20,It's just a flesh wound.,video_17,2000,2100,10000
+21,We want a shrubbery!,video_17,2100,2200,10000
+22,Nobody expects the Spanish Inquisition!,video_17,2200,2300,10000
+23,The Castle Aaargh!,video_17,2300,2400,10000
+24,We want a shrubbery!,video_17,2400,2500,10000
+25,It is a silly place.,video_17,2500,2600,10000
+26,We want a shrubbery!,video_17,2600,2700,10000
+27,Bring out your dead!,video_17,2700,2800,10000
+28,The Castle Aaargh!,video_17,2800,2900,10000
+29,Strange women lying in ponds distributing swords is no basis for a system of government!,video_17,2900,3000,10000
+30,I'm not dead yet!,video_17,3000,3100,10000
+31,Your mother was a hamster!,video_17,3100,3200,10000
+32,Bring out your dead!,video_17,3200,3300,10000
+33,I fart in your general direction!,video_17,3300,3400,10000
+34,Now go away or I shall taunt you a second time!,video_17,3400,3500,10000
+35,Nobody expects the Spanish Inquisition!,video_17,3500,3600,10000
+36,It is a silly place.,video_17,3600,3700,10000
+37,Your mother was a hamster!,video_17,3700,3800,10000
+38,You must cut down the mightiest tree in the forest with... a herring!,video_17,3800,3900,10000
+39,I'm not dead yet!,video_17,3900,4000,10000
+40,I fart in your general direction!,video_17,4000,4100,10000
+41,We want a shrubbery!,video_17,4100,4200,10000
+42,We want a shrubbery!,video_17,4200,4300,10000
+43,We want a shrubbery!,video_17,4300,4400,10000
+44,Nobody expects the Spanish Inquisition!,video_17,4400,4500,10000
+45,Strange women lying in ponds distributing swords is no basis for a system of government!,video_17,4500,4600,10000
+46,You must cut down the mightiest tree in the forest with... a herring!,video_17,4600,4700,10000
+47,Always look on the bright side of life.,video_17,4700,4800,10000
+48,I fart in your general direction!,video_17,4800,4900,10000
+49,I'm not dead yet!,video_17,4900,5000,10000
+50,Your mother was a hamster!,video_17,5000,5100,10000
+51,We are the knights who say... Ni!,video_17,5100,5200,10000
+52,Bring out your dead!,video_17,5200,5300,10000
+53,Bring out your dead!,video_17,5300,5400,10000
+54,Bring out your dead!,video_17,5400,5500,10000
+55,Always look on the bright side of life.,video_17,5500,5600,10000
+56,I'm not dead yet!,video_17,5600,5700,10000
+57,Bring out your dead!,video_17,5700,5800,10000
+58,Bring out your dead!,video_17,5800,5900,10000
+59,I fart in your general direction!,video_17,5900,6000,10000
+60,This parrot is no more!,video_17,6000,6100,10000
+61,Always look on the bright side of life.,video_17,6100,6200,10000
+62,Bring out your dead!,video_17,6200,6300,10000
+63,The Castle Aaargh!,video_17,6300,6400,10000
+64,It's just a flesh wound.,video_17,6400,6500,10000
+65,I'm not dead yet!,video_17,6500,6600,10000
+66,What is the airspeed velocity of an unladen swallow?,video_17,6600,6700,10000
+67,We want a shrubbery!,video_17,6700,6800,10000
+68,The Castle Aaargh!,video_17,6800,6900,10000
+69,You must cut down the mightiest tree in the forest with... a herring!,video_17,6900,7000,10000
+70,This parrot is no more!,video_17,7000,7100,10000
+71,Your mother was a hamster!,video_17,7100,7200,10000
+72,Always look on the bright side of life.,video_17,7200,7300,10000
+73,This parrot is no more!,video_17,7300,7400,10000
+74,It's just a flesh wound.,video_17,7400,7500,10000
+75,This parrot is no more!,video_17,7500,7600,10000
+76,Now go away or I shall taunt you a second time!,video_17,7600,7700,10000
+77,It is a silly place.,video_17,7700,7800,10000
+78,I'm not dead yet!,video_17,7800,7900,10000
+79,It is a silly place.,video_17,7900,8000,10000
+80,Nobody expects the Spanish Inquisition!,video_17,8000,8100,10000
+81,Bring out your dead!,video_17,8100,8200,10000
+82,It is a silly place.,video_17,8200,8300,10000
+83,Your mother was a hamster!,video_17,8300,8400,10000
+84,Bring out your dead!,video_17,8400,8500,10000
+85,I fart in your general direction!,video_17,8500,8600,10000
+86,This parrot is no more!,video_17,8600,8700,10000
+87,This parrot is no more!,video_17,8700,8800,10000
+88,I'm not dead yet!,video_17,8800,8900,10000
+89,We want a shrubbery!,video_17,8900,9000,10000
+90,Nobody expects the Spanish Inquisition!,video_17,9000,9100,10000
+91,We are the knights who say... Ni!,video_17,9100,9200,10000
+92,I'm not dead yet!,video_17,9200,9300,10000
+93,Bring out your dead!,video_17,9300,9400,10000
+94,Your mother was a hamster!,video_17,9400,9500,10000
+95,I'm not dead yet!,video_17,9500,9600,10000
+96,What is the airspeed velocity of an unladen swallow?,video_17,9600,9700,10000
+97,What is the airspeed velocity of an unladen swallow?,video_17,9700,9800,10000
+98,We are the knights who say... Ni!,video_17,9800,9900,10000
+99,You must cut down the mightiest tree in the forest with... a herring!,video_17,9900,10000,10000
+0,It is a silly place.,video_18,0,100,10000
+1,The Castle Aaargh!,video_18,100,200,10000
+2,Always look on the bright side of life.,video_18,200,300,10000
+3,Your mother was a hamster!,video_18,300,400,10000
+4,It is a silly place.,video_18,400,500,10000
+5,I'm not dead yet!,video_18,500,600,10000
+6,The Castle Aaargh!,video_18,600,700,10000
+7,We want a shrubbery!,video_18,700,800,10000
+8,Nobody expects the Spanish Inquisition!,video_18,800,900,10000
+9,What is the airspeed velocity of an unladen swallow?,video_18,900,1000,10000
+10,I'm not dead yet!,video_18,1000,1100,10000
+11,Always look on the bright side of life.,video_18,1100,1200,10000
+12,Strange women lying in ponds distributing swords is no basis for a system of government!,video_18,1200,1300,10000
+13,I'm not dead yet!,video_18,1300,1400,10000
+14,You must cut down the mightiest tree in the forest with... a herring!,video_18,1400,1500,10000
+15,Strange women lying in ponds distributing swords is no basis for a system of government!,video_18,1500,1600,10000
+16,Your mother was a hamster!,video_18,1600,1700,10000
+17,You must cut down the mightiest tree in the forest with... a herring!,video_18,1700,1800,10000
+18,This parrot is no more!,video_18,1800,1900,10000
+19,The Castle Aaargh!,video_18,1900,2000,10000
+20,It's just a flesh wound.,video_18,2000,2100,10000
+21,We want a shrubbery!,video_18,2100,2200,10000
+22,Nobody expects the Spanish Inquisition!,video_18,2200,2300,10000
+23,The Castle Aaargh!,video_18,2300,2400,10000
+24,We want a shrubbery!,video_18,2400,2500,10000
+25,It is a silly place.,video_18,2500,2600,10000
+26,We want a shrubbery!,video_18,2600,2700,10000
+27,Bring out your dead!,video_18,2700,2800,10000
+28,The Castle Aaargh!,video_18,2800,2900,10000
+29,Strange women lying in ponds distributing swords is no basis for a system of government!,video_18,2900,3000,10000
+30,I'm not dead yet!,video_18,3000,3100,10000
+31,Your mother was a hamster!,video_18,3100,3200,10000
+32,Bring out your dead!,video_18,3200,3300,10000
+33,I fart in your general direction!,video_18,3300,3400,10000
+34,Now go away or I shall taunt you a second time!,video_18,3400,3500,10000
+35,Nobody expects the Spanish Inquisition!,video_18,3500,3600,10000
+36,It is a silly place.,video_18,3600,3700,10000
+37,Your mother was a hamster!,video_18,3700,3800,10000
+38,You must cut down the mightiest tree in the forest with... a herring!,video_18,3800,3900,10000
+39,I'm not dead yet!,video_18,3900,4000,10000
+40,I fart in your general direction!,video_18,4000,4100,10000
+41,We want a shrubbery!,video_18,4100,4200,10000
+42,We want a shrubbery!,video_18,4200,4300,10000
+43,We want a shrubbery!,video_18,4300,4400,10000
+44,Nobody expects the Spanish Inquisition!,video_18,4400,4500,10000
+45,Strange women lying in ponds distributing swords is no basis for a system of government!,video_18,4500,4600,10000
+46,You must cut down the mightiest tree in the forest with... a herring!,video_18,4600,4700,10000
+47,Always look on the bright side of life.,video_18,4700,4800,10000
+48,I fart in your general direction!,video_18,4800,4900,10000
+49,I'm not dead yet!,video_18,4900,5000,10000
+50,Your mother was a hamster!,video_18,5000,5100,10000
+51,We are the knights who say... Ni!,video_18,5100,5200,10000
+52,Bring out your dead!,video_18,5200,5300,10000
+53,Bring out your dead!,video_18,5300,5400,10000
+54,Bring out your dead!,video_18,5400,5500,10000
+55,Always look on the bright side of life.,video_18,5500,5600,10000
+56,I'm not dead yet!,video_18,5600,5700,10000
+57,Bring out your dead!,video_18,5700,5800,10000
+58,Bring out your dead!,video_18,5800,5900,10000
+59,I fart in your general direction!,video_18,5900,6000,10000
+60,This parrot is no more!,video_18,6000,6100,10000
+61,Always look on the bright side of life.,video_18,6100,6200,10000
+62,Bring out your dead!,video_18,6200,6300,10000
+63,The Castle Aaargh!,video_18,6300,6400,10000
+64,It's just a flesh wound.,video_18,6400,6500,10000
+65,I'm not dead yet!,video_18,6500,6600,10000
+66,What is the airspeed velocity of an unladen swallow?,video_18,6600,6700,10000
+67,We want a shrubbery!,video_18,6700,6800,10000
+68,The Castle Aaargh!,video_18,6800,6900,10000
+69,You must cut down the mightiest tree in the forest with... a herring!,video_18,6900,7000,10000
+70,This parrot is no more!,video_18,7000,7100,10000
+71,Your mother was a hamster!,video_18,7100,7200,10000
+72,Always look on the bright side of life.,video_18,7200,7300,10000
+73,This parrot is no more!,video_18,7300,7400,10000
+74,It's just a flesh wound.,video_18,7400,7500,10000
+75,This parrot is no more!,video_18,7500,7600,10000
+76,Now go away or I shall taunt you a second time!,video_18,7600,7700,10000
+77,It is a silly place.,video_18,7700,7800,10000
+78,I'm not dead yet!,video_18,7800,7900,10000
+79,It is a silly place.,video_18,7900,8000,10000
+80,Nobody expects the Spanish Inquisition!,video_18,8000,8100,10000
+81,Bring out your dead!,video_18,8100,8200,10000
+82,It is a silly place.,video_18,8200,8300,10000
+83,Your mother was a hamster!,video_18,8300,8400,10000
+84,Bring out your dead!,video_18,8400,8500,10000
+85,I fart in your general direction!,video_18,8500,8600,10000
+86,This parrot is no more!,video_18,8600,8700,10000
+87,This parrot is no more!,video_18,8700,8800,10000
+88,I'm not dead yet!,video_18,8800,8900,10000
+89,We want a shrubbery!,video_18,8900,9000,10000
+90,Nobody expects the Spanish Inquisition!,video_18,9000,9100,10000
+91,We are the knights who say... Ni!,video_18,9100,9200,10000
+92,I'm not dead yet!,video_18,9200,9300,10000
+93,Bring out your dead!,video_18,9300,9400,10000
+94,Your mother was a hamster!,video_18,9400,9500,10000
+95,I'm not dead yet!,video_18,9500,9600,10000
+96,What is the airspeed velocity of an unladen swallow?,video_18,9600,9700,10000
+97,What is the airspeed velocity of an unladen swallow?,video_18,9700,9800,10000
+98,We are the knights who say... Ni!,video_18,9800,9900,10000
+99,You must cut down the mightiest tree in the forest with... a herring!,video_18,9900,10000,10000
+0,It is a silly place.,video_19,0,100,10000
+1,The Castle Aaargh!,video_19,100,200,10000
+2,Always look on the bright side of life.,video_19,200,300,10000
+3,Your mother was a hamster!,video_19,300,400,10000
+4,It is a silly place.,video_19,400,500,10000
+5,I'm not dead yet!,video_19,500,600,10000
+6,The Castle Aaargh!,video_19,600,700,10000
+7,We want a shrubbery!,video_19,700,800,10000
+8,Nobody expects the Spanish Inquisition!,video_19,800,900,10000
+9,What is the airspeed velocity of an unladen swallow?,video_19,900,1000,10000
+10,I'm not dead yet!,video_19,1000,1100,10000
+11,Always look on the bright side of life.,video_19,1100,1200,10000
+12,Strange women lying in ponds distributing swords is no basis for a system of government!,video_19,1200,1300,10000
+13,I'm not dead yet!,video_19,1300,1400,10000
+14,You must cut down the mightiest tree in the forest with... a herring!,video_19,1400,1500,10000
+15,Strange women lying in ponds distributing swords is no basis for a system of government!,video_19,1500,1600,10000
+16,Your mother was a hamster!,video_19,1600,1700,10000
+17,You must cut down the mightiest tree in the forest with... a herring!,video_19,1700,1800,10000
+18,This parrot is no more!,video_19,1800,1900,10000
+19,The Castle Aaargh!,video_19,1900,2000,10000
+20,It's just a flesh wound.,video_19,2000,2100,10000
+21,We want a shrubbery!,video_19,2100,2200,10000
+22,Nobody expects the Spanish Inquisition!,video_19,2200,2300,10000
+23,The Castle Aaargh!,video_19,2300,2400,10000
+24,We want a shrubbery!,video_19,2400,2500,10000
+25,It is a silly place.,video_19,2500,2600,10000
+26,We want a shrubbery!,video_19,2600,2700,10000
+27,Bring out your dead!,video_19,2700,2800,10000
+28,The Castle Aaargh!,video_19,2800,2900,10000
+29,Strange women lying in ponds distributing swords is no basis for a system of government!,video_19,2900,3000,10000
+30,I'm not dead yet!,video_19,3000,3100,10000
+31,Your mother was a hamster!,video_19,3100,3200,10000
+32,Bring out your dead!,video_19,3200,3300,10000
+33,I fart in your general direction!,video_19,3300,3400,10000
+34,Now go away or I shall taunt you a second time!,video_19,3400,3500,10000
+35,Nobody expects the Spanish Inquisition!,video_19,3500,3600,10000
+36,It is a silly place.,video_19,3600,3700,10000
+37,Your mother was a hamster!,video_19,3700,3800,10000
+38,You must cut down the mightiest tree in the forest with... a herring!,video_19,3800,3900,10000
+39,I'm not dead yet!,video_19,3900,4000,10000
+40,I fart in your general direction!,video_19,4000,4100,10000
+41,We want a shrubbery!,video_19,4100,4200,10000
+42,We want a shrubbery!,video_19,4200,4300,10000
+43,We want a shrubbery!,video_19,4300,4400,10000
+44,Nobody expects the Spanish Inquisition!,video_19,4400,4500,10000
+45,Strange women lying in ponds distributing swords is no basis for a system of government!,video_19,4500,4600,10000
+46,You must cut down the mightiest tree in the forest with... a herring!,video_19,4600,4700,10000
+47,Always look on the bright side of life.,video_19,4700,4800,10000
+48,I fart in your general direction!,video_19,4800,4900,10000
+49,I'm not dead yet!,video_19,4900,5000,10000
+50,Your mother was a hamster!,video_19,5000,5100,10000
+51,We are the knights who say... Ni!,video_19,5100,5200,10000
+52,Bring out your dead!,video_19,5200,5300,10000
+53,Bring out your dead!,video_19,5300,5400,10000
+54,Bring out your dead!,video_19,5400,5500,10000
+55,Always look on the bright side of life.,video_19,5500,5600,10000
+56,I'm not dead yet!,video_19,5600,5700,10000
+57,Bring out your dead!,video_19,5700,5800,10000
+58,Bring out your dead!,video_19,5800,5900,10000
+59,I fart in your general direction!,video_19,5900,6000,10000
+60,This parrot is no more!,video_19,6000,6100,10000
+61,Always look on the bright side of life.,video_19,6100,6200,10000
+62,Bring out your dead!,video_19,6200,6300,10000
+63,The Castle Aaargh!,video_19,6300,6400,10000
+64,It's just a flesh wound.,video_19,6400,6500,10000
+65,I'm not dead yet!,video_19,6500,6600,10000
+66,What is the airspeed velocity of an unladen swallow?,video_19,6600,6700,10000
+67,We want a shrubbery!,video_19,6700,6800,10000
+68,The Castle Aaargh!,video_19,6800,6900,10000
+69,You must cut down the mightiest tree in the forest with... a herring!,video_19,6900,7000,10000
+70,This parrot is no more!,video_19,7000,7100,10000
+71,Your mother was a hamster!,video_19,7100,7200,10000
+72,Always look on the bright side of life.,video_19,7200,7300,10000
+73,This parrot is no more!,video_19,7300,7400,10000
+74,It's just a flesh wound.,video_19,7400,7500,10000
+75,This parrot is no more!,video_19,7500,7600,10000
+76,Now go away or I shall taunt you a second time!,video_19,7600,7700,10000
+77,It is a silly place.,video_19,7700,7800,10000
+78,I'm not dead yet!,video_19,7800,7900,10000
+79,It is a silly place.,video_19,7900,8000,10000
+80,Nobody expects the Spanish Inquisition!,video_19,8000,8100,10000
+81,Bring out your dead!,video_19,8100,8200,10000
+82,It is a silly place.,video_19,8200,8300,10000
+83,Your mother was a hamster!,video_19,8300,8400,10000
+84,Bring out your dead!,video_19,8400,8500,10000
+85,I fart in your general direction!,video_19,8500,8600,10000
+86,This parrot is no more!,video_19,8600,8700,10000
+87,This parrot is no more!,video_19,8700,8800,10000
+88,I'm not dead yet!,video_19,8800,8900,10000
+89,We want a shrubbery!,video_19,8900,9000,10000
+90,Nobody expects the Spanish Inquisition!,video_19,9000,9100,10000
+91,We are the knights who say... Ni!,video_19,9100,9200,10000
+92,I'm not dead yet!,video_19,9200,9300,10000
+93,Bring out your dead!,video_19,9300,9400,10000
+94,Your mother was a hamster!,video_19,9400,9500,10000
+95,I'm not dead yet!,video_19,9500,9600,10000
+96,What is the airspeed velocity of an unladen swallow?,video_19,9600,9700,10000
+97,What is the airspeed velocity of an unladen swallow?,video_19,9700,9800,10000
+98,We are the knights who say... Ni!,video_19,9800,9900,10000
+99,You must cut down the mightiest tree in the forest with... a herring!,video_19,9900,10000,10000
+0,It is a silly place.,video_20,0,100,10000
+1,The Castle Aaargh!,video_20,100,200,10000
+2,Always look on the bright side of life.,video_20,200,300,10000
+3,Your mother was a hamster!,video_20,300,400,10000
+4,It is a silly place.,video_20,400,500,10000
+5,I'm not dead yet!,video_20,500,600,10000
+6,The Castle Aaargh!,video_20,600,700,10000
+7,We want a shrubbery!,video_20,700,800,10000
+8,Nobody expects the Spanish Inquisition!,video_20,800,900,10000
+9,What is the airspeed velocity of an unladen swallow?,video_20,900,1000,10000
+10,I'm not dead yet!,video_20,1000,1100,10000
+11,Always look on the bright side of life.,video_20,1100,1200,10000
+12,Strange women lying in ponds distributing swords is no basis for a system of government!,video_20,1200,1300,10000
+13,I'm not dead yet!,video_20,1300,1400,10000
+14,You must cut down the mightiest tree in the forest with... a herring!,video_20,1400,1500,10000
+15,Strange women lying in ponds distributing swords is no basis for a system of government!,video_20,1500,1600,10000
+16,Your mother was a hamster!,video_20,1600,1700,10000
+17,You must cut down the mightiest tree in the forest with... a herring!,video_20,1700,1800,10000
+18,This parrot is no more!,video_20,1800,1900,10000
+19,The Castle Aaargh!,video_20,1900,2000,10000
+20,It's just a flesh wound.,video_20,2000,2100,10000
+21,We want a shrubbery!,video_20,2100,2200,10000
+22,Nobody expects the Spanish Inquisition!,video_20,2200,2300,10000
+23,The Castle Aaargh!,video_20,2300,2400,10000
+24,We want a shrubbery!,video_20,2400,2500,10000
+25,It is a silly place.,video_20,2500,2600,10000
+26,We want a shrubbery!,video_20,2600,2700,10000
+27,Bring out your dead!,video_20,2700,2800,10000
+28,The Castle Aaargh!,video_20,2800,2900,10000
+29,Strange women lying in ponds distributing swords is no basis for a system of government!,video_20,2900,3000,10000
+30,I'm not dead yet!,video_20,3000,3100,10000
+31,Your mother was a hamster!,video_20,3100,3200,10000
+32,Bring out your dead!,video_20,3200,3300,10000
+33,I fart in your general direction!,video_20,3300,3400,10000
+34,Now go away or I shall taunt you a second time!,video_20,3400,3500,10000
+35,Nobody expects the Spanish Inquisition!,video_20,3500,3600,10000
+36,It is a silly place.,video_20,3600,3700,10000
+37,Your mother was a hamster!,video_20,3700,3800,10000
+38,You must cut down the mightiest tree in the forest with... a herring!,video_20,3800,3900,10000
+39,I'm not dead yet!,video_20,3900,4000,10000
+40,I fart in your general direction!,video_20,4000,4100,10000
+41,We want a shrubbery!,video_20,4100,4200,10000
+42,We want a shrubbery!,video_20,4200,4300,10000
+43,We want a shrubbery!,video_20,4300,4400,10000
+44,Nobody expects the Spanish Inquisition!,video_20,4400,4500,10000
+45,Strange women lying in ponds distributing swords is no basis for a system of government!,video_20,4500,4600,10000
+46,You must cut down the mightiest tree in the forest with... a herring!,video_20,4600,4700,10000
+47,Always look on the bright side of life.,video_20,4700,4800,10000
+48,I fart in your general direction!,video_20,4800,4900,10000
+49,I'm not dead yet!,video_20,4900,5000,10000
+50,Your mother was a hamster!,video_20,5000,5100,10000
+51,We are the knights who say... Ni!,video_20,5100,5200,10000
+52,Bring out your dead!,video_20,5200,5300,10000
+53,Bring out your dead!,video_20,5300,5400,10000
+54,Bring out your dead!,video_20,5400,5500,10000
+55,Always look on the bright side of life.,video_20,5500,5600,10000
+56,I'm not dead yet!,video_20,5600,5700,10000
+57,Bring out your dead!,video_20,5700,5800,10000
+58,Bring out your dead!,video_20,5800,5900,10000
+59,I fart in your general direction!,video_20,5900,6000,10000
+60,This parrot is no more!,video_20,6000,6100,10000
+61,Always look on the bright side of life.,video_20,6100,6200,10000
+62,Bring out your dead!,video_20,6200,6300,10000
+63,The Castle Aaargh!,video_20,6300,6400,10000
+64,It's just a flesh wound.,video_20,6400,6500,10000
+65,I'm not dead yet!,video_20,6500,6600,10000
+66,What is the airspeed velocity of an unladen swallow?,video_20,6600,6700,10000
+67,We want a shrubbery!,video_20,6700,6800,10000
+68,The Castle Aaargh!,video_20,6800,6900,10000
+69,You must cut down the mightiest tree in the forest with... a herring!,video_20,6900,7000,10000
+70,This parrot is no more!,video_20,7000,7100,10000
+71,Your mother was a hamster!,video_20,7100,7200,10000
+72,Always look on the bright side of life.,video_20,7200,7300,10000
+73,This parrot is no more!,video_20,7300,7400,10000
+74,It's just a flesh wound.,video_20,7400,7500,10000
+75,This parrot is no more!,video_20,7500,7600,10000
+76,Now go away or I shall taunt you a second time!,video_20,7600,7700,10000
+77,It is a silly place.,video_20,7700,7800,10000
+78,I'm not dead yet!,video_20,7800,7900,10000
+79,It is a silly place.,video_20,7900,8000,10000
+80,Nobody expects the Spanish Inquisition!,video_20,8000,8100,10000
+81,Bring out your dead!,video_20,8100,8200,10000
+82,It is a silly place.,video_20,8200,8300,10000
+83,Your mother was a hamster!,video_20,8300,8400,10000
+84,Bring out your dead!,video_20,8400,8500,10000
+85,I fart in your general direction!,video_20,8500,8600,10000
+86,This parrot is no more!,video_20,8600,8700,10000
+87,This parrot is no more!,video_20,8700,8800,10000
+88,I'm not dead yet!,video_20,8800,8900,10000
+89,We want a shrubbery!,video_20,8900,9000,10000
+90,Nobody expects the Spanish Inquisition!,video_20,9000,9100,10000
+91,We are the knights who say... Ni!,video_20,9100,9200,10000
+92,I'm not dead yet!,video_20,9200,9300,10000
+93,Bring out your dead!,video_20,9300,9400,10000
+94,Your mother was a hamster!,video_20,9400,9500,10000
+95,I'm not dead yet!,video_20,9500,9600,10000
+96,What is the airspeed velocity of an unladen swallow?,video_20,9600,9700,10000
+97,What is the airspeed velocity of an unladen swallow?,video_20,9700,9800,10000
+98,We are the knights who say... Ni!,video_20,9800,9900,10000
+99,You must cut down the mightiest tree in the forest with... a herring!,video_20,9900,10000,10000
