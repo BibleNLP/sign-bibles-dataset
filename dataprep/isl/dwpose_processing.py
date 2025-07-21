@@ -19,7 +19,20 @@ if local_folder not in sys.path:
 from annotator.dwpose import util
 from annotator.dwpose import DWposeDetector
 from annotator.dwpose.wholebody import Wholebody
-pose_estimation = Wholebody()
+ption = Wholebody()
+
+def pose_estimate_v3(image):
+  H, W, C = oriImg.shape
+  with torch.no_grad():
+      candidate, subset = pose_estimation(oriImg)
+      nums, keys, locs = candidate.shape
+      candidate[..., 0] /= float(W)
+      candidate[..., 1] /= float(H)
+      un_visible = subset<0.3
+      candidate[un_visible] = -1
+
+      return candidate, subset
+
 
 
 def draw_pose(pose, H, W, hands_scores):
@@ -265,6 +278,7 @@ def generate_pose_files_v2(id):
       # fourcc_code = cv2.VideoWriter_fourcc(*fourcc)  # Codec (e.g., 'mp4v', 'XVID')
       # video_writer2 = cv2.VideoWriter(temp_file_pose, fourcc_code, fps, (width, height))
       poses = []
+      confidences = []
 
       while True:
           ret, frame = cap.read()
@@ -273,18 +287,30 @@ def generate_pose_files_v2(id):
           image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
           image.flags.writeable = False
 
-          skeleton, candidate = pose_estimate_v2(image)
+          candidate, confidence = pose_estimate_v3(image)
           if len(candidate) < 1:
             candidate = [np.full(DWPOSE_LANDMARKS_NUM, np.nan, dtype=np.float64)]
           elif len(candidate > 1):
             candidate = [candidate[0]]
+
+
+          if confidence.shape[0] < 1:
+            confidence = np.full((1, DWPOSE_LANDMARKS_NUM), np.nan)
+          elif confidence.shape[0] > 1:
+            confidence = confidence[:1]
+
           assert len(candidate) == 1, f"{len(candidate)=}"
           assert len(candidate[0]) == DWPOSE_LANDMARKS_NUM, f"{len(candidate[0])=}"
           poses.append(candidate)
+
+          assert confidence.shape == (1, DWPOSE_LANDMARKS_NUM), confidence.shape
+          confidences.append(confidence)
           # Write frame to video
           # video_writer2.write(skeleton)
       # video_writer2.release()
-      np.savez_compressed(f"./{id}_pose-dwpose.npz", frames=np.array(poses, dtype=np.float64))
+      np.savez_compressed(f"./{id}_pose-dwpose.npz",
+          frames=np.array(poses, dtype=np.float64),
+          confidences = np.array(confidences, dtype=np.float64))
       cap.release()
     except Exception as exce:
         raise Exception("Error in pose video and array generation using dwpose") from exce
