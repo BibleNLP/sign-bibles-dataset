@@ -7,6 +7,8 @@ import numpy as np
 logging.basicConfig(filename='logs/app.log', level=logging.INFO,
 					format='%(asctime)s - %(levelname)s - %(message)s')
 
+DWPOSE_LANDMARKS_NUM = 134
+
 def json_correction(filename):
 	orig_data = {}
 	with open(filename, 'r', encoding='utf-8') as fp:
@@ -21,18 +23,18 @@ def npz_correction(filename):
 	new_array = []
 	for item in old_obj['frames']:
 		if len(item) < 1:
-			item = [np.full(134, np.nan, dtype=np.float64)]
+			item = [np.full(DWPOSE_LANDMARKS_NUM, np.nan, dtype=np.float64)]
 		elif len(item > 1):
 			item = [item[0]]
 		assert len(item) == 1, f"{len(item)=}"
-		assert len(item[0]) == 134, f"{len(item[0])=}"
+		assert len(item[0]) == DWPOSE_LANDMARKS_NUM, f"{len(item[0])=}"
 		new_array.append(item)
 	np.savez_compressed(filename, frames=np.array(new_array, dtype=np.float64))
 
 def npz_test(filename):
 	new_obj = np.load(filename) # load w/o pickle
 	assert 'frames' in new_obj
-	assert len(new_obj['frames'][0][0]) == 134
+	assert len(new_obj['frames'][0][0]) == DWPOSE_LANDMARKS_NUM
 	assert len(new_obj['frames'][0][0][0]) == 2
 
 

@@ -10,6 +10,7 @@ from dotenv import load_dotenv
 
 # Load environment variables from .env
 load_dotenv()
+DWPOSE_LANDMARKS_NUM = 134
 
 local_folder = os.getenv("DWPOSE_PATH")
 if local_folder not in sys.path:
@@ -275,11 +276,11 @@ def generate_pose_files_v2(id):
 
           skeleton, candidate = pose_estimate_v2(image)
           if len(candidate) < 1:
-            candidate = [np.full(134, np.nan, dtype=np.float64)]
+            candidate = [np.full(DWPOSE_LANDMARKS_NUM, np.nan, dtype=np.float64)]
           elif len(candidate > 1):
             candidate = [candidate[0]]
           assert len(candidate) == 1, f"{len(candidate)=}"
-          assert len(candidate[0]) == 134, f"{len(candidate[0])=}"
+          assert len(candidate[0]) == DWPOSE_LANDMARKS_NUM, f"{len(candidate[0])=}"
           poses.append(candidate)
           # Write frame to video
           video_writer2.write(skeleton)
