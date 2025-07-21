@@ -8,7 +8,7 @@ def downsample_video(video_stream):
     process = (
         ffmpeg
         .input('pipe:', format='mp4')  # Ensure input format is correct
-        .output('pipe:', format='mpegts', vf='scale=640:-2', vcodec='libx264', preset='ultrafast', crf=28)
+        .output('pipe:', format='mpegts', vf='scale=1080:-2', vcodec='libx264', preset='ultrafast', crf=28)
         .run_async(pipe_stdin=True, pipe_stdout=True, pipe_stderr=True, overwrite_output=True)
     )
     out, _ = process.communicate(input=video_stream.read())
@@ -40,7 +40,7 @@ def downsample_video_ondisk(input_path, output_path):
             .output(
                 output_path,
                 format='mp4',                   # output as MP4
-                vf='scale=640:-2',              # resize width to 640, preserve aspect ratio
+                vf='scale=1080:-2',              # resize width to 1080, preserve aspect ratio
                 vcodec='libx264',
                 preset='ultrafast',
                 crf=28
