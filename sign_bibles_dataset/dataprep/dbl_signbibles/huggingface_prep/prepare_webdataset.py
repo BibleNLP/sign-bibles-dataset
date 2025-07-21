@@ -29,7 +29,6 @@ This script:
 
 """
 
-from collections import Counter
 import argparse
 import io
 import json
@@ -38,6 +37,7 @@ import re
 import sys
 import tarfile
 import xml.etree.ElementTree as ET
+from collections import Counter, defaultdict
 from pathlib import Path
 from typing import Any
 
@@ -53,9 +53,8 @@ from sign_bibles_dataset.dataprep.dbl_signbibles.ebible_utils.vref_lookup import
 )
 from sign_bibles_dataset.dataprep.dbl_signbibles.huggingface_prep.dbl_sign_downloader import DBLSignDownloader
 
+
 # Initialize the logger with the correct path
-
-
 def setup_logger(log_file_path: str) -> logging.Logger:
     log_file = Path(log_file_path)
     log_file.parent.mkdir(parents=True, exist_ok=True)
@@ -88,28 +87,31 @@ LOG_FILE_PATH = Path("./output/run_log.txt")
 logger = setup_logger(LOG_FILE_PATH.resolve())
 logger.info(f"Command: {' '.join(sys.argv)}")
 
+# PyArrow capacity limit (2^31 - 2)
+PYARROW_MAX_BYTES = 2**31 - 2
+
 
 class WebDatasetCreator:
-    """Class to handle creating WebDataset format with subfolders per language."""
+    """Class to handle creating WebDataset format with subfolders per language, skipping samples with oversized files."""
 
     def __init__(self, output_dir: str | Path = "webdataset"):
         self.output_dir = Path(output_dir)
         self.output_dir.mkdir(parents=True, exist_ok=True)
+        self.skipped_samples = []
+        self.max_file_size_bytes = PYARROW_MAX_BYTES
 
     def _group_by_project(self, samples_info):
-        groups = {}
+        groups = defaultdict(list)
         for sample in samples_info:
             project_slug = self._slugify(sample["project_name"])
-            groups.setdefault(project_slug, []).append(sample)
+            groups[project_slug].append(sample)
         return groups
 
-    def create_webdataset(self, samples_info: list[dict[str, Any]], shard_size: int = 1000) -> list[str]:
-        # Group by language_code first
+    def create_webdataset(self, samples_info, shard_size=1000):
         language_groups = self._group_by_language(samples_info)
         all_shard_paths = []
 
         for language_code, samples in language_groups.items():
-            # Further group by project_name within language
             project_groups = self._group_by_project(samples)
 
             for project_slug, project_samples in project_groups.items():
@@ -121,53 +123,74 @@ class WebDatasetCreator:
                 project_output_dir = self.output_dir / language_code / project_slug
                 project_output_dir.mkdir(parents=True, exist_ok=True)
 
-                shard_paths = self._write_shards(shards, project_output_dir)
-                all_shard_paths.extend(shard_paths)
+                for shard_index, shard in enumerate(tqdm(shards, desc=f"Writing shards for {project_slug}")):
+                    shard_path = project_output_dir / f"shard_{shard_index:05d}.tar"
+                    with tarfile.open(shard_path, "w") as tar:
+                        for video_info in shard:
+                            if self._is_sample_too_large(video_info):
+                                continue
+                            sample = self._build_sample(video_info, shard_index)
+                            if sample:
+                                self._add_sample_to_tar(tar, sample)
+                    all_shard_paths.append(str(shard_path))
+
+        if self.skipped_samples:
+            logger.info(f"Skipped {len(self.skipped_samples)} samples due to large files:")
+            for entry in self.skipped_samples:
+                logger.info(
+                    f"- Sample: {entry['sample']} | File: {entry['large_file']} | Size: {entry['size_gb']:.2f} GB"
+                )
 
         return all_shard_paths
 
-    def _group_by_language(self, samples_info: list[dict[str, Any]]) -> dict[str, list[dict[str, Any]]]:
-        language_groups = {}
+    def _group_by_language(self, samples_info):
+        language_groups = defaultdict(list)
         for sample in samples_info:
             language_code = sample["language"]["ISO639-3"]
-            language_groups.setdefault(language_code, []).append(sample)
+            language_groups[language_code].append(sample)
         return language_groups
 
-    def _split_into_shards(self, samples_info: list[dict[str, Any]], shard_size: int) -> list[list[dict[str, Any]]]:
-        shards = []
-        for i in tqdm(range(0, len(samples_info), shard_size), desc="Sharding samples"):
-            shards.append(samples_info[i : i + shard_size])
-        return shards
+    def _split_into_shards(self, samples_info, shard_size):
+        return [samples_info[i : i + shard_size] for i in range(0, len(samples_info), shard_size)]
 
-    def _write_shards(self, shards: list[list[dict[str, Any]]], output_dir: Path) -> list[str]:
-        shard_paths = []
-        logger.debug(f"Writing {len(shards)} to {output_dir}")
-        for shard_index, shard in enumerate(tqdm(shards, desc="Writing shards")):
-            shard_path = output_dir / f"shard_{shard_index:05d}.tar"
-            with tarfile.open(shard_path, "w") as tar:
-                for video_info in shard:
-                    sample = self._build_sample(video_info, shard_index)
-                    if not sample:
-                        continue
-                    self._add_sample_to_tar(tar, sample, sample["__key__"])
-            shard_paths.append(str(shard_path))
-
-        return shard_paths
-
-    def _save_transcripts(self, transcripts: list, filename: str) -> Path:
-        """Save transcripts to a temp location for tar writing."""
+    def _save_transcripts(self, transcripts, filename):
         temp_path = Path("/tmp") / filename
         with temp_path.open("w", encoding="utf-8") as f:
             json.dump(transcripts, f, ensure_ascii=False)
         return temp_path
 
-    def _build_sample(self, video_info: dict[str, Any], shard_index: int) -> dict[str, Any]:
-        sample = {}
+    def _is_sample_too_large(self, video_info):
+        """Check if any file in this sample exceeds the max file size."""
+        video_path = Path(video_info["filename_path"])
+        files_to_check = [video_path]
 
+        optional_suffixes = [".eaf", ".autosegmented_segments.json", ".pose-dwpose.npz", ".pose"]
+        for suffix in optional_suffixes:
+            path = video_path.with_suffix(suffix)
+            if path.exists():
+                files_to_check.append(path)
+
+        for path in files_to_check:
+            if path.stat().st_size > self.max_file_size_bytes:
+                logger.warning(
+                    f"Skipping sample {video_info.get('filename')} due to large file {path.name} ({path.stat().st_size / (1024**3):.2f} GB)"
+                )
+                self.skipped_samples.append(
+                    {
+                        "sample": video_info.get("filename"),
+                        "large_file": path.name,
+                        "size_gb": path.stat().st_size / (1024**3),
+                    }
+                )
+                return True
+        return False
+
+    def _build_sample(self, video_info, shard_index):
+        sample = {}
         metadata = video_info.copy()
+
         language_code = metadata["language"]["ISO639-3"]
-        project_name = metadata["project_name"]
-        project_slug = self._slugify(project_name)
+        project_slug = self._slugify(metadata["project_name"])
         original_name = Path(metadata["filename"]).stem
         sample_name = f"{language_code}_{project_slug}_{original_name}"
         sample["__key__"] = sample_name
@@ -175,57 +198,42 @@ class WebDatasetCreator:
         video_path = Path(metadata["filename_path"])
         sample["files"] = {f"{sample_name}.mp4": video_path}
 
-        # EAF files from the autosegmenter
-        eaf_file = video_path.with_suffix(".eaf")
-        if eaf_file.exists():
-            desired_name = f"{sample_name}.eaf"
-            sample["files"][desired_name] = eaf_file
+        suffixes = {
+            ".eaf": ".eaf",
+            ".autosegmented_segments.json": ".autosegmented_segments.json",
+            ".pose-dwpose.npz": ".pose-dwpose.npz",
+            ".pose": ".pose-mediapipe.pose",
+        }
 
-        # JSON version for convenience
-        segments_json_path = video_path.with_suffix(".autosegmented_segments.json")
-        if segments_json_path.exists():
-            desired_name = f"{sample_name}.autosegmented_segments.json"
-            sample["files"][desired_name] = segments_json_path
+        for src_suffix, dest_suffix in suffixes.items():
+            path = video_path.with_suffix(src_suffix)
+            if path.exists():
+                sample["files"][f"{sample_name}{dest_suffix}"] = path
 
-        # Pose files
-        dw_pose = video_path.with_suffix(".pose-dwpose.npz")
-        if dw_pose.exists():
-            desired_name = f"{sample_name}.pose-dwpose.npz"
-            sample["files"][desired_name] = dw_pose
-
-        mediapipe_pose = video_path.with_suffix(".pose")
-        if mediapipe_pose.exists():
-            desired_name = f"{sample_name}.pose-mediapipe.pose"
-            sample["files"][desired_name] = mediapipe_pose
-
-        # Remove heavy fields
-        metadata.pop("biblenlp-vref", None)
-        metadata.pop("text", None)
-
-        # Extract transcripts
         transcripts = metadata.pop("transcripts", None)
         if transcripts:
             transcripts_filename = f"{sample_name}.transcripts.json"
-            sample["files"][transcripts_filename] = self._save_transcripts(transcripts, transcripts_filename)
-            # metadata["transcripts_file"] = transcripts_filename # don't need the filename in the metadata!
+            transcripts_path = self._save_transcripts(transcripts, transcripts_filename)
+            sample["files"][transcripts_filename] = transcripts_path
 
-        # Clean up
-        # metadata["filename"] = f"{sample_name}.mp4" # don't need filename in metadata!
-        metadata.pop("path", None)
-        metadata.pop("filename_path", None)
-        metadata.pop("transcripts_file", None)  # don't need a filename in the metadata
-        metadata.pop("transcripts", None)  # don't store this in the metadata anymore
-        metadata.pop("pose", None)  # don't need filenames in the metadata, it's in the sample
-        metadata.pop("filename", None)  # don't need filenames in the metadata, it's in the sample
+        for key in [
+            "biblenlp-vref",
+            "text",
+            "path",
+            "filename_path",
+            "transcripts_file",
+            "transcripts",
+            "pose",
+            "filename",
+        ]:
+            metadata.pop(key, None)
 
-        # Store metadata
-        json_data = json.dumps(metadata)
-        sample["json_data"] = json_data
+        sample["json_data"] = json.dumps(metadata)
         sample["json_filename"] = f"{sample_name}.json"
 
         return sample
 
-    def _add_sample_to_tar(self, tar: tarfile.TarFile, sample: dict[str, Any], sample_name: str):
+    def _add_sample_to_tar(self, tar, sample):
         encoded = sample["json_data"].encode("utf-8")
         info = tarfile.TarInfo(sample["json_filename"])
         info.size = len(encoded)
