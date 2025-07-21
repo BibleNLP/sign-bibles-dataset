@@ -36,7 +36,9 @@ class VideoTrimmer:
             # Process frame with Holistic model
             results = self.holistic.process(rgb_frame)
 
-            # person_detected = results.pose_landmarks is not None
+            person_detected = results.pose_landmarks is not None
+            if not person_detected or not results.pose_landmarks.landmark[12].x:
+              continue
             # face_detected = results.face_landmarks is not None
             if results.right_hand_landmarks:
               if right_hand_pos is None:
@@ -74,9 +76,9 @@ class VideoTrimmer:
         # print(f"Trim frame found at frame {trim_frame}.")
         output_stream = io.BytesIO()
         if trim_frame < 10:
-          with open(f"{id}.mp4", "rb") as f:
+          print(f"Trim frame {trim_frame} < 10. Hence keeping the video as such")
+          with open(f"{self.thread_id}.mp4", "rb") as f:
             output_stream.write(f.read())
-          # os.remove(f"./{self.thread_id}.mp4")
           output_stream.seek(0)
           return output_stream
 

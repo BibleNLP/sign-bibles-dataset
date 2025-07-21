@@ -35,7 +35,7 @@ def process_video(id, remote_path, nxt_cld_conn, output_path):
 		generate_pose_files_v2(id) # mp4, and npz usging dwpose
 
 		# shutil.move(f"{id}.mp4", output_path)
-		shutil.move(f"{id}_pose-animation.mp4", f"{output_path}/{id}.pose-animation.mp4")
+		# shutil.move(f"{id}_pose-animation.mp4", f"{output_path}/{id}.pose-animation.mp4")
 		shutil.move(f"{id}_pose-mediapipe.pose", f"{output_path}/{id}.pose-mediapipe.pose")
 		shutil.move(f"{id}_pose-dwpose.npz", f"{output_path}/{id}.pose-dwpose.npz")
 
@@ -62,7 +62,7 @@ def process_video(id, remote_path, nxt_cld_conn, output_path):
 
 		metadata = {"filename": f"{id}.mp4",
 					"pose": {
-						"animation": f"{id}.pose-animation.mp4",
+						# "animation": f"{id}.pose-animation.mp4",
 						"mediapipe": f"{id}.pose-mediapipe.pose",
 						"dwpose": f"{id}.pose-dwpose.npz"
 					},
@@ -82,7 +82,7 @@ def process_video(id, remote_path, nxt_cld_conn, output_path):
 								"language": {
 									"name": "English",
 									"ISO639-3": "eng",
-									"BCP-47": "eng-US"
+									"BCP-47": "en-US"
 								},
 								"source": "Berean Standard Bible",
 							}],
@@ -91,7 +91,7 @@ def process_video(id, remote_path, nxt_cld_conn, output_path):
 								"language": {
 									"name": "English",
 									"ISO639-3": "eng",
-									"BCP-47": "eng"
+									"BCP-47": "en"
 								}
 
 								}]
@@ -111,75 +111,6 @@ def clear_space(file_path):
 		os.remove(file_path)
 
 
-def process_video_onmount(id, orig_path, processed_path): 
-	'''NOT updated as per the changes in process_video'''
-
-	downsample_video_ondisk(orig_path, f"{id}.mp4")
-
-	trimmed_stream = trim_off_storyboard(None, id)
-	try:
-		if not trimmed_stream:
-			raise Exception("Processing with mediapipe failed")
-		generate_mask_and_pose_video_files(id)
-
-		output_path = f"{processed_path}/{id}.mp4"
-		shutil.move(f"{id}.mp4", output_path)
-		shutil.move(f"{id}_pose.mp4", f"{output_path}/{id}.pose.mp4")
-		shutil.move(f"{id}_mask.mp4", f"{output_path}/{id}.mask.mp4")
-
-		parts = orig_path.split("/")
-		ref = f"{parts[-3]} {parts[-2].replace("Ch ", "")}"
-		verse = parts[-1].split(".")[0].split(" ")[1]
-		verse_parts = "-".join(verse.split("-")[:-1])
-		ref = f"{ref}:{verse_parts}"
-
-
-		parts = remote_path.split("/")
-		ref = f"{parts[0]} {parts[1].replace("Ch ", "")} "
-		verse = parts[-1].split(".")[0].split(" ")[-1]
-		verse = re.sub(junk_pattern_in_filename, verse, "")
-		ref = ref+verse
-
-		metadata = {"filename": f"{id}.mp4",
-					"pose":f"{id}.pose.mp4", 
-					"mask":f"{id}.mask.mp4",
-					"source": f"{ref} of https://www.youtube.com/@islv-holybible",
-					"license": "CC-BY-SA",
-					"bible-ref": ref,
-					"transcripts": [{
-								"text": get_verses(ref),
-								"language": "English",
-								"ISO 639-1": "en"
-							}],
-					"glosses": [{
-								"text": [(0,0,"nil")],
-								"language": "English",
-								"ISO 639-1": "en"
-
-								}]
-					}
-		with open(f"{id}.json", "w") as f:
-			json.dump(metadata, f, indent=4, sort_keys=True)
-		shutil.move(f"{id}.json", f"{output_path}/{id}.json")
-		print(f'processed {id}!!!!!!!!!!!!!!!!!!!!')
-	except Exception as exce:
-		# print(exce)
-		raise exce
-
-
-
-def main():
-	if len(sys.argv) != 4:
-		print("Usage: python process_video_script.py <path> <id>")
-		sys.exit(1)
-
-	video_id = int(sys.argv[1])
-	video_path = sys.argv[2]
-
-	# nxt_cld_conn = NextCloud_connection()
-	output_path = "/mnt/share/processed_path"
-	process_video_onmount(video_id, video_path, output_path)
-
 def main_nxtcld():
 	if len(sys.argv) != 4:
 		print("Usage: python process_video_script.py <path> <id>")
@@ -190,7 +121,7 @@ def main_nxtcld():
 	output_path = sys.argv[3]
 
 	nxt_cld_conn = None
-	nxt_cld_conn = NextCloud_connection()
+	# nxt_cld_conn = NextCloud_connection()
 	process_video(video_id, video_path, nxt_cld_conn, output_path)
 
 
