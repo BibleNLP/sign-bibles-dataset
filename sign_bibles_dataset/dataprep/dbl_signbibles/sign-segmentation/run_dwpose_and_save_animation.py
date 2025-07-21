@@ -150,7 +150,6 @@ def run_pose_and_save(video_path: Path, output_dir: Path, overwrite=False) -> No
     pose_npz_path = output_dir / f"{video_stem}.pose-dwpose.npz"
     if animation_path.is_file() and pose_npz_path.is_file() and not overwrite:
         # print(f"Already done with {pose_npz_path} and {animation_path}")
-        return
         try:
             with np.load(pose_npz_path) as data:
                 if "frames" in data and "confidences" in data:
