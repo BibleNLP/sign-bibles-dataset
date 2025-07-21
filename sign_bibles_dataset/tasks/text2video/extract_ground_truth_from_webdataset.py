@@ -45,12 +45,13 @@ def extract_queries(language_subset: str, sample_count: int | None) -> pd.DataFr
 
             for seg_idx, ((start_frame, end_frame), verse_texts) in enumerate(sorted_segments):
                 for verse_text in verse_texts:
-                    queries["seg_idx"].append(seg_idx)
-                    queries["query_text"].append(verse_text)
-                    queries["video_id"].append(sample["__key__"])
-                    queries["start_frame"].append(start_frame)
-                    queries["end_frame"].append(end_frame)
-                    queries["total_frames"].append(total_frames)
+                    if verse_text:
+                        queries["query_text"].append(verse_text)
+                        queries["video_id"].append(sample["__key__"])
+                        queries["seg_idx"].append(seg_idx)
+                        queries["start_frame"].append(start_frame)
+                        queries["end_frame"].append(end_frame)
+                        queries["total_frames"].append(total_frames)
 
     return pd.DataFrame(queries)
 
