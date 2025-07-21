@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 """Upload WebDataset to HuggingFace datasets."""
 
-from collections import defaultdict
 import argparse
 import json
 import os
+from collections import defaultdict
 from pathlib import Path
 
 from huggingface_hub import HfApi, upload_large_folder
@@ -157,6 +157,8 @@ def create_dataset_card(
     return output_path
 
 
+
+
 def upload_to_huggingface(webdataset_path: str | Path, dataset_name: str, token: str | None = None) -> None:
     """
     Upload WebDataset shards (directly, preserving folders) to HuggingFace.
@@ -179,13 +181,6 @@ def upload_to_huggingface(webdataset_path: str | Path, dataset_name: str, token:
     # Create README.md in-place
     readme_path = webdataset_path / "README.md"
     create_dataset_card(webdataset_path, readme_path, dataset_name)
-
-    # # Copy manifest.json in-place if available
-    # if manifest_path:
-    #     print(f"Copying manifest.json to {webdataset_path}")
-    #     (webdataset_path / "manifest.json").write_bytes(manifest_path.read_bytes())
-    # else:
-    #     print("⚠️ No manifest.json found, skipping.")
 
     print(f"Uploading to HuggingFace Hub as {dataset_name}")
     api = HfApi(token=token)
