@@ -35,7 +35,7 @@ def process_video(id, remote_path, nxt_cld_conn, output_path):
 		generate_pose_files_v2(id) # mp4, and npz usging dwpose
 
 		# shutil.move(f"{id}.mp4", output_path)
-		shutil.move(f"{id}_pose-animation.mp4", f"{output_path}/{id}.pose-animation.mp4")
+		# shutil.move(f"{id}_pose-animation.mp4", f"{output_path}/{id}.pose-animation.mp4")
 		shutil.move(f"{id}_pose-mediapipe.pose", f"{output_path}/{id}.pose-mediapipe.pose")
 		shutil.move(f"{id}_pose-dwpose.npz", f"{output_path}/{id}.pose-dwpose.npz")
 
@@ -62,7 +62,7 @@ def process_video(id, remote_path, nxt_cld_conn, output_path):
 
 		metadata = {"filename": f"{id}.mp4",
 					"pose": {
-						"animation": f"{id}.pose-animation.mp4",
+						# "animation": f"{id}.pose-animation.mp4",
 						"mediapipe": f"{id}.pose-mediapipe.pose",
 						"dwpose": f"{id}.pose-dwpose.npz"
 					},

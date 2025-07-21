@@ -5,22 +5,30 @@ import json
 import tempfile
 import os
 import cv2
+from io import BytesIO
+import urllib3
+
+# Increase urllib3 timeout globally
+urllib3.util.timeout.Timeout.DEFAULT_TIMEOUT = 300  # 5 minutes
 
 
 def main():
+	# dataset = wds.WebDataset(
+	# 	"https://huggingface.co/datasets/bridgeconn/sign-bible/resolve/main/chunk_{00001..00002}.tar",
+	# 	# timeout=300,
+	# 	bufsize=1024,
+	# 	).decode()
 
-	# dataset = wds.WebDataset("https://huggingface.co/datasets/bridgeconn/sign-bible/resolve/main/chunk_{00001..00005}.tar").decode(isl_custom_decoder)
-
-	buffer_size = 1000
+	buffer_size = 1024
 	dataset = (
-	    wds.WebDataset("https://huggingface.co/datasets/bridgeconn/sign-bible/resolve/main/chunk_00001.tar", shardshuffle=False)
-	    # .shuffle(buffer_size)
-	    .decode(isl_custom_decoder)
+	    wds.WebDataset("https://huggingface.co/datasets/bridgeconn/sign-dictionary-isl/resolve/refs%2Fpr%2F1/chunk_00001.tar", shardshuffle=False)
+	    .shuffle(buffer_size)
+	    .decode()
 	)
 
 	# dataset = wds.WebDataset(
-	# 			"../../../ISLGospels_tar_chunks/chunk_{00001..00002}.tar"
-	# 			).decode(isl_custom_decoder)
+	# 			"../../../ISLDict_tar_chunks/chunk_{00001..00002}.tar"
+	# 			).decode()
 
 	for sample in dataset:
 		''' Each sample contains:
@@ -33,8 +41,8 @@ def main():
 		# JSON metadata
 		json_data = sample['json']
 		print(json_data['filename']) 
-		print(json_data['bible-ref']) 
-		print(json_data['biblenlp-vref']) 
+		# print(json_data['bible-ref']) 
+		# print(json_data['biblenlp-vref']) 
 		print(json_data['signer'])
 		print(json_data['transcripts']) 
 
@@ -42,12 +50,10 @@ def main():
 		mp4_data = sample['mp4']
 		process_video(mp4_data)
 		
-		# pose video
-		pose_data = sample['pose-animation.mp4']
-		process_video(pose_data)
 
 		# dwpose results
-		dwpose_coords = sample["pose-dwpose.npz"]
+		# dwpose_coords = np.load(BytesIO(sample["pose-dwpose.npz"]))
+		dwpose_coords = sample['pose-dwpose.npz']
 		frame_poses = dwpose_coords['frames'].tolist()
 		print(f"Frames in dwpose coords: {len(frame_poses)} poses")
 		print(f"Pose coords shape: {len(frame_poses[0][0])}")
@@ -59,16 +65,6 @@ def main():
 
 		break
 
-
-def isl_custom_decoder(key, data):
-	'''Need special handling as .npz files need pickle''' 
-	from io import BytesIO
-	if key == ".pose-dwpose.npz":
-		data_stream = BytesIO(data)
-		data = np.load(data_stream, allow_pickle=True)
-	elif key == ".json":
-		data = json.loads(data.decode('utf-8'))
-	return data
 
 def process_poseformat(pose_format_data):
 	from pose_format import Pose

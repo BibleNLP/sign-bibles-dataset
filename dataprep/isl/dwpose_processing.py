@@ -252,19 +252,18 @@ def generate_mask_and_pose_video_files(id):
 
 def generate_pose_files_v2(id):
     try:
-      temp_file_pose =f"./{id}_pose-animation.mp4"
+      # temp_file_pose =f"./{id}_pose-animation.mp4"
 
       cap = cv2.VideoCapture(f"./{id}.mp4")
-      width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
-      height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
-      fps = int(cap.get(cv2.CAP_PROP_FPS))
+      # width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+      # height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+      # fps = int(cap.get(cv2.CAP_PROP_FPS))
       cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
 
-      # print(f"about to trim! Width: {width}, Height: {height}, FPS: {fps}")
 
-      fourcc="mp4v"
-      fourcc_code = cv2.VideoWriter_fourcc(*fourcc)  # Codec (e.g., 'mp4v', 'XVID')
-      video_writer2 = cv2.VideoWriter(temp_file_pose, fourcc_code, fps, (width, height))
+      # fourcc="mp4v"
+      # fourcc_code = cv2.VideoWriter_fourcc(*fourcc)  # Codec (e.g., 'mp4v', 'XVID')
+      # video_writer2 = cv2.VideoWriter(temp_file_pose, fourcc_code, fps, (width, height))
       poses = []
 
       while True:
@@ -283,8 +282,8 @@ def generate_pose_files_v2(id):
           assert len(candidate[0]) == DWPOSE_LANDMARKS_NUM, f"{len(candidate[0])=}"
           poses.append(candidate)
           # Write frame to video
-          video_writer2.write(skeleton)
-      video_writer2.release()
+          # video_writer2.write(skeleton)
+      # video_writer2.release()
       np.savez_compressed(f"./{id}_pose-dwpose.npz", frames=np.array(poses, dtype=np.float64))
       cap.release()
     except Exception as exce:
