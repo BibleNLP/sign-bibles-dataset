@@ -2,11 +2,14 @@
 
 import argparse
 import logging
+import time
 from pathlib import Path
 
 from pose_format import Pose
 from sign_language_segmentation.bin import segment_pose
 from tqdm import tqdm
+
+MODEL_CHOICES = ["model_E4s-1.pth", "model_E1s-1.pth"]
 
 
 def find_pose_files(search_path: Path):
@@ -16,62 +19,70 @@ def find_pose_files(search_path: Path):
     return list(search_path.rglob("*.pose"))
 
 
-def has_eaf(pose_file: Path) -> bool:
-    """Check if corresponding .eaf file exists."""
-    eaf_file = pose_file.with_suffix(".eaf")
-    return eaf_file.exists()
+def get_eaf_file(pose_file: Path, model: str) -> Path:
+    """Determine the EAF file name corresponding to pose file and model."""
+    model_name = Path(model).stem
+    return pose_file.with_name(f"{pose_file.stem}.{model_name}.eaf")
 
 
-def write_eaf_file(pose_file: Path, eaf) -> None:
-    eaf_file = pose_file.with_suffix(".eaf")
+def has_eaf(pose_file: Path, model: str) -> bool:
+    return get_eaf_file(pose_file, model).exists()
+
+
+def write_eaf_file(pose_file: Path, model: str, eaf) -> None:
+    eaf_file = get_eaf_file(pose_file, model)
     eaf.to_file(eaf_file)
     logging.debug(f"Saved {eaf_file}")
 
 
-def process_pose_file(pose_file: Path, model: str, verbose=False):
-    logging.debug(f"Processing {pose_file}...")
-
+def segment_pose_file(pose_file: Path, model: str, verbose=False):
+    logging.debug(f"Processing {pose_file.name} with {model}...")
     with pose_file.open("rb") as f:
         pose = Pose.read(f)
 
     eaf, _ = segment_pose(pose, model=model, verbose=verbose)
-
-    # Always link pose
-    eaf.add_linked_file(str(pose_file), mimetype="application/pose")
-
-    write_eaf_file(pose_file, eaf)
+    write_eaf_file(pose_file, model, eaf)
 
 
 def main():
     parser = argparse.ArgumentParser(description="Batch segmentation of pose files to EAF files.")
-    parser.add_argument(
-        "search_path", type=Path, help="Root directory to search for .pose files, or path to a .pose file"
-    )
-    parser.add_argument("--model", default="model_E4s-1.pth", help="Path to model (default model_E1s-1.pth)")
+    parser.add_argument("search_path", type=Path, help="Root directory or pose file to process")
+    parser.add_argument("--model", choices=MODEL_CHOICES, help=f"Model to use (default: all: {MODEL_CHOICES})")
     parser.add_argument("--overwrite", action="store_true")
     parser.add_argument("--verbose", action="store_true")
-
     args = parser.parse_args()
 
-    logging.basicConfig(level=logging.INFO)
+    logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 
+    models = [args.model] if args.model else MODEL_CHOICES
     pose_files = find_pose_files(args.search_path)
-
     logging.info(f"Found {len(pose_files)} pose files under {args.search_path}")
 
+    total_start = time.perf_counter()
     skipped, processed = 0, 0
+    model_timings = {}
 
-    for pose_file in tqdm(pose_files, desc="Segmenting"):
-        if has_eaf(pose_file) and not args.overwrite:
-            skipped += 1
-            continue
-        try:
-            process_pose_file(pose_file, model=args.model, verbose=args.verbose)
+    for model in models:
+        model_start = time.perf_counter()
+        for pose_file in tqdm(pose_files, desc=f"Segmenting with {model}"):
+            eaf_file = get_eaf_file(pose_file, model)
+            if eaf_file.exists() and not args.overwrite:
+                skipped += 1
+                logging.debug(f"Skipping {pose_file.name} with {model} (EAF exists).")
+                continue
+            segment_pose_file(pose_file, model, verbose=args.verbose)
             processed += 1
-        except Exception as e:
-            logging.error(f"Failed processing {pose_file}: {e}")
+        model_elapsed = time.perf_counter() - model_start
+        model_timings[model] = model_elapsed
+        logging.info(f"Model {model} completed in {model_elapsed:.2f} seconds")
 
-    logging.info(f"Processing complete: {processed} files segmented, {skipped} skipped (already had EAF).")
+    total_elapsed = time.perf_counter() - total_start
+    logging.info(f"Total time: {total_elapsed:.2f} seconds")
+    logging.info(f"Processed {processed} files, skipped {skipped}")
+
+    logging.info("Per-model timings:")
+    for model, duration in model_timings.items():
+        logging.info(f"  {model}: {duration:.2f} seconds")
 
 
 if __name__ == "__main__":
