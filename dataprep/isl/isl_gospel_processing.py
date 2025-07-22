@@ -23,7 +23,7 @@ def process_video(id, remote_path, nxt_cld_conn, output_path):
 		output_path = output_path[:-1]
 	main_path = f"{output_path}/{id}.mp4"
 	try:
-		# nxt_cld_conn.download_file(remote_path, f"{id}_large.mp4")
+		nxt_cld_conn.download_file(remote_path, f"{id}_large.mp4")
 
 		downsample_video_ondisk(f"{id}_large.mp4", f"{id}.mp4")
 		# shutil.copy(main_path, f"./{id}.mp4")  
