@@ -59,45 +59,48 @@ def process_video(id, remote_path, nxt_cld_conn, output_path):
 
 		probe = ffmpeg.probe(main_path)
 		duration = float(probe['format']['duration'])
+		fps = float(probe['format']['fps'])
+		width = int(probe['streams'][0]['width'])
+		height = int(probe['streams'][0]['height'])
 
-		metadata = {"filename": f"{id}.mp4",
-					"pose": {
-						# "animation": f"{id}.pose-animation.mp4",
-						"mediapipe": f"{id}.pose-mediapipe.pose",
-						"dwpose": f"{id}.pose-dwpose.npz"
-					},
-					"source": "https://www.youtube.com/@islv-holybible",
-					"license": "CC-BY-SA",
+		metadata = {
 					"language": {
 						"name": "Indian Sign Language",
+						"nameLocal" : "Indian Sign Language",
 						"ISO639-3": "ins",
 						"BCP-47": "ins-IN"
 					},
+					"project": "Indian Sign Language Bible (ISLV)",
+					"source": "https://www.youtube.com/@islv-holybible",
+					"license": "Creative Commons - Attribution-ShareAlike [CC BY-SA]",
 					"bible-ref": ref,
 					"biblenlp-vref": vref,
-					"duration": f"{duration} seconds",
+					"duration_sec": f"{duration} seconds",
 					"signer": signer,
-					"transcripts": [{
-								"text": get_verses(ref, "BSB"),
-								"language": {
-									"name": "English",
-									"ISO639-3": "eng",
-									"BCP-47": "en-US"
-								},
-								"source": "Berean Standard Bible",
-							}],
-					"glosses": [{
-								"text": [(0,0,"nil")],
-								"language": {
-									"name": "English",
-									"ISO639-3": "eng",
-									"BCP-47": "en"
-								}
-
-								}]
+					"total_frames": frame_count,
+					"fps": fps,
+					"width": width,
+					"height":height,
 					}
+		transcripts = [{
+					"text": get_verses(ref, "BSB"),
+					"start_frame": 0,
+					"end_frame": frame_count,
+					"language": {
+						"name": "English",
+						"nameLocal" : "Indian Sign Language",
+						"ISO639-3": "eng",
+						"BCP-47": "en-US"
+					},
+					"license": "public domain",
+					"source": "http://ebible.org/engbsb/",
+					"bible-ref": ref,
+					"biblenlp-vref": vref,
+				}]
 		with open(f"{output_path}/{id}.json", "w") as f:
 			json.dump(metadata, f, indent=4)
+		with open(f"{output_path}/{id}.transcripts.json", "w") as f:
+			json.dump(transcripts, f, indent=4)
 		print(f'Processed {id}!!!!!!!!!!!!!!!!!!!!')
 	finally:
 		clear_space(f"{id}_large.mp4")
