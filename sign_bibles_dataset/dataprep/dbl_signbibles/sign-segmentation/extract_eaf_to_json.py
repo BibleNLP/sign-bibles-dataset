@@ -42,20 +42,14 @@ def extract_sentence_sign_segments(eaf_path: Path) -> Path:
     return output_json
 
 
-def main():
-    parser = argparse.ArgumentParser(description="Extract SENTENCE and SIGN segments from EAF files.")
-    parser.add_argument("path", type=Path, help="Path to a .eaf file or a directory containing .eaf files")
-    args = parser.parse_args()
-
-    path = args.path.resolve()
-
+def recursive_eaf_to_json(path: Path):
     if not path.exists():
         raise FileNotFoundError(f"Path not found: {path}")
 
     if path.is_file():
         eaf_files = [path]
     elif path.is_dir():
-        eaf_files = list(path.rglob("*.eaf"))
+        eaf_files = list(path.rglob("*.model*.eaf"))
     else:
         raise ValueError(f"Path must be a file or directory: {path}")
 
@@ -63,6 +57,15 @@ def main():
 
     for eaf_file in tqdm(eaf_files, desc="Processing .eaf files"):
         extract_sentence_sign_segments(eaf_file)
+
+
+def main():
+    parser = argparse.ArgumentParser(description="Extract SENTENCE and SIGN segments from EAF files.")
+    parser.add_argument("path", type=Path, help="Path to a .eaf file or a directory containing .eaf files")
+    args = parser.parse_args()
+
+    path = args.path.resolve()
+    recursive_eaf_to_json(path)
 
 
 if __name__ == "__main__":
