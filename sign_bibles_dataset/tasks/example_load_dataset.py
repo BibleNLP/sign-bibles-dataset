@@ -12,11 +12,15 @@ from tqdm import tqdm
 # requires torchcodec, torchvision
 
 
-def iterate_over_dataset(language_subset: str, sample_count: int) -> pd.DataFrame:
+def iterate_over_dataset(language_subset: str, sample_count: int, output_dir: Path | None = None) -> pd.DataFrame:
     """Extract valid queries from the Sign Bibles dataset."""
     # https://huggingface.co/docs/datasets/en/video_load#webdataset
     # The dataet is massive! Best to stream it
     ds = load_dataset("bible-nlp/sign-bibles", language_subset, streaming=True, split="train")
+
+    if output_dir is None:
+        output_dir = Path.cwd() / "example_outputs/"
+        output_dir.mkdir(exist_ok=True)
 
     print(f"Loading dataset subset '{language_subset}: {ds}'")
     ds = ds.cast_column("mp4", Video())  # for convenience, otherwise we just get Value('binary'), aka just bytes
@@ -31,12 +35,13 @@ def iterate_over_dataset(language_subset: str, sample_count: int) -> pd.DataFram
         # load Pose format. Normally it expects a file buffer, so..
         pose = Pose.read(io.BytesIO(sample["pose-mediapipe.pose"]))
         print("Pose Format (https://github.com/sign-language-processing/pose)")
-        print(pose)
+        print(pose)  # should show Pose Header
 
         # DWPose
-        dwpose = sample["pose-dwpose.npz"]
-        print("DWPose Format")
-        print(type(dwpose))  # dictionary with "frames" as the key, sometimes also "confidences"
+        if "pose-dwpose.npz" in sample:
+            dwpose = sample["pose-dwpose.npz"]
+            print("DWPose Format")
+            print(type(dwpose))  # dictionary with "frames" as the key, sometimes also "confidences"
 
         # load video
         video = sample["mp4"]
@@ -49,23 +54,30 @@ def iterate_over_dataset(language_subset: str, sample_count: int) -> pd.DataFram
         if "transcripts.json" in sample:
             transcripts = sample["transcripts.json"]
             print(f"Transcripts for {sample_key}")
-            for transcript in transcripts:
+            for i, transcript in enumerate(transcripts):
                 start_frame_index = transcript["start_frame"]
-
                 end_frame_index = transcript["end_frame"]
+
+                mid_index = start_frame_index + (end_frame_index - start_frame_index) // 2
+
                 print(transcript["text"][:100], start_frame_index, end_frame_index)
 
                 # torchcodec._frame.Frame's .data has the data
-                start_frame = video.get_frame_at(start_frame_index).data
-                end_frame = video.get_frame_at(end_frame_index).data
+                # start_frame = video.get_frame_at(start_frame_index).data
+                mid_frame = video.get_frame_at(mid_index).data
+                # end_frame = video.get_frame_at(end_frame_index).data
 
-                start_out_path = f"{sample_key}_{start_frame_index}.png"
-                print(f"Writing to {Path(start_out_path).resolve()}")
+                # start_out_path = output_dir / f"{sample_key}_{start_frame_index}.png"
+                # print(f"Writing to {Path(start_out_path).resolve()}")
                 # write_png(start_frame, start_out_path)
 
-                end_out_path = f"{sample_key}_{end_frame_index}.png"
-                print(f"Writing to {Path(end_out_path).resolve()}")
+                # end_out_path = output_dir / f"{sample_key}_{end_frame_index}.png"
+                # print(f"Writing to {Path(end_out_path).resolve()}")
                 # write_png(end_frame, end_out_path)
+
+                mid_out_path = output_dir / f"{sample_key}_seg{i}_frame{mid_index}.png"
+                print(f"Writing to {Path(mid_out_path).resolve()}")
+                write_png(mid_frame, mid_out_path)
 
 
 def main(
@@ -83,7 +95,7 @@ if __name__ == "__main__":
         default="ase_small",
         help="Language subset to download (default: ase_small)",
     )
-    parser.add_argument("--sample-count", type=int, default=1)
+    parser.add_argument("--sample-count", type=int, default=10)
 
     args = parser.parse_args()
 
