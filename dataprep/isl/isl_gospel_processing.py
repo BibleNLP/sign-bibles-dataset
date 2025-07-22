@@ -113,7 +113,7 @@ def process_video(id, remote_path, nxt_cld_conn, output_path):
 			json.dump(transcripts, f, indent=4)
 		print(f'Processed {id}!!!!!!!!!!!!!!!!!!!!')
 	finally:
-		# clear_space(f"{id}_large.mp4")
+		clear_space(f"{id}_large.mp4")
 		clear_space(f"{id}.mp4")
 		clear_space(f"{id}_pose-animation.mp4")
 		clear_space(f"{id}_pose-dwpose.npz")
