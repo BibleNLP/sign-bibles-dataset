@@ -199,9 +199,11 @@ class WebDatasetCreator:
         sample["files"] = {f"{sample_name}.mp4": video_path}
 
         suffixes = {
-            ".eaf": ".eaf",
-            ".autosegmented_segments.json": ".autosegmented_segments.json",
-            ".pose-dwpose.npz": ".pose-dwpose.npz",
+            ".model_E4s-1.eaf": ".model_E4s-1.eaf",
+            ".model_E4s-1.autosegmented_segments.json": ".model_E4s-1.autosegmented_segments.json",
+            ".model_E1s-1.eaf": ".model_E1s-1.eaf",
+            ".model_E1s-1.autosegmented_segments.json": ".model_E1s-1.autosegmented_segments.json",
+            # ".pose-dwpose.npz": ".pose-dwpose.npz", # TODO: add this back in once they're all done.
             ".pose": ".pose-mediapipe.pose",
         }
 
@@ -211,10 +213,13 @@ class WebDatasetCreator:
                 sample["files"][f"{sample_name}{dest_suffix}"] = path
 
         transcripts = metadata.pop("transcripts", None)
-        if transcripts:
+        if transcripts is not None and len(transcripts) > 0:
             transcripts_filename = f"{sample_name}.transcripts.json"
             transcripts_path = self._save_transcripts(transcripts, transcripts_filename)
             sample["files"][transcripts_filename] = transcripts_path
+            logger.debug(f"Shard {shard_index}, sample {sample_name}: we have transcripts with len {len(transcripts)}")
+        else:
+            logger.debug(f"Shard {shard_index}, sample {sample_name}: NO transcripts: {transcripts}")
 
         for key in [
             "biblenlp-vref",
@@ -583,6 +588,11 @@ if __name__ == "__main__":
     main()
 # cd "/opt/home/cleong/projects/semantic_and_visual_similarity/sign-bibles-dataset" && conda activate /opt/home/cleong/envs/sign-bibles-dataset && python /opt/home/cleong/projects/semantic_and_visual_similarity/sign-bibles-dataset/dataprep/DBL-signbibles/huggingface-prep/prepare_webdataset.py --output-dir . --language-code esl
 # cd "/opt/home/cleong/projects/semantic_and_visual_similarity/sign-bibles-dataset" && conda activate /opt/home/cleong/envs/sign-bibles-dataset && python /opt/home/cleong/projects/semantic_and_visual_similarity/sign-bibles-dataset/dataprep/DBL-signbibles/huggingface-prep/prepare_webdataset.py --output-dir . --language-code sqs --language-code esl --num-videos 10000000000000
+
+# do a number of projects
+# cd "/opt/home/cleong/projects/semantic_and_visual_similarity/sign-bibles-dataset" && python /opt/home/cleong/projects/semantic_and_visual_similarity/sign-bibles-dataset/sign_bibles_dataset/dataprep/dbl_signbibles/huggingface_prep/prepare_webdataset.py --output-dir . --language-code ase --language-code esl --language-code eso --language-code gse --language-code ins --language-code nsp --language-code sqs --num-videos 50000000
+# Do those same ones but NOT ase
+# cd "/opt/home/cleong/projects/semantic_and_visual_similarity/sign-bibles-dataset" && python /opt/home/cleong/projects/semantic_and_visual_similarity/sign-bibles-dataset/sign_bibles_dataset/dataprep/dbl_signbibles/huggingface_prep/prepare_webdataset.py --output-dir . --language-code esl --language-code eso --language-code gse --language-code ins --language-code nsp --language-code sqs --num-videos 50000000
 
 
 # upload a project
