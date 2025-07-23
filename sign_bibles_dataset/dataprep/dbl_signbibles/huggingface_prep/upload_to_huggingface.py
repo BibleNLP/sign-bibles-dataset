@@ -45,7 +45,7 @@ def load_cached_stats(stats_path: Path, shard_count: int, subfolder_count: int) 
     return None
 
 
-def compute_stats_by_sampling(shards_by_folder: dict[str, list[Path]], sample_count: int | None = 1) -> dict:
+def compute_stats_by_sampling(shards_by_folder: dict[str, list[Path]], sample_count: int | None = 3) -> dict:
     total_samples = 0
     languages, projects = set(), set()
     stats_per_folder = {}
@@ -155,8 +155,6 @@ def create_dataset_card(
 
     print(f"✅ Dataset card written to {output_path}")
     return output_path
-
-
 
 
 def upload_to_huggingface(webdataset_path: str | Path, dataset_name: str, token: str | None = None) -> None:

@@ -44,19 +44,15 @@ def segment_pose_file(pose_file: Path, model: str, verbose=False):
     write_eaf_file(pose_file, model, eaf)
 
 
-def main():
-    parser = argparse.ArgumentParser(description="Batch segmentation of pose files to EAF files.")
-    parser.add_argument("search_path", type=Path, help="Root directory or pose file to process")
-    parser.add_argument("--model", choices=MODEL_CHOICES, help=f"Model to use (default: all: {MODEL_CHOICES})")
-    parser.add_argument("--overwrite", action="store_true")
-    parser.add_argument("--verbose", action="store_true")
-    args = parser.parse_args()
-
-    logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
-
-    models = [args.model] if args.model else MODEL_CHOICES
-    pose_files = find_pose_files(args.search_path)
-    logging.info(f"Found {len(pose_files)} pose files under {args.search_path}")
+def recursively_run_segmentation(
+    search_path: Path,
+    model: str | None = None,
+    overwrite: bool = False,
+    verbose: bool = False,
+):
+    models = [model] if model else MODEL_CHOICES
+    pose_files = find_pose_files(search_path)
+    logging.info(f"Found {len(pose_files)} pose files under {search_path}")
 
     total_start = time.perf_counter()
     skipped, processed = 0, 0
@@ -66,11 +62,11 @@ def main():
         model_start = time.perf_counter()
         for pose_file in tqdm(pose_files, desc=f"Segmenting with {model}"):
             eaf_file = get_eaf_file(pose_file, model)
-            if eaf_file.exists() and not args.overwrite:
+            if eaf_file.exists() and not overwrite:
                 skipped += 1
                 logging.debug(f"Skipping {pose_file.name} with {model} (EAF exists).")
                 continue
-            segment_pose_file(pose_file, model, verbose=args.verbose)
+            segment_pose_file(pose_file, model, verbose=verbose)
             processed += 1
         model_elapsed = time.perf_counter() - model_start
         model_timings[model] = model_elapsed
@@ -83,6 +79,24 @@ def main():
     logging.info("Per-model timings:")
     for model, duration in model_timings.items():
         logging.info(f"  {model}: {duration:.2f} seconds")
+
+
+def main():
+    parser = argparse.ArgumentParser(description="Batch segmentation of pose files to EAF files.")
+    parser.add_argument("search_path", type=Path, help="Root directory or pose file to process")
+    parser.add_argument("--model", choices=MODEL_CHOICES, help=f"Model to use (default: all: {MODEL_CHOICES})")
+    parser.add_argument("--overwrite", action="store_true")
+    parser.add_argument("--verbose", action="store_true")
+    args = parser.parse_args()
+
+    logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
+
+    recursively_run_segmentation(
+        search_path=args.search_path,
+        model=args.model,
+        overwrite=args.overwrite,
+        verbose=args.verbose,
+    )
 
 
 if __name__ == "__main__":
