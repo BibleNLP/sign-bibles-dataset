@@ -6,7 +6,6 @@ This script:
 * Packages everything into WebDataset format
 * Puts each language in its own subfolder in the webdataset
 
-# TODO: Add autosegmenter .eaf file instead, though maybe clean them up to remove paths. (need pympi-ling)
 # TODO: size-based sharding, try for not too big?
 # TODO: add in "glosses" to match https://huggingface.co/datasets/bridgeconn/sign-bibles-isl?
 # example:
@@ -44,14 +43,21 @@ from typing import Any
 import cv2
 import langcodes
 import pandas as pd
-from tqdm import tqdm
-
 from sign_bibles_dataset.dataprep.dbl_signbibles.ebible_utils.vref_lookup import (
     citation_to_text_and_vrefs,
     load_bible_lines,
     load_vref_map,
 )
-from sign_bibles_dataset.dataprep.dbl_signbibles.huggingface_prep.dbl_sign_downloader import DBLSignDownloader
+from sign_bibles_dataset.dataprep.dbl_signbibles.huggingface_prep.dbl_sign_downloader import (
+    DBLSignDownloader,
+)
+from sign_bibles_dataset.dataprep.dbl_signbibles.sign_segmentation.extract_eaf_to_json import (
+    recursive_eaf_to_json,
+)
+from sign_bibles_dataset.dataprep.dbl_signbibles.sign_segmentation.recursively_run_segmentation import (
+    MODEL_CHOICES,
+)
+from tqdm import tqdm
 
 
 # Initialize the logger with the correct path
@@ -123,7 +129,9 @@ class WebDatasetCreator:
                 project_output_dir = self.output_dir / language_code / project_slug
                 project_output_dir.mkdir(parents=True, exist_ok=True)
 
-                for shard_index, shard in enumerate(tqdm(shards, desc=f"Writing shards for {project_slug}")):
+                for shard_index, shard in enumerate(
+                    tqdm(shards, desc=f"Writing shards for {project_slug}")
+                ):
                     shard_path = project_output_dir / f"shard_{shard_index:05d}.tar"
                     with tarfile.open(shard_path, "w") as tar:
                         for video_info in shard:
@@ -135,7 +143,9 @@ class WebDatasetCreator:
                     all_shard_paths.append(str(shard_path))
 
         if self.skipped_samples:
-            logger.info(f"Skipped {len(self.skipped_samples)} samples due to large files:")
+            logger.info(
+                f"Skipped {len(self.skipped_samples)} samples due to large files:"
+            )
             for entry in self.skipped_samples:
                 logger.info(
                     f"- Sample: {entry['sample']} | File: {entry['large_file']} | Size: {entry['size_gb']:.2f} GB"
@@ -151,7 +161,10 @@ class WebDatasetCreator:
         return language_groups
 
     def _split_into_shards(self, samples_info, shard_size):
-        return [samples_info[i : i + shard_size] for i in range(0, len(samples_info), shard_size)]
+        return [
+            samples_info[i : i + shard_size]
+            for i in range(0, len(samples_info), shard_size)
+        ]
 
     def _save_transcripts(self, transcripts, filename):
         temp_path = Path("/tmp") / filename
@@ -164,7 +177,12 @@ class WebDatasetCreator:
         video_path = Path(video_info["filename_path"])
         files_to_check = [video_path]
 
-        optional_suffixes = [".eaf", ".autosegmented_segments.json", ".pose-dwpose.npz", ".pose"]
+        optional_suffixes = [
+            ".eaf",
+            ".autosegmented_segments.json",
+            ".pose-dwpose.npz",
+            ".pose",
+        ]
         for suffix in optional_suffixes:
             path = video_path.with_suffix(suffix)
             if path.exists():
@@ -189,37 +207,48 @@ class WebDatasetCreator:
         sample = {}
         metadata = video_info.copy()
 
-        language_code = metadata["language"]["ISO639-3"]
+        language_code = metadata["language"]["ISO639-3"].lower()
         project_slug = self._slugify(metadata["project_name"])
-        original_name = Path(metadata["filename"]).stem
-        sample_name = f"{language_code}_{project_slug}_{original_name}"
+        original_name = Path(metadata["filename"]).stem.lower()
+        sample_name = f"{language_code}_{project_slug}_{original_name}".lower()
         sample["__key__"] = sample_name
 
         video_path = Path(metadata["filename_path"])
         sample["files"] = {f"{sample_name}.mp4": video_path}
 
         suffixes = {
-            ".model_E4s-1.eaf": ".model_E4s-1.eaf",
-            ".model_E4s-1.autosegmented_segments.json": ".model_E4s-1.autosegmented_segments.json",
-            ".model_E1s-1.eaf": ".model_E1s-1.eaf",
-            ".model_E1s-1.autosegmented_segments.json": ".model_E1s-1.autosegmented_segments.json",
             # ".pose-dwpose.npz": ".pose-dwpose.npz", # TODO: add this back in once they're all done.
             ".pose": ".pose-mediapipe.pose",
         }
+
+        for model_pth in MODEL_CHOICES:
+            model_stem = Path(model_pth).stem  # .model_E4s-1, .model_E1s-1
+
+            for suffix in [".eaf", ".autosegmented_segments.json"]:
+                model_and_suffix = f".{model_stem}{suffix}"
+                # turns out huggingface cannot handle uppercase filename extensions, so we lowercase them
+                suffixes[model_and_suffix] = model_and_suffix.lower()
 
         for src_suffix, dest_suffix in suffixes.items():
             path = video_path.with_suffix(src_suffix)
             if path.exists():
                 sample["files"][f"{sample_name}{dest_suffix}"] = path
 
-        transcripts = metadata.pop("transcripts", None)
-        if transcripts is not None and len(transcripts) > 0:
-            transcripts_filename = f"{sample_name}.transcripts.json"
-            transcripts_path = self._save_transcripts(transcripts, transcripts_filename)
-            sample["files"][transcripts_filename] = transcripts_path
-            logger.debug(f"Shard {shard_index}, sample {sample_name}: we have transcripts with len {len(transcripts)}")
+        # empty list as default
+        transcripts = metadata.pop("transcripts", [])
+        transcripts_filename = f"{sample_name}.transcripts.json"
+        transcripts_path = self._save_transcripts(transcripts, transcripts_filename)
+        sample["files"][transcripts_filename] = transcripts_path
+        if (
+            len(transcripts) > 0
+        ):  # TODO: check if "text" is in any item and item["text"] is not an empty string
+            logger.debug(
+                f"Shard {shard_index}, sample {sample_name}: we have transcripts with len {len(transcripts)}"
+            )
         else:
-            logger.debug(f"Shard {shard_index}, sample {sample_name}: NO transcripts: {transcripts}")
+            logger.debug(
+                f"Shard {shard_index}, sample {sample_name}: NO transcripts: {transcripts}"
+            )
 
         for key in [
             "biblenlp-vref",
@@ -296,7 +325,9 @@ def parse_metadata_to_info(xml_path: Path):
     Parse a metadata.xml file and extract language, countries, and rights holders.
     Returns a tuple: (language_dict, countries_list, rights_holders_list)
     """
-    logger.debug(f"Parsing metadata for language, countries, and rights holders: {xml_path}")
+    logger.debug(
+        f"Parsing metadata for language, countries, and rights holders: {xml_path}"
+    )
     try:
         tree = ET.parse(xml_path)
         root = tree.getroot()
@@ -351,10 +382,14 @@ def search_ebible_translations(
         & (ebible_translations_df["translationId"] == translation_id)
     ]
     if result.empty:
-        logger.debug(f"No results found for ({language_code}, {translation_id})")  # expected, many don't have it
+        logger.debug(
+            f"No results found for ({language_code}, {translation_id})"
+        )  # expected, many don't have it
         return None
     elif len(result) > 1:
-        logger.warning(f"Warning: Multiple results found for ({language_code}, {translation_id}), returning the first.")
+        logger.warning(
+            f"Warning: Multiple results found for ({language_code}, {translation_id}), returning the first."
+        )
 
     return result.iloc[0].to_dict()
 
@@ -404,12 +439,18 @@ def build_transcripts(
         reference_texts = df["text"].fillna("").tolist()
 
         for idx, start_frame in enumerate(frame_indices):
-            end_frame = frame_indices[idx + 1] - 1 if idx + 1 < len(frame_indices) else total_frames - 1
+            end_frame = (
+                frame_indices[idx + 1] - 1
+                if idx + 1 < len(frame_indices)
+                else total_frames - 1
+            )
             reference = reference_texts[idx].strip()
             if not reference:
                 continue
 
-            verse_text, vref_indices = citation_to_text_and_vrefs(reference, vref_map, bible_verses)
+            verse_text, vref_indices = citation_to_text_and_vrefs(
+                reference, vref_map, bible_verses
+            )
 
             transcripts.append(
                 {
@@ -428,10 +469,16 @@ def build_transcripts(
         biblenlp_vrefs = sorted({v for t in transcripts for v in t["biblenlp-vref"]})
 
     else:
-        logger.debug(f"No fine-grained transcript for {video_path.name}, using fallback single transcript.")
-        verse_text, vref_indices = citation_to_text_and_vrefs(bible_ref, vref_map, bible_verses)
+        logger.debug(
+            f"No fine-grained transcript for {video_path.name}, using fallback single transcript."
+        )
+        verse_text, vref_indices = citation_to_text_and_vrefs(
+            bible_ref, vref_map, bible_verses
+        )
         if not verse_text:
-            logger.warning(f"No verses found for {video_path} reference {bible_ref}, returning empty lists")
+            logger.warning(
+                f"No verses found for {video_path} reference {bible_ref}, returning empty lists"
+            )
             return [], vref_indices
 
         transcripts.append(
@@ -470,32 +517,44 @@ def process_without_gui(args):
         )
 
     vref_map = load_vref_map(ebible_corpus_path / "metadata" / "vref.txt")
-    bible_verses = load_bible_lines(ebible_corpus_path / "corpus" / f"{args.ebible_version}.txt")
-    ebible_translations_df = pd.read_csv(ebible_corpus_path / "metadata" / "translations.csv")
+    bible_verses = load_bible_lines(
+        ebible_corpus_path / "corpus" / f"{args.ebible_version}.txt"
+    )
+    ebible_translations_df = pd.read_csv(
+        ebible_corpus_path / "metadata" / "translations.csv"
+    )
 
     logger.info(
         f"eBible Corpus: Loaded {len(vref_map)} vrefs, {len(bible_verses)} verses, {len(ebible_translations_df)} translations"
     )
 
     language_code, translation_id = args.ebible_version.split("-")
-    ebible_version_metadata = search_ebible_translations(language_code, translation_id, ebible_translations_df)
+    ebible_version_metadata = search_ebible_translations(
+        language_code, translation_id, ebible_translations_df
+    )
 
     # === Step 2: Download Videos ===
-    logger.info(f"=== Downloading {args.num_videos} videos (language code: {args.language_code}) ===")
+    logger.info(
+        f"=== Downloading {args.num_videos} videos (language code: {args.language_code}) ==="
+    )
     downloader = DBLSignDownloader(downloads_dir)
-    video_info_list = downloader.download_videos(args.num_videos, args.language_code, args.project_name)
+    video_info_list = downloader.download_videos(
+        args.num_videos, args.language_code, args.project_name
+    )
     logger.info(f"Downloaded {len(video_info_list)} videos")
 
     # === Step #: Parse
     for video_info in video_info_list:
-        meta_xml_language, meta_xml_countries, meta_xml_rights_holders = parse_metadata_to_info(
-            Path(video_info["path"]).parent / "metadata.xml"
+        meta_xml_language, meta_xml_countries, meta_xml_rights_holders = (
+            parse_metadata_to_info(Path(video_info["path"]).parent / "metadata.xml")
         )
         video_info["language"]["name"] = meta_xml_language["name"]
         video_info["language"]["nameLocal"] = meta_xml_language["nameLocal"]
         video_info["language"]["ISO639-3"] = meta_xml_language["iso"]
         # possibly try meta_xml_countries["countries"][0]["iso"]?
-        video_info["language"]["BCP-47"] = langcodes.standardize_tag(meta_xml_language["iso"])
+        video_info["language"]["BCP-47"] = langcodes.standardize_tag(
+            meta_xml_language["iso"]
+        )
 
         video_info["copyright"] = meta_xml_rights_holders
 
@@ -521,17 +580,39 @@ def process_without_gui(args):
 
         enriched_video_info_list.append(video_info)
 
+    # TODO: run pose estimators in here too
+
+    # === Run autosegmenter and also convert the eafs to jsons for convenience
+    parents = set()
+    for video_info in video_info_list:
+        parents.add(Path(video_info["filename_path"]).parent.resolve())
+
+    for parent in parents:
+        # slow, TODO: put this back in.
+        # logger.info(f"Running autosegmenter on {parent}")
+        # recursively_run_segmentation(parent)
+        logger.info(f"Converting autosegmenter outputs for {parent} to json")
+        recursive_eaf_to_json(parent)
+
     # === Step 4: Create WebDataset ===
-    logger.info(f"=== Creating WebDataset with {len(enriched_video_info_list)} samples ===")
+    logger.info(
+        f"=== Creating WebDataset with {len(enriched_video_info_list)} samples ==="
+    )
     creator = WebDatasetCreator(webdataset_dir)
-    shard_paths = creator.create_webdataset(enriched_video_info_list, shard_size=args.shard_size)
+    shard_paths = creator.create_webdataset(
+        enriched_video_info_list, shard_size=args.shard_size
+    )
     # Get parent folders for all shards
-    parent_folders = [str(Path(shard_path).parent.resolve()) for shard_path in shard_paths]
+    parent_folders = [
+        str(Path(shard_path).parent.resolve()) for shard_path in shard_paths
+    ]
 
     # Count occurrences
     folder_counts = Counter(parent_folders)
 
-    logger.info(f"Created {len(shard_paths)} shards in {webdataset_dir.resolve()}, including the following subfolders:")
+    logger.info(
+        f"Created {len(shard_paths)} shards in {webdataset_dir.resolve()}, including the following subfolders:"
+    )
     for folder, count in folder_counts.items():
         logger.info(f"* {folder} — {count} shard(s)")
 
@@ -546,8 +627,15 @@ def process_without_gui(args):
 
 def main():
     """Main function to run the entire process."""
-    parser = argparse.ArgumentParser(description="Prepare sign language videos for HuggingFace datasets")
-    parser.add_argument("--num-videos", type=int, default=10, help="Number of videos to download")
+    parser = argparse.ArgumentParser(
+        description="Prepare sign language videos for HuggingFace datasets"
+    )
+    parser.add_argument(
+        "--num-videos",
+        type=int,
+        default=10000000000000,
+        help="Number of videos to download",
+    )
     parser.add_argument(
         "--language-code",
         action="append",
@@ -572,7 +660,9 @@ def main():
         default="eng-engbsb",
     )
 
-    parser.add_argument("--output-dir", type=str, default="output", help="Output directory")
+    parser.add_argument(
+        "--output-dir", type=str, default="output", help="Output directory"
+    )
     parser.add_argument(
         "--shard-size",
         type=int,
