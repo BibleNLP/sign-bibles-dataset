@@ -96,6 +96,7 @@ if __name__ == "__main__":
         help="Language subset to download (default: ase_small)",
     )
     parser.add_argument("--sample-count", type=int, default=10)
+    parser.add_argument("--output-dir", type=Path, default="./example_outputs/")
 
     args = parser.parse_args()
 
