@@ -37,3 +37,5 @@ ENV/
 # OS
 .DS_Store
 Thumbs.db
+**/ebible_isolatedsigndataset_vocab_overlaps/**
+**/make_supervenn/**
