@@ -13,7 +13,7 @@ tqdm.pandas()
 def get_possible_asl_lex_matches(bible_text_list, asl_lex_vocab):
     bible_text_to_check = " ".join(bible_text_list)
 
-    # strip alphanumeric
+    # strip nonalphanumeric
     bible_text_to_check = re.sub(r"[^a-zA-Z\s]", "", bible_text_to_check)
 
     asl_lex_possible_matches = set()
