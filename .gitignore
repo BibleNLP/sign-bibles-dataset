@@ -198,3 +198,6 @@ sign-bibles-dataset
 **/webdataset/*
 webdataset
 *.tar.zst
+*.pose
+*.eaf
+*.bak
