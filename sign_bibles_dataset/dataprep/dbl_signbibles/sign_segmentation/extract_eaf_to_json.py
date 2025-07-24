@@ -30,7 +30,11 @@ def extract_sentence_sign_segments(eaf_path: Path) -> Path:
 
         annotations = eaf.get_annotation_data_for_tier(tier)
         data[tier] = [
-            {"start_ms": int(start), "end_ms": int(end), "text": text.strip() if text else ""}
+            {
+                "start_ms": int(start),
+                "end_ms": int(end),
+                "text": text.strip() if text else "",
+            }
             for start, end, text in annotations
         ]
 
@@ -60,8 +64,14 @@ def recursive_eaf_to_json(path: Path):
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Extract SENTENCE and SIGN segments from EAF files.")
-    parser.add_argument("path", type=Path, help="Path to a .eaf file or a directory containing .eaf files")
+    parser = argparse.ArgumentParser(
+        description="Extract SENTENCE and SIGN segments from EAF files."
+    )
+    parser.add_argument(
+        "path",
+        type=Path,
+        help="Path to a .eaf file or a directory containing .eaf files",
+    )
     args = parser.parse_args()
 
     path = args.path.resolve()
