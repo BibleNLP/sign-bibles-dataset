@@ -16,10 +16,14 @@ dependencies = [
     "ruff",
     "opencv-python",
     "tqdm",
-    "mediapipe",
+    # "mediapipe",
     "boto3",
     "requests",
     "bs4",
+    "huggingface_hub",
+    "webdataset",
+    "sign_language_segmentation @ git+https://github.com/sign-language-processing/segmentation",
+    "sign-language-gloss-utils @ git+https://github.com/cleong110/sign-language-gloss-utils.git",
 ]
 
 
@@ -90,4 +94,9 @@ known-first-party = ["sign_bibles_dataset"]
 [tool.ruff.format]
 
 [tool.setuptools]
-packages = ["sign_bibles_dataset", "sign_bibles_dataset.dataprep"]
+packages = [
+    "sign_bibles_dataset",
+    "sign_bibles_dataset.dataprep",
+    "sign_bibles_dataset.tasks",
+]
+
