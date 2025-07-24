@@ -8,11 +8,11 @@ import shutil
 from pathlib import Path
 import ffmpeg
 
-# from nextcloud_connect import NextCloud_connection
-# from ffmpeg_downsample import downsample_video_ondisk
+from nextcloud_connect import NextCloud_connection
+from ffmpeg_downsample import downsample_video_ondisk
 from mediapipe_trim import trim_off_storyboard
 from pose_format_util import video2poseformat
-from dwpose_processing import generate_pose_files_v2
+# from dwpose_processing import generate_pose_files_v2
 from bible_text_access import get_verses, book_code_lookup
 from biblenlp_util import ref2vref
 
@@ -26,18 +26,17 @@ def process_video(id, remote_path, nxt_cld_conn, output_path):
 		nxt_cld_conn.download_file(remote_path, f"{id}_large.mp4")
 
 		downsample_video_ondisk(f"{id}_large.mp4", f"{id}.mp4")
-		shutil.copy(main_path, f"./{id}.mp4")  
+		# shutil.copy(main_path, f"./{id}.mp4")  
 
 		trimmed_stream = trim_off_storyboard(None, id)
 		if not trimmed_stream:
 			raise Exception("Processing with mediapipe failed")
 		video2poseformat(id) #  .pose format using mediapipe
-		generate_pose_files_v2(id) # mp4, and npz usging dwpose
+		# generate_pose_files_v2(id) # mp4, and npz usging dwpose
 
-		# shutil.move(f"{id}.mp4", output_path)
-		# shutil.move(f"{id}_pose-animation.mp4", f"{output_path}/{id}.pose-animation.mp4")
+		shutil.move(f"{id}.mp4", output_path)
 		shutil.move(f"{id}_pose-mediapipe.pose", f"{output_path}/{id}.pose-mediapipe.pose")
-		shutil.move(f"{id}_pose-dwpose.npz", f"{output_path}/{id}.pose-dwpose.npz")
+		# shutil.move(f"{id}_pose-dwpose.npz", f"{output_path}/{id}.pose-dwpose.npz")
 
 		parts = remote_path.split("/")
 
@@ -59,45 +58,59 @@ def process_video(id, remote_path, nxt_cld_conn, output_path):
 
 		probe = ffmpeg.probe(main_path)
 		duration = float(probe['format']['duration'])
+		width = 0
+		height = 0
+		fps = 0
+		for stream in probe['streams']:
+			if stream['codec_type'] == 'video': 
+				width = int(stream['width'])
+				height = int(stream['height'])
+				fps_str = stream['r_frame_rate']      # e.g., '25/1'
+				num, denom = map(int, fps_str.split('/'))
+				fps = num / denom
 
-		metadata = {"filename": f"{id}.mp4",
-					"pose": {
-						# "animation": f"{id}.pose-animation.mp4",
-						"mediapipe": f"{id}.pose-mediapipe.pose",
-						"dwpose": f"{id}.pose-dwpose.npz"
-					},
-					"source": "https://www.youtube.com/@islv-holybible",
-					"license": "CC-BY-SA",
+				break
+
+		frame_count = int(duration * fps)
+
+		metadata = {
 					"language": {
 						"name": "Indian Sign Language",
+						"nameLocal" : "Indian Sign Language",
 						"ISO639-3": "ins",
 						"BCP-47": "ins-IN"
 					},
+					"project": "Indian Sign Language Bible (ISLV)",
+					"source": "https://www.youtube.com/@islv-holybible",
+					"license": "Creative Commons - Attribution-ShareAlike [CC BY-SA]",
 					"bible-ref": ref,
 					"biblenlp-vref": vref,
-					"duration": f"{duration} seconds",
+					"duration_sec": duration,
 					"signer": signer,
-					"transcripts": [{
-								"text": get_verses(ref, "BSB"),
-								"language": {
-									"name": "English",
-									"ISO639-3": "eng",
-									"BCP-47": "en-US"
-								},
-								"source": "Berean Standard Bible",
-							}],
-					"glosses": [{
-								"text": [(0,0,"nil")],
-								"language": {
-									"name": "English",
-									"ISO639-3": "eng",
-									"BCP-47": "en"
-								}
-
-								}]
+					"total_frames": frame_count,
+					"fps": fps,
+					"width": width,
+					"height":height,
 					}
+		transcripts = [{
+					"text": get_verses(ref, "BSB"),
+					"start_frame": 0,
+					"end_frame": frame_count,
+					"language": {
+						"name": "English",
+						"nameLocal" : "Indian Sign Language",
+						"ISO639-3": "eng",
+						"BCP-47": "en-US"
+					},
+					"license": "public domain",
+					"source": "http://ebible.org/engbsb/",
+					"bible-ref": ref,
+					"biblenlp-vref": vref,
+				}]
 		with open(f"{output_path}/{id}.json", "w") as f:
 			json.dump(metadata, f, indent=4)
+		with open(f"{output_path}/{id}.transcripts.json", "w") as f:
+			json.dump(transcripts, f, indent=4)
 		print(f'Processed {id}!!!!!!!!!!!!!!!!!!!!')
 	finally:
 		clear_space(f"{id}_large.mp4")
@@ -120,14 +133,15 @@ def main_nxtcld():
 	video_path = sys.argv[2]
 	output_path = sys.argv[3]
 
-	nxt_cld_conn = None
-	# nxt_cld_conn = NextCloud_connection()
+	# nxt_cld_conn = None
+	nxt_cld_conn = NextCloud_connection()
 	process_video(video_id, video_path, nxt_cld_conn, output_path)
 
 
 if __name__ == "__main__":
 
-	# process_video("2", "/Matthew/Ch 1/10 17-0D5A1069.MP4", None, "../../../Matthew_processed")
+	# nxt_cld_conn = NextCloud_connection()
+	# process_video("2", "/Matthew/Ch 1/10 17-0D5A1069.MP4", nxt_cld_conn, "../../../Matthew_processed")
 	# main()
 
 	main_nxtcld()
