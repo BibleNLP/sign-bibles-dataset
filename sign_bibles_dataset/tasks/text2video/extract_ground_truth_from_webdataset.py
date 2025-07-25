@@ -6,21 +6,18 @@ from pathlib import Path
 
 import pandas as pd
 from datasets import get_dataset_config_names, load_dataset
+from tqdm import tqdm
+
 from sign_bibles_dataset.dataprep.dbl_signbibles.ebible_utils.vref_lookup import (
     get_bible_verse_by_vref_index,
 )
-from tqdm import tqdm
 
-logging.basicConfig(
-    level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
-)
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 
 
 def extract_queries(language_subset: str, sample_count: int | None) -> pd.DataFrame:
     """Extract valid queries from the Sign Bibles dataset."""
-    ds = load_dataset(
-        "bible-nlp/sign-bibles", language_subset, streaming=True, split="train"
-    ).decode(False)
+    ds = load_dataset("bible-nlp/sign-bibles", language_subset, streaming=True, split="train").decode(False)
     logging.info(f"Loaded dataset subset '{language_subset}'")
 
     queries = defaultdict(list)
@@ -47,9 +44,7 @@ def extract_queries(language_subset: str, sample_count: int | None) -> pd.DataFr
 
             sorted_segments = sorted(segments.items(), key=lambda x: x[0][0])
 
-            for seg_idx, ((start_frame, end_frame), verse_texts) in enumerate(
-                sorted_segments
-            ):
+            for seg_idx, ((start_frame, end_frame), verse_texts) in enumerate(sorted_segments):
                 for verse_text in verse_texts:
                     if verse_text:
                         queries["query_text"].append(verse_text)
@@ -63,12 +58,14 @@ def extract_queries(language_subset: str, sample_count: int | None) -> pd.DataFr
 
 
 def main(language_subset: str, sample_count: int, output_path: Path | None = None):
-    queries_df = extract_queries(
-        language_subset=language_subset, sample_count=sample_count
-    )
+    queries_df = extract_queries(language_subset=language_subset, sample_count=sample_count)
     unique_video_ids = queries_df["video_id"].unique().tolist()
 
-    default_csv_name = f"{language_subset}_{len(queries_df)}queries_across_{len(unique_video_ids)}videos.csv"
+    default_csv_name = (
+        Path(__file__).parent
+        / "queries"
+        / f"{language_subset}_{len(queries_df)}queries_across_{len(unique_video_ids)}videos.csv"
+    )
     if output_path is None:
         output_path = Path(default_csv_name)
     if output_path.is_dir():
@@ -79,17 +76,13 @@ def main(language_subset: str, sample_count: int, output_path: Path | None = Non
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(
-        description="Extract Sign Bibles queries from Huggingface dataset."
-    )
+    parser = argparse.ArgumentParser(description="Extract Sign Bibles queries from Huggingface dataset.")
     parser.add_argument(
         "--language-subset",
         type=str,
         help="Language subset to download (default: all configs)",
     )
-    parser.add_argument(
-        "--sample-count", type=int, help="Number of samples to parse (default: 5)"
-    )
+    parser.add_argument("--sample-count", default=10, type=int, help="Number of samples to parse (default: 10)")
     parser.add_argument(
         "--output-path",
         type=Path,
