@@ -201,3 +201,5 @@ webdataset
 *.pose
 *.eaf
 *.bak
+*.elan
+*.parquet
