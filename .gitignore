@@ -203,3 +203,4 @@ webdataset
 *.bak
 *.elan
 *.parquet
+*.pkl
