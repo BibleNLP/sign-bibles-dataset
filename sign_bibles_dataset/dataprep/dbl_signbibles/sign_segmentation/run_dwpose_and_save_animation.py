@@ -194,6 +194,7 @@ def run_pose_and_save(video_path: Path, output_dir: Path, overwrite=False) -> No
     animation_path = output_dir / f"{video_stem}.pose-animation.mp4"
     pose_npz_path = output_dir / f"{video_stem}.pose-dwpose.npz"
     expected_keys = ["frames", "confidences"]
+
     with timed_section("Load and check numpy"):
         if animation_path.is_file() and pose_npz_path.is_file() and not overwrite:
             if is_valid_pose_npz(pose_npz_path, expected_keys):
@@ -211,48 +212,52 @@ def run_pose_and_save(video_path: Path, output_dir: Path, overwrite=False) -> No
     fourcc = cv2.VideoWriter_fourcc(*"mp4v")
     writer = cv2.VideoWriter(str(animation_path), fourcc, fps, (width, height))
 
-    poses = []
-    confidences = []
+    # Preallocate assuming known shape: (total_frames, 1, 134, 2)
+    frames_array = np.empty((total_frames, 1, 134, 2), dtype=np.float32)
+    conf_array = np.empty((total_frames, 1, 134), dtype=np.float32)
 
     iterator = range(total_frames)
     if total_frames > 1000:
         iterator = tqdm(iterator, desc=f"Processing {video_stem}.", unit="frame")
+
     with timed_section("Iterate Frames"):
-        for _ in iterator:
+        valid_frame_count = 0
+        for idx in iterator:
             ret, frame = cap.read()
             if not ret:
+                log.warning(f"Frame {idx} could not be read, stopping early.")
                 break
 
             rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
             skeleton_frame, candidate, confidence = pose_estimate_with_candidates(rgb_frame)
-
-            # try to release memory
             del frame, rgb_frame
 
             candidate, confidence = normalize_candidate_confidence(candidate, confidence)
 
-            poses.append(candidate)
-            confidences.append(confidence)
-            writer.write(skeleton_frame)
+            if candidate.shape != (1, 134, 2) or confidence.shape != (1, 134):
+                log.warning(f"Unexpected pose shape at frame {idx}, skipping.")
+                continue
 
+            frames_array[valid_frame_count] = candidate.astype(np.float32, copy=False)
+            conf_array[valid_frame_count] = confidence.astype(np.float32, copy=False)
+            writer.write(skeleton_frame)
             del candidate, confidence, skeleton_frame
 
-            # if idx % 1000 == 0:
-            #     gc.collect()
+            valid_frame_count += 1
 
     writer.release()
     cap.release()
 
-    # Convert lists to arrays with appropriate dtype
-    frames_array = np.array(poses, dtype=np.float64)  # Shape: (N, 1, 134, 2)
-    conf_array = np.array(confidences, dtype=np.float64)  # Shape: (N, 1, 134)
+    # Trim to actual number of valid frames
+    frames_array = frames_array[:valid_frame_count]
+    conf_array = conf_array[:valid_frame_count]
 
-    # Save both arrays into a compressed .npz file
     with timed_section("Save Numpy"):
         np.savez_compressed(pose_npz_path, frames=frames_array, confidences=conf_array)
 
     log.info(
-        f"Processed {len(poses)} frames from {video_path.name}, \n\tframes: {frames_array.shape}, conf:{conf_array.shape}"
+        f"Processed {valid_frame_count} valid frames from {video_path.name}, "
+        f"\n\tframes: {frames_array.shape}, conf: {conf_array.shape}"
     )
     log.info(f"Saved pose animation to {animation_path}")
     log.info(f"Saved pose data (frames, conf) to {pose_npz_path}")
