@@ -1,6 +1,7 @@
 import argparse
 import logging
 import re
+import warnings
 from pathlib import Path
 
 import numpy as np
@@ -8,6 +9,9 @@ import pandas as pd
 from brisque import BRISQUE
 from PIL import Image, UnidentifiedImageError
 from tqdm import tqdm
+
+warnings.filterwarnings("ignore")  # Suppress Python warnings about invalid values
+
 
 # Setup logging
 logging.basicConfig(level=logging.INFO)
@@ -72,9 +76,8 @@ def brisque_scores_from_video_frames(video_path: Path, overwrite: bool = False) 
     df = pd.DataFrame(results, columns=["frame", "score"]).sort_values("frame").reset_index(drop=True)
 
     df.to_parquet(parquet_path, index=False)
-    logger.info(f"Mean BRISQUE for video: {df['score'].mean()}")
+    logger.info(f"Mean BRISQUE for video ({len(df)} frames): {df['score'].mean()}")
     logger.info(f"Saved BRISQUE scores to {parquet_path}")
-
 
     return df
 
@@ -123,12 +126,19 @@ def brisque_scores_from_folder(folder: Path, recursive: bool = False, overwrite:
 
     logger.info(f"BRISQUE summary: processed {processed}, skipped {skipped} due to missing frame folders.")
 
-    return pd.concat(all_results, ignore_index=True) if all_results else pd.DataFrame(columns=["video", "frame", "score"])
+    return (
+        pd.concat(all_results, ignore_index=True) if all_results else pd.DataFrame(columns=["video", "frame", "score"])
+    )
+
 
 def main():
-    parser = argparse.ArgumentParser(description="Compute BRISQUE scores from video frame folders or individual .mp4 files.")
+    parser = argparse.ArgumentParser(
+        description="Compute BRISQUE scores from video frame folders or individual .mp4 files."
+    )
     parser.add_argument("path", type=Path, help="Either a directory containing .mp4 files or a single .mp4 file")
-    parser.add_argument("--recursive", action="store_true", help="Search for .mp4 files recursively (only applies to directories)")
+    parser.add_argument(
+        "--recursive", action="store_true", help="Search for .mp4 files recursively (only applies to directories)"
+    )
     parser.add_argument("--overwrite", action="store_true", help="Overwrite existing parquet files in _frames folders")
     args = parser.parse_args()
     print(args)
@@ -165,6 +175,7 @@ def main():
         logger.info(f"Overall average BRISQUE score across all videos: {overall_avg:.2f}")
     else:
         logger.error(f"Invalid path: {path}. Must be a directory or a .mp4 file.")
+
 
 if __name__ == "__main__":
     main()
