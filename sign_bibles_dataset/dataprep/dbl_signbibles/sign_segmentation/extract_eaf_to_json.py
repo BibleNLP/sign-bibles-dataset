@@ -4,6 +4,7 @@ import logging
 from pathlib import Path
 
 import pympi
+from pose_format import Pose
 from tqdm import tqdm
 
 logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
@@ -16,6 +17,12 @@ def extract_sentence_sign_segments(eaf_path: Path) -> Path:
     and save to a .autosegmented_segments.json file, grouped by tier.
     """
     output_json = eaf_path.with_name(eaf_path.stem + ".autosegmented_segments.json")
+    input_pose_path = eaf_path.parent / (eaf_path.name.split(".")[0] + ".pose")
+
+    fps = None
+    if input_pose_path.is_file():
+        pose = Pose.read(input_pose_path.read_bytes())
+        fps = pose.body.fps
 
     eaf = pympi.Elan.Eaf(str(eaf_path))
     tier_names = eaf.get_tier_names()
@@ -29,14 +36,22 @@ def extract_sentence_sign_segments(eaf_path: Path) -> Path:
             continue
 
         annotations = eaf.get_annotation_data_for_tier(tier)
-        data[tier] = [
-            {
-                "start_ms": int(start),
-                "end_ms": int(end),
+        tier_data = []
+        for start_ms, end_ms, text in annotations:
+            segment = {
+                "start_ms": int(start_ms),
+                "end_ms": int(end_ms),
                 "text": text.strip() if text else "",
             }
-            for start, end, text in annotations
-        ]
+
+            if fps is not None:
+                # Add frame index equivalents
+                segment["start_frame"] = round(start_ms / 1000 * fps)
+                segment["end_frame"] = round(end_ms / 1000 * fps)
+
+            tier_data.append(segment)
+
+        data[tier] = tier_data
 
     with open(output_json, "w", encoding="utf-8") as f:
         json.dump(data, f, indent=2, ensure_ascii=False)
@@ -64,9 +79,7 @@ def recursive_eaf_to_json(path: Path):
 
 
 def main():
-    parser = argparse.ArgumentParser(
-        description="Extract SENTENCE and SIGN segments from EAF files."
-    )
+    parser = argparse.ArgumentParser(description="Extract SENTENCE and SIGN segments from EAF files.")
     parser.add_argument(
         "path",
         type=Path,
