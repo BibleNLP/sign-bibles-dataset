@@ -190,3 +190,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+# find samples/mp4/ -name "*.mp4"|grep -v "animation"|parallel --progress python /opt/home/cleong/projects/semantic_and_visual_similarity/sign-bibles-dataset/sign_bibles_dataset/dataprep/dbl_signbibles/huggingface_prep/ocr/extract_frame.py "{}" --step 10s --quiet

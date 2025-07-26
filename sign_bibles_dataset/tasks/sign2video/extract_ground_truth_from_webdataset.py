@@ -14,7 +14,7 @@ def main(language_subset: str, sample_count: int, output_path: Path | None = Non
     asl_citizen_vocab = get_dataset_vocab("asl-citizen")
 
     queries_df["query_glosses"] = queries_df["query_text"].apply(
-        lambda text: get_glosses_set_from_text(text, asl_citizen_vocab)
+        lambda text: get_glosses_set_from_text(text, asl_citizen_vocab, remove_stopwords=True)
     )
 
     queries_df = queries_df.drop(columns=["query_text"])  # query_text
@@ -37,7 +37,7 @@ def main(language_subset: str, sample_count: int, output_path: Path | None = Non
     output_path.parent.mkdir(parents=True, exist_ok=True)
 
     queries_df["query_glosses"] = queries_df["query_glosses"].apply(lambda s: ",".join(sorted(s)))
-    queries_df.to_json(output_path.with_suffix(".json"), orient="records", lines=True)
+    queries_df.to_json(output_path.with_suffix(".jsonl"), orient="records", lines=True)
     queries_df.to_csv(output_path, index=False)
 
     print(f"Wrote queries to {output_path.resolve()}")
