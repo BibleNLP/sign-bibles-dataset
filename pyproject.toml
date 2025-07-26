@@ -24,6 +24,7 @@ dependencies = [
     "webdataset",
     "sign_language_segmentation @ git+https://github.com/sign-language-processing/segmentation",
     "sign-language-gloss-utils @ git+https://github.com/cleong110/sign-language-gloss-utils.git",
+    "datasets",
 ]
 
 
@@ -99,4 +100,3 @@ packages = [
     "sign_bibles_dataset.dataprep",
     "sign_bibles_dataset.tasks",
 ]
-
