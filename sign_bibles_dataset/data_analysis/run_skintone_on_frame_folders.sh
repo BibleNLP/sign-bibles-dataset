@@ -8,16 +8,19 @@ script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 project_root="$(dirname "$(dirname "$script_dir")")"
 
 # Parse arguments
-dir_to_search="${1:-$project_root/downloads}"  # default if not given
-workers="${2:-16}"                         # default to 16 workers
+dir_to_search="${1:-$project_root/downloads}"   # default if not given
+workers="${2:-4}"                               # default to 10 workers
+stone_workers="${3:-4}"                         # ...each of which has workers
 
 # Debug printout (remove or comment out if undesired)
 echo "Project root: $project_root"
 echo "Directory to search: $dir_to_search"
 echo "Parallel workers: $workers"
+echo "Skintone workers: $stone_workers"
 
 # Run the command in parallel
-find "$dir_to_search" -name "*.mp4" |
+find "$dir_to_search" -type d -name "*_frames" |
   grep -v "animation" |
   parallel --progress -j "$workers" \
-    python "$project_root/sign_bibles_dataset/data_analysis/brisque_scores.py" "{}"
+    stone -i "{}" -o "{}"/"skintone" --n_workers "$stone_workers"
+    # stone -i "{}" -o "{}"/"skintone" -d --n_workers "$stone_workers" # outputting debug images causes trouble for other scripts
