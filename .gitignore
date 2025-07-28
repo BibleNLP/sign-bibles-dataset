@@ -204,3 +204,4 @@ webdataset
 *.elan
 *.parquet
 *.pkl
+*.pdf
