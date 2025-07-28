@@ -1,7 +1,9 @@
 import argparse
 import logging
 import re
+import time
 import warnings
+from contextlib import contextmanager
 from pathlib import Path
 
 import numpy as np
@@ -16,6 +18,17 @@ warnings.filterwarnings("ignore")  # Suppress Python warnings about invalid valu
 # Setup logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+
+
+@contextmanager
+def timed_section(name: str):
+    start = time.perf_counter()
+    result = {}
+    yield result
+    end = time.perf_counter()
+    duration = end - start
+    result["duration"] = duration
+    logger.info(f"[TIMER] {name} took {duration:.2f} seconds.")
 
 
 def brisque_scores_from_video_frames(video_path: Path, overwrite: bool = False) -> pd.DataFrame:
@@ -66,14 +79,20 @@ def brisque_scores_from_video_frames(video_path: Path, overwrite: bool = False) 
             continue
 
         try:
-            score = brisque.score(img=img_array)
+            with timed_section("Run BRISQUE score") as duration:
+                score = brisque.score(img=img_array)
+
         except ValueError as e:
             logger.debug(f"Failed to compute BRISQUE score for {img_path}: {e}")
             continue
 
-        results.append((frame_num, score))
+        results.append((frame_num, score, duration["duration"]))
 
-    df = pd.DataFrame(results, columns=["frame", "score"]).sort_values("frame").reset_index(drop=True)
+    df = (
+        pd.DataFrame(results, columns=["frame", "score", "score_duration_sec"])
+        .sort_values("frame")
+        .reset_index(drop=True)
+    )
 
     df.to_parquet(parquet_path, index=False)
     logger.info(f"Mean BRISQUE for video ({len(df)} frames): {df['score'].mean()}")
@@ -127,7 +146,9 @@ def brisque_scores_from_folder(folder: Path, recursive: bool = False, overwrite:
     logger.info(f"BRISQUE summary: processed {processed}, skipped {skipped} due to missing frame folders.")
 
     return (
-        pd.concat(all_results, ignore_index=True) if all_results else pd.DataFrame(columns=["video", "frame", "score"])
+        pd.concat(all_results, ignore_index=True)
+        if all_results
+        else pd.DataFrame(columns=["video", "frame", "score", "score_duration_sec"])
     )
 
 
