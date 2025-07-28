@@ -9,10 +9,6 @@ from tqdm import tqdm
 log = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 
-import logging
-
-log = logging.getLogger(__name__)
-
 
 def extract_frames(
     video_path: Path,
@@ -72,6 +68,7 @@ def handle_same_folder(video_path: Path, **kwargs):
 
 def handle_subfolder(video_path: Path, **kwargs):
     subfolder = video_path.parent / (video_path.stem + "_frames")
+    log.info(f"Saving frames to subfolder: {subfolder}")
     return extract_frames(video_path, subfolder, **kwargs)
 
 
@@ -162,6 +159,8 @@ def main():
         logging.getLogger().setLevel(logging.WARNING)
 
     video_path = args.video_path.resolve()
+
+    log.info(f"Path: {video_path}, Mode: {args.mode}")
 
     cap = cv2.VideoCapture(str(video_path))
     if not cap.isOpened():

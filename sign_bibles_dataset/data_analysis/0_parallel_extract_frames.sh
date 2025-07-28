@@ -22,4 +22,5 @@ echo "Step size: $step"
 find "$dir_to_search" -name "*.mp4" |
   grep -v "animation" |
   parallel --progress -j "$workers" \
-    python "$project_root/sign_bibles_dataset/dataprep/dbl_signbibles/huggingface_prep/ocr/extract_frame.py" "{}" --step "$step" --quiet
+    python "$project_root/sign_bibles_dataset/dataprep/dbl_signbibles/huggingface_prep/ocr/extract_frame.py" "{}" --mode "subfolder" --step "$step" --quiet
+# sign_bibles_dataset/dataprep/dbl_signbibles/huggingface_prep/ocr/extract_frame.py
