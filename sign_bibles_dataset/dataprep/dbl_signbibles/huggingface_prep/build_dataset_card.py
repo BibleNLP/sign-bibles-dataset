@@ -112,8 +112,12 @@ def get_configs_block(configs: list[tuple[str, str]]) -> str:
     """Generate a YAML block listing configurations per language."""
     lines = ["configs:", "  - config_name: all", "    data_files: '*/*/*.tar'", "    default: true"]
     print(configs)
-    for config_name, pattern in list(configs):
-        lines.append(f"  - config_name: {config_name.replace('/', '_')}\n    data_files: {pattern}")
+    for _config_name, config_lines in configs.items():
+        for config_line in config_lines:
+            lines.append(config_line)
+            print(f"Appending {config_line}")
+
+        # lines.append(conf)
 
     return "\n".join(lines)
 

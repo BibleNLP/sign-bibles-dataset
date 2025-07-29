@@ -18,15 +18,12 @@ def get_expected_extensions() -> set[str]:
         "json",  # base metadata
         "mp4",  # the actual file
         "pose-mediapipe.pose",
-        # "pose-dwpose.npz",
+        "pose-dwpose.npz",
         "transcripts.json",
     }
 
-    model_extensions = {
-        f"{Path(model).stem.lower()}.eaf" for model in MODEL_CHOICES
-    } | {
-        f"{Path(model).stem.lower()}.autosegmented_segments.json"
-        for model in MODEL_CHOICES
+    model_extensions = {f"{Path(model).stem.lower()}.eaf" for model in MODEL_CHOICES} | {
+        f"{Path(model).stem.lower()}.autosegmented_segments.json" for model in MODEL_CHOICES
     }
 
     return base_extensions | model_extensions
@@ -43,9 +40,7 @@ def extract_sample_groups(members):
     return grouped
 
 
-def validate_sample(
-    sample_name: str, filelist: list[tuple[str, tarfile.TarInfo]], tar, errors
-):
+def validate_sample(sample_name: str, filelist: list[tuple[str, tarfile.TarInfo]], tar, errors):
     try:
         # Enforce lowercase extension naming
         for ext, _ in filelist:
@@ -101,9 +96,7 @@ def validate_webdataset(webdataset_dir: Path, max_samples: int | None = None):
                 members = [m for m in tar.getmembers() if m.isfile()]
                 sample_groups = extract_sample_groups(members)
 
-                for sample_name, filelist in tqdm(
-                    sample_groups.items(), desc=tar_path.name, leave=False
-                ):
+                for sample_name, filelist in tqdm(sample_groups.items(), desc=tar_path.name, leave=False):
                     total_samples += 1
                     if max_samples and total_samples > max_samples:
                         print("Reached max sample count, exiting early")
@@ -137,12 +130,8 @@ def validate_webdataset(webdataset_dir: Path, max_samples: int | None = None):
 
 
 def main():
-    parser = argparse.ArgumentParser(
-        description="Validate local WebDataset shards before upload."
-    )
-    parser.add_argument(
-        "webdataset_dir", type=Path, help="Path to local WebDataset directory"
-    )
+    parser = argparse.ArgumentParser(description="Validate local WebDataset shards before upload.")
+    parser.add_argument("webdataset_dir", type=Path, help="Path to local WebDataset directory")
     parser.add_argument(
         "--max-samples",
         type=int,

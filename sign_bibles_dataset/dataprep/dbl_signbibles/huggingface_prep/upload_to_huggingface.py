@@ -49,17 +49,23 @@ def compute_stats_by_sampling(shards_by_folder: dict[str, list[Path]], sample_co
     total_samples = 0
     languages, projects = set(), set()
     stats_per_folder = {}
-    configs = set()
+    configs = {}
 
     for folder, shards in tqdm(shards_by_folder.items(), desc="Sampling shards"):
         lang = Path(folder).parts[0]
         project = Path(folder).parts[1] if len(Path(folder).parts) > 1 else "unknown"
 
-        configs.add((lang, f"{lang}/*/*.tar"))
-        configs.add((f"{lang}_small", f"{lang}/*/shard_00000.tar"))
-        configs.add((folder, f"{folder}/*.tar"))
-        configs.add((f"{folder}_small", f"{folder}/shard_00000.tar"))
+        lang_config_lines = []
+        lang_config_lines.append(f"  - config_name: {lang.replace('/', '_')}\n    data_files:")
+        project_config_lines = []
+        project_config_lines.append(f"  - config_name: {project.replace('/', '_')}\n    data_files:")
 
+        for split in ["train", "val", "test"]:
+            lang_config_lines.append(f"      - split: {split}\n        path: {lang}/*/*{split}.tar")
+            project_config_lines.append(f"      - split: {split}\n        path: {folder}/*{split}.tar")
+        configs[lang] = lang_config_lines
+
+        configs[project] = project_config_lines
         languages.add(lang)
         projects.add(project)
 
@@ -79,13 +85,14 @@ def compute_stats_by_sampling(shards_by_folder: dict[str, list[Path]], sample_co
             "shard_count": len(shards),
             "estimated_samples": int(estimated),
         }
+        # print(json.dumps(configs, indent=2))
 
     return {
         "total_samples_estimated": int(total_samples),
         "languages": sorted(languages),
         "projects": sorted(projects),
         "stats_per_folder": stats_per_folder,
-        "configs": sorted(configs),
+        "configs": configs,
     }
 
 
@@ -179,6 +186,7 @@ def upload_to_huggingface(webdataset_path: str | Path, dataset_name: str, token:
     # Create README.md in-place
     readme_path = webdataset_path / "README.md"
     create_dataset_card(webdataset_path, readme_path, dataset_name)
+    print(f"README CREATED at {readme_path.resolve()}")
 
     print(f"Uploading to HuggingFace Hub as {dataset_name}")
     api = HfApi(token=token)
