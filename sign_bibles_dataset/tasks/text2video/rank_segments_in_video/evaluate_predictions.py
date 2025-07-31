@@ -1,15 +1,16 @@
 import argparse
-import pandas as pd
 from pathlib import Path
 
+import pandas as pd
 import torch
 from torchmetrics.retrieval import (
-    RetrievalRecall,
-    RetrievalPrecision,
-    RetrievalMRR,
     RetrievalMAP,
+    RetrievalMRR,
     RetrievalNormalizedDCG,
+    RetrievalPrecision,
+    RetrievalRecall,
 )
+from tqdm import tqdm
 
 
 def prepare_references(df: pd.DataFrame) -> dict[str, set[int]]:
@@ -65,7 +66,7 @@ def evaluate_prediction(
 
     # Initialize metrics
     metrics = {}
-    for k in ks:
+    for k in tqdm(ks, desc="k..."):
         metrics[f"precision_at_{k}"] = RetrievalPrecision(top_k=k)
         metrics[f"recall_at_{k}"] = RetrievalRecall(top_k=k)
 
