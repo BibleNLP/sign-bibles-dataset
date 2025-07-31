@@ -97,15 +97,23 @@ def main():
     parser.add_argument("ground_truth_csv", type=Path, help="CSV with seg_idx and query_text")
     parser.add_argument("predictions_csv", type=Path, help="CSV with query_text,rank,seg_idx")
     parser.add_argument("--ks", type=int, nargs="+", default=[1, 5, 10])
-    parser.add_argument("--output_csv", type=Path, default="evaluation_results.csv", help="Where to save results")
+    parser.add_argument(
+        "--output_csv",
+        type=Path,
+        # default="evaluation_results.csv",
+        help="Where to save results",
+    )
 
     args = parser.parse_args()
+
+    if args.output_csv is None:
+        output_csv = args.predictions_csv.parent / "evaluation_results.csv"
 
     results_df = evaluate_prediction(args.ground_truth_csv, args.predictions_csv, args.ks)
 
     results_df.to_csv(args.output_csv, index=False)
     print(results_df)
-    print(f"Saved evaluation results to {Path(args.output_csv).resolve()}")
+    print(f"Saved evaluation results to {Path(output_csv).resolve()}")
 
 
 if __name__ == "__main__":
