@@ -64,6 +64,12 @@ def evaluate_prediction(
 
     scores, targets, query_ids = align_predictions_and_refs(preds, refs, max_k)
 
+    # Compute average number of segments ranked per query (i.e., candidates)
+    pred_df = pd.read_csv(predictions_csv_path)
+    candidate_counts = pred_df.groupby("query_text")["seg_idx"].nunique()
+    avg_candidates = candidate_counts.mean()
+    print(f"Average number of segments ranked per query: {avg_candidates:.2f}")
+
     # Initialize metrics
     metrics = {}
     for k in tqdm(ks, desc="k..."):
@@ -77,8 +83,10 @@ def evaluate_prediction(
     # Evaluate
     metric_results = {}
     for metric_name, metric in metrics.items():
-        # returns a single-element tensor so we gotta call item()
         metric_results[metric_name] = metric(scores, targets, indexes=query_ids).item()
+
+    # Add average segment count info
+    metric_results["avg_segments_ranked"] = avg_candidates
 
     results_df = pd.DataFrame([metric_results])
     return results_df
