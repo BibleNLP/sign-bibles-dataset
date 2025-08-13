@@ -1,7 +1,7 @@
 #!/bin/bash
 
-INPUT_FILE="mat_list.txt"
-OUT_PATH="../../../Matthew_processed"
+INPUT_FILE="dict_list.txt"
+OUT_PATH="/mnt/share/ISLDict_processed/"
 
 LOG_DIR="logs"
 SUCCESS_LOG="$LOG_DIR/success.log"
@@ -29,7 +29,7 @@ run_job() {
 export -f run_job
 
 # Run in parallel
-parallel -j 8 --colsep '\t' run_job {1} {2} "$OUT_PATH" :::: "$INPUT_FILE"
+parallel -j 16 --colsep '\t' run_job {1} {2} "$OUT_PATH" :::: "$INPUT_FILE"
 
 
 if [ -s logs/fail.log ]; then
@@ -37,5 +37,5 @@ if [ -s logs/fail.log ]; then
     cp logs/fail.log retry.txt
     > logs/fail.log  # Clear old failures
 
-    parallel -j 8 --colsep '\t' run_job {1} {2} "$OUT_PATH" :::: retry.txt
+    parallel -j 16 --colsep '\t' run_job {1} {2} "$OUT_PATH" :::: retry.txt
 fi
