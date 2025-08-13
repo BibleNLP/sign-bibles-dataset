@@ -13,7 +13,7 @@ from pathlib import Path
 # 	return i
 
 def list_videofile_inputs_onmount(path, count_start=0):
-	files = [f for f in Path(path).iterdir() if f.is_file()]
+	files = [f for f in Path(path).rglob("*") if f.is_file()]
 	i = count_start
 	for file in files:
 		if file.suffix.lower() == ".mp4":
