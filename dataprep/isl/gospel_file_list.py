@@ -16,7 +16,7 @@ def list_videofile_inputs_onmount(path, count_start=0):
 	files = [f for f in Path(path).iterdir() if f.is_file()]
 	i = count_start
 	for file in files:
-		if file.endswith("mp4") or file.endswith("MP4"):
+		if file.suffix.lower() == ".mp4":
 			i += 1
 			print(f"{i}\t{path}{file}")
 	return i
