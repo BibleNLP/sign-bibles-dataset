@@ -42,15 +42,15 @@ def process_video(id, input_path, output_path):
 		parts = input_path.split("/")
 
 		signer = "Signer_1"
-		if input_path.startswith("/John"):
-			ref = f"{book_code_lookup[parts[1]]} {parts[2].replace("Ch-", "")}"
+		if parts[3]=="john":
+			ref = f"{book_code_lookup[parts[3]]} {parts[4].replace("Ch-", "")}"
 			ver_match = re.search(verse_john_pattern, parts[-1])
 			if not ver_match:
 				raise Exception(f"Cant compose reference from:{parts}")
 			verse_parts = ver_match.group(1)
 			signer = "Signer_2"
 		else:
-			ref = f"{book_code_lookup[parts[1]]} {parts[2].replace("Ch ", "")}"
+			ref = f"{book_code_lookup[parts[3]]} {parts[4].replace("Ch ", "")}"
 			verse = parts[-1].split(".")[0].split(" ")[1]
 			verse_parts = "-".join(verse.split("-")[:-1])
 
