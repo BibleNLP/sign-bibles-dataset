@@ -29,7 +29,7 @@ run_job() {
 export -f run_job
 
 # Run in parallel
-parallel -j 16 --colsep '\t' run_job {1} {2} "$OUT_PATH" :::: "$INPUT_FILE"
+parallel --tmpdir /mnt/share/temp -j 16 --colsep '\t' run_job {1} {2} "$OUT_PATH" :::: "$INPUT_FILE"
 
 
 if [ -s logs/fail.log ]; then
@@ -37,5 +37,5 @@ if [ -s logs/fail.log ]; then
     cp logs/fail.log retry.txt
     > logs/fail.log  # Clear old failures
 
-    parallel -j 16 --colsep '\t' run_job {1} {2} "$OUT_PATH" :::: retry.txt
+    parallel --tmpdir /mnt/share/temp -j 16 --colsep '\t' run_job {1} {2} "$OUT_PATH" :::: retry.txt
 fi
