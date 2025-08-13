@@ -18,7 +18,7 @@ def list_videofile_inputs_onmount(path, count_start=0):
 	for file in files:
 		if file.suffix.lower() == ".mp4":
 			i += 1
-			print(f"{i}\t{path}{file}")
+			print(f"{i}\t{file}")
 	return i
 
 # def list_already_uploaded(path="/ISLGospels_processed/")
