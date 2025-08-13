@@ -1,7 +1,7 @@
 #!/bin/bash
 
-INPUT_FILE="dict_list.txt"
-OUT_PATH="/mnt/share/ISLDict_processed/"
+INPUT_FILE="gospel_list.txt"
+OUT_PATH="/mnt/share/ISLGospel_processed/"
 
 LOG_DIR="logs"
 SUCCESS_LOG="$LOG_DIR/success.log"
@@ -19,7 +19,7 @@ run_job() {
     VIDEO_PATH="$2"
     PROCCESSED_PATH="$3"
 
-    if python3 isl_dict_processing.py "$VIDEO_ID" "$VIDEO_PATH" "$PROCCESSED_PATH"; then
+    if python3 isl_gospel_processing.py "$VIDEO_ID" "$VIDEO_PATH" "$PROCCESSED_PATH"; then
         echo -e "$VIDEO_ID\t$VIDEO_PATH" >> "$SUCCESS_LOG"
     else
         echo -e "$VIDEO_ID\t$VIDEO_PATH" >> "$FAIL_LOG"

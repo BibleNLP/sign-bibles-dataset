@@ -5,28 +5,29 @@ import asyncio
 import json
 import sys
 import shutil
+import logging
 from pathlib import Path
 import ffmpeg
 
-from nextcloud_connect import NextCloud_connection
 from ffmpeg_downsample import downsample_video_ondisk
 from mediapipe_trim import trim_off_storyboard
 from pose_format_util import video2poseformat
-# from dwpose_processing import generate_pose_files_v2
 from bible_text_access import get_verses, book_code_lookup
 from biblenlp_util import ref2vref
 
+logging.basicConfig(filename='logs/app.log', level=logging.INFO,
+                    format='%(asctime)s - %(levelname)s - %(message)s')
+
 verse_john_pattern = re.compile(r"(\d+(\-\d+)?)\.MP4")
 
-def process_video(id, remote_path, nxt_cld_conn, output_path):
+def process_video(id, input_path, output_path):
 	if output_path.endswith("/"):
 		output_path = output_path[:-1]
 	main_path = f"{output_path}/{id}.mp4"
 	try:
-		nxt_cld_conn.download_file(remote_path, f"{id}_large.mp4")
+		shutil.copy(main_path, f"./{id}_large.mp4")  
 
 		downsample_video_ondisk(f"{id}_large.mp4", f"{id}.mp4")
-		# shutil.copy(main_path, f"./{id}.mp4")  
 
 		trimmed_stream = trim_off_storyboard(None, id)
 		if not trimmed_stream:
@@ -38,10 +39,10 @@ def process_video(id, remote_path, nxt_cld_conn, output_path):
 		shutil.move(f"{id}_pose-mediapipe.pose", f"{output_path}/{id}.pose-mediapipe.pose")
 		# shutil.move(f"{id}_pose-dwpose.npz", f"{output_path}/{id}.pose-dwpose.npz")
 
-		parts = remote_path.split("/")
+		parts = input_path.split("/")
 
 		signer = "Signer_1"
-		if remote_path.startswith("/John"):
+		if input_path.startswith("/John"):
 			ref = f"{book_code_lookup[parts[1]]} {parts[2].replace("Ch-", "")}"
 			ver_match = re.search(verse_john_pattern, parts[-1])
 			if not ver_match:
@@ -111,12 +112,10 @@ def process_video(id, remote_path, nxt_cld_conn, output_path):
 			json.dump(metadata, f, indent=4)
 		with open(f"{output_path}/{id}.transcripts.json", "w") as f:
 			json.dump(transcripts, f, indent=4)
-		print(f'Processed {id}!!!!!!!!!!!!!!!!!!!!')
+		logging.info(f'Processed {id}!!!!!!!!!!!!!!!!!!!!')
 	finally:
 		clear_space(f"{id}_large.mp4")
 		clear_space(f"{id}.mp4")
-		clear_space(f"{id}_pose-animation.mp4")
-		clear_space(f"{id}_pose-dwpose.npz")
 		clear_space(f"{id}_pose-mediapipe.pose")
 
 def clear_space(file_path):
@@ -124,26 +123,22 @@ def clear_space(file_path):
 		os.remove(file_path)
 
 
-def main_nxtcld():
+def main():
 	if len(sys.argv) != 4:
-		print("Usage: python process_video_script.py <path> <id>")
+		print("Usage: python process_video_script.py <id> <input-video-path> <out-folder>")
 		sys.exit(1)
 
 	video_id = int(sys.argv[1])
 	video_path = sys.argv[2]
 	output_path = sys.argv[3]
 
-	# nxt_cld_conn = None
-	nxt_cld_conn = NextCloud_connection()
-	process_video(video_id, video_path, nxt_cld_conn, output_path)
+	process_video(video_id, video_path, output_path)
 
 
 if __name__ == "__main__":
 
-	# nxt_cld_conn = NextCloud_connection()
-	# process_video("2", "/Matthew/Ch 1/10 17-0D5A1069.MP4", nxt_cld_conn, "../../../Matthew_processed")
-	# main()
+	# process_video("2", "/Matthew/Ch 1/10 17-0D5A1069.MP4", "../../../Matthew_processed")
 
-	main_nxtcld()
+	main()
 
 

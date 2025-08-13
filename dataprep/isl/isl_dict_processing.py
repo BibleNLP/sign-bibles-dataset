@@ -106,7 +106,7 @@ def clear_space(file_path):
 
 def main():
 	if len(sys.argv) < 4:
-		print("Usage: python isl_dict_processing.py <input_file> <output_path>")
+		print("Usage: python process_video_script.py <id> <input-video-path> <out-folder>")
 		sys.exit(1)
 	
 	video_id = sys.argv[1]
