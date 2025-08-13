@@ -1,0 +1,6 @@
+ffmpeg-python
+mediapipe
+opencv-python
+matplotlib
+python-dotenv
+webdataset==0.2.111
