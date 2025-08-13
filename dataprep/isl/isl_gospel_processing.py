@@ -25,7 +25,7 @@ def process_video(id, input_path, output_path):
 		output_path = output_path[:-1]
 	main_path = f"{output_path}/{id}.mp4"
 	try:
-		shutil.copy(main_path, f"./{id}_large.mp4")  
+		shutil.copy(input_path, f"./{id}_large.mp4")  
 
 		downsample_video_ondisk(f"{id}_large.mp4", f"{id}.mp4")
 
