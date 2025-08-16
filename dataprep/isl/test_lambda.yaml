@@ -5,6 +5,7 @@ resources:
 workdir: ./lambda
 
 setup: |
+  pip install --upgrade pip
   pip install -r requirements-dwpose-on_GPU.txt
 
 
