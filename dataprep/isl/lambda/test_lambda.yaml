@@ -1,0 +1,12 @@
+resources:
+  cloud: lambda
+  accelerators: GH200:1   # 1x GPU(96 GB), 64 vCPUs, 432 GB RAM, 4 TB SSD
+
+file_mounts:
+  /inputs: ./inputs
+  /outputs: ./outputs
+  /scripts: ./scripts
+
+run: |
+  echo "Running split_words.py..."
+  python3 /scripts/split_words.py

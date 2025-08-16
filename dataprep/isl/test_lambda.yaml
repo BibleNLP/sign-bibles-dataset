@@ -1,8 +1,0 @@
-resources:
-  cloud: lambda
-  accelerators: GH200:1   # 1x GPU(96 GB), 64 vCPUs, 432 GB RAM, 4 TB SSD
-
-run: |
-  echo "Running on CPU only"
-  python -c "print(sum(range(1000000)))"
-  echo "Done"
