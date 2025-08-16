@@ -1,6 +1,6 @@
 resources:
   cloud: lambda
-  accelerators: T4:1   # 1x T4 GPU
+  accelerators: GH200:1   # 1x T4 GPU
   use_spot: true       # cheaper (preemptible), can stop anytime
 
 run: |
