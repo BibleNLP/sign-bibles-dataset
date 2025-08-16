@@ -4,9 +4,13 @@ resources:
 
 file_mounts:
   /inputs: ./inputs
-  /outputs: ./outputs
   /scripts: ./scripts
+
+# Sync outputs from remote -> local after the run finishes
+sync_down:
+  ./outputs: /outputs
 
 run: |
   echo "Running split_words.py..."
+  mkdir -p /outputs
   python3 /scripts/split_words.py
