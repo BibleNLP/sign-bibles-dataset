@@ -1,0 +1,7 @@
+resources:
+  cloud: lambda
+  cpus: 2+
+run: |
+  echo "Running on CPU only"
+  python -c "print(sum(range(1000000)))"
+  echo "Done"
