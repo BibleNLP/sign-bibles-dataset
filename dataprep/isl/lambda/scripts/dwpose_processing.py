@@ -277,7 +277,6 @@ def generate_pose_files_v2(id):
           ret, frame = cap.read()
           if not ret:
               break
-          print("One frame processing")
           image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
           image.flags.writeable = False
 
