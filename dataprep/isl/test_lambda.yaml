@@ -4,7 +4,10 @@ resources:
 
 workdir: ./lambda
 
+setup: |
+  pip install -r requirements-dwpose-on_GPU.txt
+
+
 run: |
-  echo "Running split_words.py..."
   mkdir -p outputs
-  python3 scripts/split_words.py
+  python3 scripts/dwpose_processing.py

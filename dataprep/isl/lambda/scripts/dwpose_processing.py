@@ -310,4 +310,4 @@ def generate_pose_files_v2(id):
         raise Exception("Error in pose video and array generation using dwpose") from exce
 
 if __name__ == '__main__':
-  generate_pose_files_v2(100001)
+  generate_pose_files_v2(100)
