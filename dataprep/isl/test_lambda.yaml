@@ -1,6 +1,8 @@
 resources:
   cloud: lambda
-  cpus: 2+
+  accelerators: T4:1   # 1x T4 GPU
+  use_spot: true       # cheaper (preemptible), can stop anytime
+
 run: |
   echo "Running on CPU only"
   python -c "print(sum(range(1000000)))"
