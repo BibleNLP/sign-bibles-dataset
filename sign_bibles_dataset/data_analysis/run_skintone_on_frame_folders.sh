@@ -9,8 +9,8 @@ project_root="$(dirname "$(dirname "$script_dir")")"
 
 # Parse arguments
 dir_to_search="${1:-$project_root/downloads}"   # default if not given
-workers="${2:-4}"                               # default to 5 workers
-stone_workers="${3:-4}"                         # ...each of which has workers
+workers="${2:-3}"                               # default to this many workers
+stone_workers="${3:-3}"                         # ...each of which has workers
 
 # Debug printout (remove or comment out if undesired)
 echo "Project root: $project_root"
@@ -22,5 +22,5 @@ echo "Skintone workers: $stone_workers"
 find "$dir_to_search" -type d -name "*_frames" |
   grep -v "animation" |
   parallel --progress -j "$workers" \
-    stone -i "{}" -o "{}"/"skintone" --n_workers "$stone_workers"
-    # stone -i "{}" -o "{}"/"skintone" -d --n_workers "$stone_workers" # outputting debug images causes trouble for other scripts
+    stone -i "{}/facecrops/" -t color --min_nbrs 4 --min_size 10 10 -o "{}"/"skintone" --n_workers "$stone_workers" #-d # outputting debug images with -d causes trouble for other scripts
+    
