@@ -11,4 +11,5 @@ setup: |
 
 run: |
   mkdir -p outputs
-  python3 scripts/dwpose_processing.py
+  mkdir -p logs
+  bash scripts/parallel_run.sh
