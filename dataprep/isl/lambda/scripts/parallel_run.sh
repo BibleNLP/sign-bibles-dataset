@@ -1,9 +1,8 @@
 #!/bin/bash
 
 INPUT_FILE="input_list.txt"
-OUT_PATH="outputs/"
 
-LOG_DIR="logs"
+LOG_DIR="/my_data/logs"
 SUCCESS_LOG="$LOG_DIR/success.log"
 FAIL_LOG="$LOG_DIR/fail.log"
 
@@ -27,7 +26,7 @@ run_job() {
 export -f run_job
 
 # Run in parallel
-parallel -j 5 run_job {1} :::: "$INPUT_FILE"
+parallel -j 3 run_job {1} :::: "$INPUT_FILE"
 
 
 if [ -s logs/fail.log ]; then
@@ -35,5 +34,5 @@ if [ -s logs/fail.log ]; then
     cp logs/fail.log retry.txt
     > logs/fail.log  # Clear old failures
 
-    parallel -j 5 run_job {1} :::: retry.txt
+    parallel -j 3 run_job {1} :::: retry.txt
 fi

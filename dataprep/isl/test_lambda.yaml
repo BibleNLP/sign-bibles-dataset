@@ -5,14 +5,20 @@ resources:
 
 workdir: ./lambda
 
+# Mount an existing R2 bucket
+file_mounts:
+  /my_data:
+    source: r2://isl-dataset-prep/  # or gs://, https://<azure_storage_account>.blob.core.windows.net/<container>, r2://, cos://<region>/<bucket>, oci://<bucket_name>
+    mode: MOUNT  # MOUNT or COPY or MOUNT_CACHED. Defaults to MOUNT. Optional.
+
+
 setup: |
   pip install --upgrade pip
   pip install -r requirements-dwpose-on_GPU.txt
   sudo apt-get install -y parallel
-
+  cp /my_data/dw-ll_ucoco_384.onnx scripts/ckpts/
+  cp /my_data/yolox_l.onnx scripts/ckpts/
 
 run: |
-  mkdir -p outputs
-  mkdir -p logs
-  # bash scripts/parallel_run.sh
-  parallel --version
+  mkdir -p /my_data/logs
+  bash scripts/parallel_run.sh
