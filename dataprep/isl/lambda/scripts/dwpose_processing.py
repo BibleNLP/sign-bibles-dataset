@@ -6,6 +6,11 @@ import matplotlib
 import cv2
 import torch
 import numpy as np
+import logging
+
+logging.basicConfig(filename='logs/app.log', level=logging.INFO,
+                    format='%(asctime)s - %(levelname)s - %(message)s')
+
 DWPOSE_LANDMARKS_NUM = 134
 
 
@@ -254,6 +259,7 @@ def generate_mask_and_pose_video_files(id):
       video_writer2.release()
       cap.release()
     except Exception as exce:
+        logging.error(f"Error in generating mask and pose video files for id {id}: {exce}")
         raise Exception("Error in pose and mask generation using dwpose")
 
 def generate_pose_files_v2(id):
@@ -306,7 +312,13 @@ def generate_pose_files_v2(id):
           confidences = np.array(confidences, dtype=np.float64))
       cap.release()
     except Exception as exce:
+        logging.error(f"Error in generating pose files for id {id}!")
+        logging.exception("Exception occurred:")
         raise Exception("Error in pose video and array generation using dwpose") from exce
 
 if __name__ == '__main__':
-  generate_pose_files_v2(100)
+  if len(sys.argv) < 2:
+      logging.error("Usage: python dwpose_processing.py <video_id>")
+      sys.exit(1)
+  video_id = sys.argv[1]
+  generate_pose_files_v2(video_id)
