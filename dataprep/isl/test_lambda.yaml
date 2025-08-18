@@ -8,8 +8,7 @@ workdir: ./lambda
 # Mount an existing R2 bucket
 file_mounts:
   /my_data:
-    source: r2://,
-    bucket: isl-dataset-prep,
+    source: r2://isl-dataset-prep,
     mode: MOUNT  # MOUNT or COPY or MOUNT_CACHED. Defaults to MOUNT. Optional.
 
 
