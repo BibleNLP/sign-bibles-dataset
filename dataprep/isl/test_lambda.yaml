@@ -1,6 +1,7 @@
 resources:
   cloud: lambda
   accelerators: GH200:1   # 1x GPU(96 GB), 64 vCPUs, 432 GB RAM, 4 TB SSD
+  region: us-east-3
 
 workdir: ./lambda
 
