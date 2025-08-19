@@ -8,7 +8,7 @@ import torch
 import numpy as np
 import logging
 
-logging.basicConfig(filename='/my_data/logs/app.log', level=logging.INFO,
+logging.basicConfig(filename='/my_logs/logs/app.log', level=logging.INFO,
                     format='%(asctime)s - %(levelname)s - %(message)s')
 
 DWPOSE_LANDMARKS_NUM = 134

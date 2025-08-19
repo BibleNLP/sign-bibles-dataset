@@ -8,17 +8,22 @@ workdir: ./lambda
 # Mount an existing R2 bucket
 file_mounts:
   /my_data:
-    source: r2://isl-dataset-prep
+    source: /mnt/share/lambda_fs
     mode: MOUNT  # MOUNT or COPY or MOUNT_CACHED. Defaults to MOUNT. Optional.
-
+  /my_models:
+    source: /mnt/share/lambda_models
+    mode: COPY
+  /my_logs:
+    source: /mnt/share/lambda_logs
+    mode: MOUNT_CACHED
 
 setup: |
   pip install --upgrade pip
   pip install -r requirements-dwpose-on_GPU.txt
   sudo apt-get install -y parallel
-  cp /my_data/dw-ll_ucoco_384.onnx scripts/ckpts/
-  cp /my_data/yolox_l.onnx scripts/ckpts/
+  cp /my_models/dw-ll_ucoco_384.onnx scripts/ckpts/
+  cp /my_models/yolox_l.onnx scripts/ckpts/
 
 run: |
-  mkdir -p /my_data/logs
+  mkdir -p /my_logs/logs
   bash scripts/parallel_run.sh
