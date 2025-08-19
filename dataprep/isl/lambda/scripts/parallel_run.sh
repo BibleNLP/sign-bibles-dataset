@@ -2,7 +2,7 @@
 
 INPUT_FILE="input_list.txt"
 
-LOG_DIR="/my_logs/logs"
+LOG_DIR="/isl-dataset-prep/logs"
 SUCCESS_LOG="$LOG_DIR/success.log"
 FAIL_LOG="$LOG_DIR/fail.log"
 
@@ -29,10 +29,10 @@ export -f run_job
 parallel -j 3 run_job {1} :::: "$INPUT_FILE"
 
 
-if [ -s /my_logs/logs/fail.log ]; then
+if [ -s /isl-dataset-prep/logs/fail.log ]; then
     echo "Retrying failed jobs..."
-    cp /my_logs/logs/fail.log retry.txt
-    > /my_logs/logs/fail.log  # Clear old failures
+    cp /isl-dataset-prep/logs/fail.log retry.txt
+    > /isl-dataset-prep/logs/fail.log  # Clear old failures
 
     parallel -j 3 run_job {1} :::: retry.txt
 fi
