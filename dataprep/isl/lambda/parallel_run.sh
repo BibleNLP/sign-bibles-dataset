@@ -16,7 +16,7 @@ export SUCCESS_LOG FAIL_LOG
 run_job() {
     VIDEO_ID="$1"
 
-    if python3 dwpose_processing.py "$VIDEO_ID"; then
+    if python3 scripts/dwpose_processing.py "$VIDEO_ID"; then
         echo -e "$VIDEO_ID" >> "$SUCCESS_LOG"
     else
         echo -e "$VIDEO_ID" >> "$FAIL_LOG"
