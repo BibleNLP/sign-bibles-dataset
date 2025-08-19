@@ -8,16 +8,13 @@ workdir: ./lambda
 # Mount an existing R2 bucket
 file_mounts:
   /my_data:
-    name: my-data
-    source: /mnt/share/lambda_fs
+    source: ./lambda_fs
     mode: MOUNT  # MOUNT or COPY or MOUNT_CACHED. Defaults to MOUNT. Optional.
   /my_models:
-    name: my-models
-    source: /mnt/share/lambda_models
+    source: ./lambda_models
     mode: COPY
   /my_logs:
-    name: my-logs
-    source: /mnt/share/lambda_logs
+    source: ./lambda_logs
     mode: MOUNT_CACHED
 
 setup: |
