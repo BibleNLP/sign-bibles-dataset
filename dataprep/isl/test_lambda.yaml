@@ -5,18 +5,9 @@ resources:
 
 # Mount an existing R2 bucket
 file_mounts:
-  /my_data:
-    name: my-data
-    source: ./lambda_fs
-    mode: MOUNT  # MOUNT or COPY or MOUNT_CACHED. Defaults to MOUNT. Optional.
-  /my_models:
-    name: my-models
-    source: ./lambda_models
-    mode: COPY
-  /my_logs:
-    name: my-logs
-    source: ./lambda_logs
-    mode: MOUNT_CACHED
+  /my_data: ./lambda_fs
+  /my_models: ./lambda_models
+  /my_logs: ./lambda_logs
 
 workdir: ./lambda
 
