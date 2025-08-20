@@ -26,10 +26,17 @@ def parse_args() -> argparse.Namespace:
         help="Directory to save output Parquet files and LaTeX. Default: ./unique_verses/depth_{depth}",
     )
     parser.add_argument(
-        "--ebible_bsb",
+        "--eng_ebible",
         type=Path,
         default="/opt/home/cleong/data/eBible/ebible/corpus/eng-engbsb.txt",
-        help="Directory to save output Parquet files and LaTeX. Default: ./unique_verses/depth_{depth}",
+        help="Path to an English translation from the eBible corpus",
+    )
+
+    parser.add_argument(
+        "--eng_vref",
+        type=Path,
+        default="/opt/home/cleong/data/eBible/ebible/metadata/vref.txt",
+        help="Path to vref.txt from the eBible corpus",
     )
 
     return parser.parse_args()
@@ -151,10 +158,25 @@ def save_latex_table(verse_counts: dict[str, set[int]], output_file: Path) -> No
         f.write("\\hline\n\\end{tabular}\n")
 
 
-import matplotlib.pyplot as plt
-from pathlib import Path
-from supervenn import supervenn
-import logging
+def load_english_verse_indices(path: Path) -> set[int]:
+    """
+    Load verse indices from an English eBible file.
+    Each line corresponds to a verse; non-empty lines are counted.
+    """
+    with path.open(encoding="utf-8") as f:
+        return {i for i, line in enumerate(f) if line.strip()}
+
+
+def load_vrefs(path: Path):
+    """
+    Load verse indices from an English eBible file.
+    Each line corresponds to a verse; non-empty lines are counted.
+    """
+    vref_dict = {}
+    with path.open(encoding="utf-8") as f:
+        for i, line in enumerate(f):
+            vref_dict[i] = line.strip()
+    return vref_dict
 
 
 def plot_supervenn_diagram(verse_counts: dict[str, set[int]], output_file: Path | None = None) -> None:
@@ -196,12 +218,12 @@ def plot_supervenn_diagram(verse_counts: dict[str, set[int]], output_file: Path 
     plt.title("Verse Overlaps Across Languages", fontsize=24)
     plt.tight_layout()
 
-    if output_file:
-        output_file.parent.mkdir(parents=True, exist_ok=True)
-        plt.savefig(output_file, dpi=300)
-        logging.info(f"Saved supervenn to {output_file.resolve()}")
-    else:
-        plt.show()
+
+    output_file.parent.mkdir(parents=True, exist_ok=True)
+    plt.savefig(output_file, dpi=300)
+    logging.info(f"Saved supervenn to {output_file.resolve()}")
+    
+    plt.close()
 
 
 def main() -> None:
@@ -236,7 +258,43 @@ def main() -> None:
     verse_counts = save_language_dataframe(full_df, output_dir)
     save_latex_table(verse_counts, output_dir / "verse_counts.tex")
 
+    english_indices = load_english_verse_indices(args.eng_ebible)
+    vref_dict = load_vrefs(args.eng_vref)
+    verse_counts["English"] = english_indices
+    logging.info(f"Loaded {len(english_indices)} nonblank verse indices from {args.eng_ebible}")
+
     plot_supervenn_diagram(verse_counts, output_file=output_dir / "verse_overlap_supervenn.png")
+
+    for lang, verses in verse_counts.items():
+        if lang == "English":
+            continue
+        pair_counts = {
+            "English": english_indices,
+            lang: verses,
+        }
+        plot_supervenn_diagram(
+            pair_counts, output_file=output_dir / f"supervenn_{lang.lower().replace(' ', '_')}_vs_english.png"
+        )
+        missing_verses = verses - english_indices
+        print(f"{lang} has these that AREN'T in English\n")
+        for missing_verse_index in missing_verses:
+            logging.info(vref_dict.get(missing_verse_index, missing_verse_index))
+
+
+        rows = []
+        for missing_verse_index in sorted(missing_verses):
+            rows.append(
+                {
+                    "missing_index": missing_verse_index,
+                    "Verse": vref_dict.get(missing_verse_index, ""),
+                }
+            )
+        out_path = output_dir /f"{lang.lower()}_missing_verses.csv"
+        missing_verses_df = pd.DataFrame(rows, columns=["missing_index", "Verse"])
+        missing_verses_df.to_csv(out_path, index=False)
+        logging.info("Saved missing verses CSV to %s", out_path)
+
+        logging.info(f"Verses in {lang} not in English:\n{missing_verses_df}")
 
     logging.info("Results written to: %s", output_dir)
 
