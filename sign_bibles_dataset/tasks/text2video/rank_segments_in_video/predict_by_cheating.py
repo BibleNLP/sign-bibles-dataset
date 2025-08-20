@@ -75,7 +75,7 @@ def main():
 
     df = pd.read_csv(args.input_csv)
 
-    required_cols = {"seg_idx", "query_text", "video_id", "start_frame", "end_frame", "total_frames"}
+    required_cols = {"seg_idx", "query_text", "video_id", "start_frame", "end_frame"}
     if not required_cols.issubset(df.columns):
         raise ValueError(f"Input CSV must contain columns: {required_cols}")
 

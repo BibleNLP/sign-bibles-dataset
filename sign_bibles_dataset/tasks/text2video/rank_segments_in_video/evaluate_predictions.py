@@ -51,7 +51,7 @@ def align_predictions_and_refs(preds: dict, refs: dict, k: int):
 
 
 def evaluate_prediction(
-    ground_truth_csv_path: Path, predictions_csv_path: Path, ks: list | None = None
+    ground_truth_csv_path: Path, predictions_csv_path: Path, ks: list | None = None, progress=False
 ) -> pd.DataFrame:
     if ks is None:
         ks = [1, 5, 10]
@@ -59,7 +59,7 @@ def evaluate_prediction(
     gt_df = pd.read_csv(ground_truth_csv_path)
     refs = prepare_references(gt_df)
     max_k = max(ks)
-    print(f"K values: {ks}, Max K: {max_k}")
+    # print(f"K values: {ks}, Max K: {max_k}")
     preds = load_predictions(predictions_csv_path, max_k)
 
     scores, targets, query_ids = align_predictions_and_refs(preds, refs, max_k)
@@ -68,11 +68,11 @@ def evaluate_prediction(
     pred_df = pd.read_csv(predictions_csv_path)
     candidate_counts = pred_df.groupby("query_text")["seg_idx"].nunique()
     avg_candidates = candidate_counts.mean()
-    print(f"Average number of segments ranked per query: {avg_candidates:.2f}")
+    # print(f"Average number of segments ranked per query: {avg_candidates:.2f}")
 
     # Initialize metrics
     metrics = {}
-    for k in tqdm(ks, desc="k..."):
+    for k in tqdm(ks, desc="k...", disable=not progress):
         metrics[f"precision_at_{k}"] = RetrievalPrecision(top_k=k)
         metrics[f"recall_at_{k}"] = RetrievalRecall(top_k=k)
 
