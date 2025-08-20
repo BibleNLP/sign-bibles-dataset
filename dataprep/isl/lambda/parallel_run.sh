@@ -26,7 +26,7 @@ run_job() {
 export -f run_job
 
 # Run in parallel
-parallel -j 3 run_job {1} :::: "$INPUT_FILE"
+parallel -j 1 run_job {1} :::: "$INPUT_FILE"
 
 
 if [ -s /mnt/share/logs/fail.log ]; then
@@ -34,5 +34,5 @@ if [ -s /mnt/share/logs/fail.log ]; then
     cp /mnt/share/logs/fail.log retry.txt
     > /mnt/share/logs/fail.log  # Clear old failures
 
-    parallel -j 3 run_job {1} :::: retry.txt
+    parallel -j 1 run_job {1} :::: retry.txt
 fi

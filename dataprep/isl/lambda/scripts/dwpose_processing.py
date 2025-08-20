@@ -266,7 +266,7 @@ def generate_pose_files_v2(id):
     try:
       # temp_file_pose =f"./{id}_pose-animation.mp4"
 
-      cap = cv2.VideoCapture(f"../lambda_fs/{id}.mp4")
+      cap = cv2.VideoCapture(f"/mnt/share/ISLDict_processed/{id}.mp4")
       # width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
       # height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
       # fps = int(cap.get(cv2.CAP_PROP_FPS))
@@ -307,7 +307,7 @@ def generate_pose_files_v2(id):
           # Write frame to video
           # video_writer2.write(skeleton)
       # video_writer2.release()
-      np.savez_compressed(f"../lambda_fs/{id}.pose-dwpose.npz",
+      np.savez_compressed(f"/mnt/share/outputs/{id}.pose-dwpose.npz",
           frames=np.array(poses, dtype=np.float64),
           confidences = np.array(confidences, dtype=np.float64))
       cap.release()
