@@ -22,5 +22,6 @@ echo "Skintone workers: $stone_workers"
 find "$dir_to_search" -type d -name "*_frames" |
   grep -v "animation" |
   parallel --progress -j "$workers" \
-    stone -i "{}/facecrops/" -t color --min_nbrs 4 --min_size 10 10 -o "{}"/"skintone" --n_workers "$stone_workers" #-d # outputting debug images with -d causes trouble for other scripts
+    stone -i "{}/facecrops/" -t color -o "{}"/"skintone" --n_workers "$stone_workers" -d #-d # outputting debug images with -d causes trouble for other scripts
+    # stone -i "{}/facecrops/" -t color --min_nbrs 4 --min_size 10 10 -o "{}"/"skintone" --n_workers "$stone_workers" #-d # outputting debug images with -d causes trouble for other scripts
     

@@ -20,4 +20,4 @@ echo "Parallel workers: $workers"
 find "$dir_to_search" -name "*.mp4" |
   grep -v "animation" |
   parallel --progress -j "$workers" \
-    python "$project_root/sign_bibles_dataset/data_analysis/brisque_scores.py" "{}"
+    python "$project_root/sign_bibles_dataset/data_analysis/calculate_brisque_scores.py" "{}"
