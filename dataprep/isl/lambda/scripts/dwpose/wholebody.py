@@ -10,10 +10,10 @@ class Wholebody:
         device = 'cuda:0'
         providers = ['CPUExecutionProvider'
                  ] if device == 'cpu' else ['CUDAExecutionProvider']
-        # onnx_det = '/home/kavitha/Documents/Sign/ISL dataset/sign-bibles-dataset/dataprep/isl/lambda/scripts/ckpts/yolox_l.onnx'
-        # onnx_pose = '/home/kavitha/Documents/Sign/ISL dataset/sign-bibles-dataset/dataprep/isl/lambda/scripts/ckpts/dw-ll_ucoco_384.onnx'
-        onnx_det = '/home/ubuntu/isl-dataset-prep/models/yolox_l.onnx'
-        onnx_pose = '/home/ubuntu/isl-dataset-prep/models/dw-ll_ucoco_384.onnx'
+        onnx_det = '/home/kavitha/sign-bibles-dataset/dataprep/isl/lambda_models/yolox_l.onnx'
+        onnx_pose = '/home/kavitha/sign-bibles-dataset/dataprep/isl/lambda_models/dw-ll_ucoco_384.onnx'
+        # onnx_det = '/home/ubuntu/isl-dataset-prep/models/yolox_l.onnx'
+        # onnx_pose = '/home/ubuntu/isl-dataset-prep/models/dw-ll_ucoco_384.onnx'
 
         self.session_det = ort.InferenceSession(path_or_bytes=onnx_det, providers=providers)
         self.session_pose = ort.InferenceSession(path_or_bytes=onnx_pose, providers=providers)
