@@ -55,7 +55,7 @@ def group_files_into_chunks(grouped, splits, base_path, max_size):
 def create_tarballs(chunks, output_dir, count_start):
     for idx, chunk in enumerate(chunks, 1):
         num = count_start+idx
-        tar_name = os.path.join(output_dir, f"chunk_{num:05d}-{chunk[1]}.tar")
+        tar_name = os.path.join(output_dir, f"shard_{num:05d}-{chunk[1]}.tar")
         with tarfile.open(tar_name, "w") as tar:
             for base, filepaths in chunk[0]:
                 for filepath in filepaths:
