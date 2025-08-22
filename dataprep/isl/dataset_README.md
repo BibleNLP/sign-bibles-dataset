@@ -12,11 +12,11 @@ configs:
   - config_name: indian_sign_language_version_islv
     data_files:
       - split: train
-        path: "ins/indian_sign_language_version_islv/{00001..00055}-train.tar"
+        path: "ins/indian_sign_language_version_islv/*-train.tar"
       - split: val
-        path: "ins/indian_sign_language_version_islv/{00075..00095}-val.tar"
+        path: "ins/indian_sign_language_version_islv/*-val.tar"
       - split: test
-        path: "ins/indian_sign_language_version_islv/{00056..00074}-test.tar"
+        path: "ins/indian_sign_language_version_islv/*-test.tar"
 language:
 - ins
 license: cc-by-sa-4.0
