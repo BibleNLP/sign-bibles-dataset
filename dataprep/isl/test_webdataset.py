@@ -5,65 +5,53 @@ import json
 import tempfile
 import os
 import cv2
-from io import BytesIO
-import urllib3
-
-# Increase urllib3 timeout globally
-urllib3.util.timeout.Timeout.DEFAULT_TIMEOUT = 300  # 5 minutes
 
 
 def main():
-	# dataset = wds.WebDataset(
-	# 	"https://huggingface.co/datasets/bridgeconn/sign-bible/resolve/main/chunk_{00001..00002}.tar",
-	# 	# timeout=300,
-	# 	bufsize=1024,
-	# 	).decode()
+    lang = "ins" 
+    project = "indian_sign_language_version_islv"
+    split = "train"
+    buffer_size = 1024
+    dataset = (
+        wds.WebDataset(
+            f"https://huggingface.co/datasets/bridgeconn/sign-bibles-isl/resolve/main/{lang}/{project}/shard_{{00001..00002}}-{split}.tar",
+            shardshuffle=False)
+        .shuffle(buffer_size)
+        .decode()
+    )
+    for sample in dataset:
+        ''' Each sample contains:
+             'mp4', 'pose-dwpose.npz', 'pose-mediapipe.pose'
+             'transcripts.json' and 'json'
+        '''
+        # print(sample.keys())
 
-	buffer_size = 1024
-	dataset = (
-	    wds.WebDataset("https://huggingface.co/datasets/bridgeconn/sign-dictionary-isl/resolve/refs%2Fpr%2F1/chunk_00001.tar", shardshuffle=False)
-	    .shuffle(buffer_size)
-	    .decode()
-	)
+        # JSON metadata
+        json_data = sample['json']
+        print(json_data['filename'])
+        print(json_data['bible-ref'])
+        print(json_data['biblenlp-vref'])
+        print(json_data['signer'])
 
-	# dataset = wds.WebDataset(
-	# 			"../../../ISLDict_tar_chunks/chunk_{00001..00002}.tar"
-	# 			).decode()
+        # Text
+        text_json = sample['transcripts.json']
 
-	for sample in dataset:
-		''' Each sample contains:
-			 'mp4', 'pose-animation.mp4', 
-			 'pose-dwpose.npz', 'pose-mediapipe.pose'
-			 and 'json
-		'''
-		# print(sample.keys())
+        # main video
+        mp4_data = sample['mp4']
+        process_video(mp4_data)
 
-		# JSON metadata
-		json_data = sample['json']
-		print(json_data['filename']) 
-		# print(json_data['bible-ref']) 
-		# print(json_data['biblenlp-vref']) 
-		print(json_data['signer'])
-		print(json_data['transcripts']) 
+        # # dwpose results
+        # dwpose_coords = sample["pose-dwpose.npz"]
+        # frame_poses = dwpose_coords['frames'].tolist()
+        # print(f"Frames in dwpose coords: {len(frame_poses)} poses")
+        # print(f"Pose coords shape: {len(frame_poses[0][0])}")
+        # print(f"One point looks like [x,y]: {frame_poses[0][0][0]}")
 
-		# main video
-		mp4_data = sample['mp4']
-		process_video(mp4_data)
-		
+        # mediapipe results in .pose format
+        pose_format_data = sample["pose-mediapipe.pose"]
+        process_poseformat(pose_format_data)
 
-		# dwpose results
-		# dwpose_coords = np.load(BytesIO(sample["pose-dwpose.npz"]))
-		dwpose_coords = sample['pose-dwpose.npz']
-		frame_poses = dwpose_coords['frames'].tolist()
-		print(f"Frames in dwpose coords: {len(frame_poses)} poses")
-		print(f"Pose coords shape: {len(frame_poses[0][0])}")
-		print(f"One point looks like [x,y]: {frame_poses[0][0][0]}")
-
-		# mediapipe results in .pose format
-		pose_format_data = sample["pose-mediapipe.pose"]
-		process_poseformat(pose_format_data)
-
-		break
+        break
 
 
 def process_poseformat(pose_format_data):
