@@ -13,8 +13,7 @@ def json_correction(filename):
 	orig_data = {}
 	with open(filename, 'r', encoding='utf-8') as fp:
 		orig_data = json.load(fp)
-	orig_data['transcripts'][0]['language']['BCP-47'] = "en-US"
-	orig_data['glosses'][0]['language']['BCP-47'] = "en-US"
+	orig_data[0]['language']['nameLocal'] = "English"
 	with open(filename, 'w', encoding='utf-8') as fp:
 		json.dump(orig_data, fp, indent=4)
 
@@ -46,15 +45,15 @@ def main():
 	candidate_files = [
 		file 
 		for directory in args.directories 
-		# for file in Path(directory).rglob("*.json") 
-		for file in Path(directory).rglob("*.npz")
+			for file in Path(directory).rglob("*.transcripts.json") 
+		# for file in Path(directory).rglob("*.npz")
 	]
 
 	for file in candidate_files:
 		try:
-			# json_correction(file) 
+			json_correction(file) 
 			# npz_correction(file)
-			npz_test(file)
+			# npz_test(file)
 			logging.info(f"Edited {file}")
 		except Exception as e:
 			logging.exception(f"{file} Errored out!!!!")

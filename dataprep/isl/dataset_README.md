@@ -1,16 +1,22 @@
 ---
 configs:
   - config_name: all
-    data_files: '*/*/*.tar'
+    data_files:
+      - split: train
+        path: "*/*/*-train.tar"
+      - split: val
+        path: "*/*/*-val.tar"
+      - split: test
+        path: "*/*/*-test.tar"
     default: true
   - config_name: indian_sign_language_version_islv
     data_files:
       - split: train
-        path: ins/indian_sign_language_version_islv/{00001..00055}-train.tar
+        path: "ins/indian_sign_language_version_islv/{00001..00055}-train.tar"
       - split: val
-        path: ins/indian_sign_language_version_islv/{00075..00095}-val.tar
+        path: "ins/indian_sign_language_version_islv/{00075..00095}-val.tar"
       - split: test
-        path: ins/indian_sign_language_version_islv/{00056..00074}-val.tar
+        path: "ins/indian_sign_language_version_islv/{00056..00074}-test.tar"
 language:
 - ins
 license: cc-by-sa-4.0
@@ -27,6 +33,7 @@ tags:
 - low-resource-languages
 ---
 
+
 # Dataset Card for Sign Bible Dataset
 
 This dataset contains Indian sign language videos from the Bible recordings, processed for machine learning applications.
@@ -35,13 +42,13 @@ The dataset is licensed under the Creative Commons Attribution-ShareAlike 4.0 In
 
 ## Dataset Details
 
-Contains 1128 sign videos of 20 hours in total.
+Contains 1111 sign videos of 19.5 hours in total.
 
 ### Dataset Description
 
 - Continuous signing videos
-- Parallel text (Bible verses from BSB version) 
-- Bible reference to signed verses (For aligning to other Bible versions and resources)
+- Parallel text
+- Bible reference to signed verses
 - Pose estimation data in the following formats
   - Frames wise body landmarks detected by dwpose as a numpy array
   - Frames wise body landmarks detected by mediapose as .pose format
@@ -72,8 +79,8 @@ def main():
     buffer_size = 1024
     dataset = (
         wds.WebDataset(
-            f"https://huggingface.co/datasets/bridgeconn/sign-bibles-isl/resolve/main/{lang}/{project}/shard_{00001..00002}-{split}.tar",
-            shardshuffle=False)
+        f"https://huggingface.co/datasets/bridgeconn/sign-bibles-isl/resolve/main/{lang}/{project}/shard_{{00001..00002}}-{split}.tar",
+        shardshuffle=False)
         .shuffle(buffer_size)
         .decode()
     )
@@ -86,13 +93,15 @@ def main():
 
         # JSON metadata
         json_data = sample['json']
-        print(json_data['filename'])
+        print(json_data['total_frames'])
         print(json_data['bible-ref'])
         print(json_data['biblenlp-vref'])
         print(json_data['signer'])
 
         # Text
         text_json = sample['transcripts.json']
+        print(text_json[0]['text'])
+        print(text_json[0]['language']['name'])
 
         # main video
         mp4_data = sample['mp4']
@@ -111,7 +120,6 @@ def main():
 
         break
 
-
 def process_poseformat(pose_format_data):
     from pose_format import Pose
     temp_file = None
@@ -129,7 +137,6 @@ def process_poseformat(pose_format_data):
     finally:
         if temp_file and os.path.exists(temp_file):
             os.remove(temp_file) # Clean up the temporary file
-
 
 
 def process_video(mp4_data):
@@ -179,4 +186,4 @@ def process_video(mp4_data):
 
 if __name__ == '__main__':
     main()
-
+```

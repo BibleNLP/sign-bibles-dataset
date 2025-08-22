@@ -28,13 +28,14 @@ def main():
 
         # JSON metadata
         json_data = sample['json']
-        print(json_data['filename'])
+        print(json_data['total_frames'])
         print(json_data['bible-ref'])
         print(json_data['biblenlp-vref'])
         print(json_data['signer'])
 
         # Text
-        text_json = sample['transcripts.json']
+        text_json = sample['transcripts']
+        print(text_json[0]['text'])
 
         # main video
         mp4_data = sample['mp4']
@@ -48,7 +49,7 @@ def main():
         # print(f"One point looks like [x,y]: {frame_poses[0][0][0]}")
 
         # mediapipe results in .pose format
-        pose_format_data = sample["pose-mediapipe.pose"]
+        pose_format_data = sample["pose-mediapipe"]
         process_poseformat(pose_format_data)
 
         break

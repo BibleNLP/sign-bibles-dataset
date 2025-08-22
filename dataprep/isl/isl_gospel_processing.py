@@ -99,7 +99,7 @@ def process_video(id, input_path, output_path):
 					"end_frame": frame_count,
 					"language": {
 						"name": "English",
-						"nameLocal" : "Indian Sign Language",
+						"nameLocal" : "English",
 						"ISO639-3": "eng",
 						"BCP-47": "en-US"
 					},
