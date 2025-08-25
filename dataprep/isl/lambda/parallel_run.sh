@@ -16,6 +16,7 @@ export SUCCESS_LOG FAIL_LOG
 # Function to run a job and log result
 run_job() {
     VIDEO_ID="$1"
+    echo "Processing $VIDEO_ID"
     if python3 scripts/dwpose_processing.py "$VIDEO_ID"; then
         echo -e "$VIDEO_ID" >> "$SUCCESS_LOG"
     else
