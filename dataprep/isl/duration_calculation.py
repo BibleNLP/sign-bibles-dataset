@@ -31,7 +31,7 @@ def main():
     print(f"{args.directories=}")
 
     json_files = [
-        video_file.replace('.mp4', '.json') 
+        video_file.with_suffix('.json') 
         for directory in args.directories
         for video_file in Path(directory).rglob("*.mp4") 
      ]
