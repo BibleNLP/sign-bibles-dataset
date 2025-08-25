@@ -3,9 +3,9 @@ import tarfile
 from pathlib import Path
 from sklearn.model_selection import train_test_split
 import logging
-LOG_FILE = "/mnt/share/logs/make_tars.log"
+LOG_FILE = "/mnt/share/logs/app.log"
 os.makedirs(os.path.dirname(LOG_FILE), exist_ok=True)
-logging.basicConfig(filename=LOG_FILE, level=logging.DEBUG, format='%(asctime)s %(levelname)s: %(message)s')
+logging.basicConfig(filename=LOG_FILE, level=logging.INFO, format='%(asctime)s %(levelname)s: %(message)s')
 
 def get_file_groups(source_dir):
     """Group files by base name before extension."""
@@ -108,8 +108,8 @@ if __name__ == '__main__':
         splits = split_grouped_files(sorted(grouped_files.keys()))
         chunks = group_files_into_chunks(grouped_files, splits, SOURCE_DIR, MAX_TAR_SIZE)
         print(f"Created chunks: {len(chunks)}")
-        # create_tarballs(chunks, OUTPUT_DIR, count_start=COUNT_START)
-        # logging.info("make_tar_files.py completed successfully.")
+        create_tarballs(chunks, OUTPUT_DIR, count_start=COUNT_START)
+        logging.info("make_tar_files.py completed successfully.")
     except Exception as e:
         logging.error(f"Script failed: {e}")
         raise
