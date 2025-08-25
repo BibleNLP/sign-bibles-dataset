@@ -75,6 +75,8 @@ def main():
 	]
 
 	missing_verses = get_known_missing_verses()
+	print(f"Total candidate files: {len(candidate_files)}")
+	print(f"Candidate files: {candidate_files[:10]} ...")
 
 	for file in candidate_files:
 		try:
