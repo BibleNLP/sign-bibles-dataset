@@ -36,6 +36,28 @@ def npz_test(filename):
 	assert len(new_obj['frames'][0][0]) == DWPOSE_LANDMARKS_NUM
 	assert len(new_obj['frames'][0][0][0]) == 2
 
+def get_known_missing_verses():
+	from bible_text_access import known_missing_verses
+	from biblenlp_util import ref2vref
+	vrefs = set()
+	for bible in known_missing_verses:
+		for ref in known_missing_verses[bible]:
+			vref = ref2vref(ref)
+			vrefs.add(vref[0])
+	return vrefs
+
+def is_missing_versetext(filename, missing_verses):
+	json_data = {}
+	with open(filename, 'r', encoding='utf-8') as fp:
+		json_data = json.load(fp)
+	for entry in json_data:
+		verses = entry.get('biblenlp-vref', [])
+		for verse in verses:
+			if verse in missing_verses:
+				print(f"{filename} has known missing verse text: {verse}")
+				return True
+	return False
+
 
 def main():
 	parser = argparse.ArgumentParser(description='Calculate total duration from JSON files.')
@@ -43,18 +65,22 @@ def main():
 	args = parser.parse_args()
 
 	candidate_files = [
-		file 
+		file.with_suffix('.json')
 		for directory in args.directories 
-			for file in Path(directory).rglob("*.transcripts.json") 
+			# for file in Path(directory).rglob("*.transcripts.json")
+			for file in Path(directory).rglob("*.mp4") 
 		# for file in Path(directory).rglob("*.npz")
 	]
 
+	missing_verses = get_known_missing_verses()
+
 	for file in candidate_files:
 		try:
-			json_correction(file) 
+			_= is_missing_versetext(file, missing_verses)
+			# json_correction(file) 
 			# npz_correction(file)
 			# npz_test(file)
-			logging.info(f"Edited {file}")
+			# logging.info(f"Edited {file}")
 		except Exception as e:
 			logging.exception(f"{file} Errored out!!!!")
 
