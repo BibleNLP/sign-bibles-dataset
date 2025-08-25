@@ -42,7 +42,7 @@ The dataset is licensed under the Creative Commons Attribution-ShareAlike 4.0 In
 
 ## Dataset Details
 
-Contains 1111 sign videos of 19.5 hours in total.
+Contains 1128 sign videos of 19.5 hours in total.
 
 ### Dataset Description
 
