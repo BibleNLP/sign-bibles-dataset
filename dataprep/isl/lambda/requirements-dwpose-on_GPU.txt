@@ -1,6 +1,6 @@
 opencv-python
 onnx==1.17.0
-onnxruntime
+onnxruntime-gpu
 matplotlib
 accelerate
 torch
