@@ -2,7 +2,7 @@
 
 INPUT_FILE="input_list.txt"
 
-LOG_DIR="/mnt/share/logs"
+LOG_DIR="/content/logs"
 SUCCESS_LOG="$LOG_DIR/success.log"
 FAIL_LOG="$LOG_DIR/fail.log"
 
@@ -10,6 +10,8 @@ mkdir -p "$LOG_DIR"
 : > "$SUCCESS_LOG"  # Clear old logs
 : > "$FAIL_LOG"
 
+# Export needed for GNU parallel to use these variables
+export SUCCESS_LOG FAIL_LOG
 
 # Function to run a job and log result
 run_job() {
@@ -21,20 +23,16 @@ run_job() {
     fi
 }
 
-# Run jobs sequentially from input file
-while IFS= read -r VIDEO_ID || [ -n "$VIDEO_ID" ]; do
-    run_job "$VIDEO_ID"
-done < "$INPUT_FILE"
+export -f run_job
+
+# Run in parallel
+parallel -j 10 run_job {1} :::: "$INPUT_FILE"
 
 
-
-# Retry failed jobs if any
-if [ -s "$FAIL_LOG" ]; then
+if [ -s /content/logs/fail.log ]; then
     echo "Retrying failed jobs..."
-    cp "$FAIL_LOG" retry.txt
-    > "$FAIL_LOG"  # Clear old failures
+    cp /content/logs/fail.log retry.txt
+    > /content/logs/fail.log  # Clear old failures
 
-    while IFS= read -r VIDEO_ID || [ -n "$VIDEO_ID" ]; do
-        run_job "$VIDEO_ID"
-    done < retry.txt
+    parallel -j 10 run_job {1} :::: retry.txt
 fi
