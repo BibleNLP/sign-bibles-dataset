@@ -44,6 +44,7 @@ def get_known_missing_verses():
 		for ref in known_missing_verses[bible]:
 			vref = ref2vref(ref)
 			vrefs.add(vref[0])
+	print(f"Known missing verses: {vrefs}")
 	return vrefs
 
 def is_missing_versetext(filename, missing_verses):
@@ -53,6 +54,7 @@ def is_missing_versetext(filename, missing_verses):
 	for entry in json_data:
 		verses = entry.get('biblenlp-vref', [])
 		for verse in verses:
+			print(f"Checking {filename} verse {verse}")
 			if verse in missing_verses:
 				print(f"{filename} has known missing verse text: {verse}")
 				return True
