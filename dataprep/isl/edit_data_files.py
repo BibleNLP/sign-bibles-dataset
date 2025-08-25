@@ -51,13 +51,11 @@ def is_missing_versetext(filename, missing_verses):
 	json_data = {}
 	with open(filename, 'r', encoding='utf-8') as fp:
 		json_data = json.load(fp)
-	for entry in json_data:
-		verses = entry.get('biblenlp-vref', [])
-		for verse in verses:
-			print(f"Checking {filename} verse {verse}")
-			if verse in missing_verses:
-				print(f"{filename} has known missing verse text: {verse}")
-				return True
+	verses = json_data.get('biblenlp-vref', [])
+	for verse in verses:
+		if verse in missing_verses:
+			print(f"{filename} has known missing verse text: {verse}")
+			return True
 	return False
 
 
