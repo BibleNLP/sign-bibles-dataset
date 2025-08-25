@@ -42,7 +42,7 @@ The dataset is licensed under the Creative Commons Attribution-ShareAlike 4.0 In
 
 ## Dataset Details
 
-Contains 1128 sign videos of 19.5 hours in total.
+Contains 1114 sign videos of 19.5 hours in total.
 
 ### Dataset Description
 
@@ -50,6 +50,7 @@ Contains 1128 sign videos of 19.5 hours in total.
 - Parallel text
 - Bible reference to signed verses
 - Pose estimation data in the following formats
+  - skeletal video
   - Frames wise body landmarks detected by dwpose as a numpy array
   - Frames wise body landmarks detected by mediapose as .pose format
 - Signer id for each video
@@ -121,69 +122,69 @@ def main():
         break
 
 def process_poseformat(pose_format_data):
-    from pose_format import Pose
-    temp_file = None
-    try:
-        with tempfile.NamedTemporaryFile(suffix=".pose", delete=False) as tmp:
-            tmp.write(pose_format_data)
-            temp_file = tmp.name
+	from pose_format import Pose
+	temp_file = None
+	try:
+		with tempfile.NamedTemporaryFile(suffix=".pose", delete=False) as tmp:
+			tmp.write(pose_format_data)
+			temp_file = tmp.name
 
-        data_buffer = open(temp_file, "rb").read()
-        pose = Pose.read(data_buffer)
+		data_buffer = open(temp_file, "rb").read()
+		pose = Pose.read(data_buffer)
 
-        print(f"Mediapipe results from pose-format: {pose.body.data.shape}")
-    except Exception as e:
-        print(f"Error processing pose-format: {e}")
-    finally:
-        if temp_file and os.path.exists(temp_file):
-            os.remove(temp_file) # Clean up the temporary file
+		print(f"Mediapipe results from pose-format: {pose.body.data.shape}")
+	except Exception as e:
+		print(f"Error processing pose-format: {e}")
+	finally:
+		if temp_file and os.path.exists(temp_file):
+			os.remove(temp_file) # Clean up the temporary file
 
 
 def process_video(mp4_data):
-    print(f"Video bytes length: {len(mp4_data)} bytes")
+	print(f"Video bytes length: {len(mp4_data)} bytes")
 
-    temp_file = None
-    try:
-        # Processing video from temporary file
-        with tempfile.NamedTemporaryFile(suffix=".mp4", delete=False) as tmp:
-            tmp.write(mp4_data)
-            temp_file = tmp.name
+	temp_file = None
+	try:
+		# Processing video from temporary file
+		with tempfile.NamedTemporaryFile(suffix=".mp4", delete=False) as tmp:
+			tmp.write(mp4_data)
+			temp_file = tmp.name
 
-        cap = cv2.VideoCapture(temp_file)
+		cap = cv2.VideoCapture(temp_file)
 
-        if not cap.isOpened():
-            raise IOError(f"Could not open video file: {temp_file}")
+		if not cap.isOpened():
+			raise IOError(f"Could not open video file: {temp_file}")
 
-        # Example: Get video metadata
-        frame_count = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
-        fps = cap.get(cv2.CAP_PROP_FPS)
-        width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
-        height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+		# Example: Get video metadata
+		frame_count = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+		fps = cap.get(cv2.CAP_PROP_FPS)
+		width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+		height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
 
-        print(f"Video Info: {frame_count} frames, {fps:.2f} FPS, {width}x{height}")
+		print(f"Video Info: {frame_count} frames, {fps:.2f} FPS, {width}x{height}")
 
-        # Example: Read and display the first frame (or process as needed)
-        ret, frame = cap.read()
-        if ret:
-            print(f"First frame shape: {frame.shape}, dtype: {frame.dtype}")
-            # You can then use this frame for further processing, e.g.,
-            frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-            import matplotlib.pyplot as plt
-            plt.imshow(frame_rgb)
-            plt.title(f"Sample First Frame")
-            plt.show()
-        else:
-            print("Could not read first frame.")
+		# Example: Read and display the first frame (or process as needed)
+		ret, frame = cap.read()
+		if ret:
+			print(f"First frame shape: {frame.shape}, dtype: {frame.dtype}")
+			# You can then use this frame for further processing, e.g.,
+			frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+			import matplotlib.pyplot as plt
+			plt.imshow(frame_rgb)
+			plt.title(f"Sample First Frame")
+			plt.show()
+		else:
+			print("Could not read first frame.")
 
-        cap.release()
+		cap.release()
 
-    except Exception as e:
-        print(f"Error processing external MP4: {e}")
-    finally:
-        if temp_file and os.path.exists(temp_file):
-            os.remove(temp_file) # Clean up the temporary file
+	except Exception as e:
+		print(f"Error processing external MP4: {e}")
+	finally:
+		if temp_file and os.path.exists(temp_file):
+			os.remove(temp_file) # Clean up the temporary file
 
 
 if __name__ == '__main__':
-    main()
+	main()
 ```

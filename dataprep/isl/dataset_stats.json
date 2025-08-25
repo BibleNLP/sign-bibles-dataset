@@ -1,5 +1,5 @@
 {
-  "total_samples_estimated": 1128,
+  "total_samples_estimated": 1114,
   "languages": [
     "ins"
   ],
@@ -9,7 +9,7 @@
   "stats_per_folder": {
     "ins/indian_sign_language_version_islv": {
       "shard_count": 93,
-      "estimated_samples": 1128
+      "estimated_samples": 1114
     }
   },
   "configs": {
