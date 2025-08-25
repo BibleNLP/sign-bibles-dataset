@@ -67,8 +67,11 @@ def group_files_into_chunks(grouped, splits, base_path, max_size):
 
         if current_chunk:
             chunks.append((current_chunk, split))
+            current_chunk = []
+            current_size = 0
 
     logging.info(f"Grouped into {len(chunks)} chunks (max size {max_size} bytes)")
+    logging.debug(f"Chunks detail: {chunks}")
     return chunks
 
 def create_tarballs(chunks, output_dir, count_start):
