@@ -6,22 +6,20 @@ import matplotlib
 import cv2
 import torch
 import numpy as np
-from dotenv import load_dotenv
+import logging
 
-# Load environment variables from .env
-load_dotenv()
+logging.basicConfig(filename='/content/logs/app.log', level=logging.INFO,
+                    format='%(asctime)s - %(levelname)s - %(message)s')
+
 DWPOSE_LANDMARKS_NUM = 134
 
-local_folder = os.getenv("DWPOSE_PATH")
-if local_folder not in sys.path:
-    sys.path.append(local_folder)
 
-from annotator.dwpose import util
-from annotator.dwpose import DWposeDetector
-from annotator.dwpose.wholebody import Wholebody
-ption = Wholebody()
+from dwpose import util
+from dwpose import DWposeDetector
+from dwpose.wholebody import Wholebody
+pose_estimation = Wholebody()
 
-def pose_estimate_v3(image):
+def pose_estimate_v3(oriImg):
   H, W, C = oriImg.shape
   with torch.no_grad():
       candidate, subset = pose_estimation(oriImg)
@@ -261,13 +259,14 @@ def generate_mask_and_pose_video_files(id):
       video_writer2.release()
       cap.release()
     except Exception as exce:
+        logging.error(f"Error in generating mask and pose video files for id {id}: {exce}")
         raise Exception("Error in pose and mask generation using dwpose")
 
 def generate_pose_files_v2(id):
     try:
       # temp_file_pose =f"./{id}_pose-animation.mp4"
 
-      cap = cv2.VideoCapture(f"./{id}.mp4")
+      cap = cv2.VideoCapture(f"/content/isl_gospel_videos/{id}.mp4")
       # width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
       # height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
       # fps = int(cap.get(cv2.CAP_PROP_FPS))
@@ -308,10 +307,18 @@ def generate_pose_files_v2(id):
           # Write frame to video
           # video_writer2.write(skeleton)
       # video_writer2.release()
-      np.savez_compressed(f"./{id}_pose-dwpose.npz",
+      np.savez_compressed(f"/content/dwpose_output/{id}.pose-dwpose.npz",
           frames=np.array(poses, dtype=np.float64),
           confidences = np.array(confidences, dtype=np.float64))
       cap.release()
     except Exception as exce:
+        logging.error(f"Error in generating pose files for id {id}!")
+        logging.exception("Exception occurred:")
         raise Exception("Error in pose video and array generation using dwpose") from exce
 
+if __name__ == '__main__':
+  if len(sys.argv) < 2:
+      logging.error("Usage: python dwpose_processing.py <video_id>")
+      sys.exit(1)
+  video_id = sys.argv[1]
+  generate_pose_files_v2(video_id)
