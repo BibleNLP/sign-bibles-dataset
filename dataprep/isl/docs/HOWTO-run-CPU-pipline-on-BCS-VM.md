@@ -48,7 +48,7 @@ python gospel_file_list.py > gospel_list.txt
 ### 6. Process files parallely
 
 ```bash
-bash run_parallel.sh
+bash run_parallel_cpu.sh
 ```
 This command will take inputs from `gospel_list.txt` and run `n` jobs at a time to process the files using ffmpeg and mediapipe.
 

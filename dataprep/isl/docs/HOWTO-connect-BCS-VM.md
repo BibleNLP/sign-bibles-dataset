@@ -48,9 +48,9 @@
 - For code transfer, I recommend using git from the ssh terminal
 
 Other tools
-- scp
 - wget
 - aws s3
+- gdown
 
 
 
