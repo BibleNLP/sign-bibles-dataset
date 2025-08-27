@@ -41,12 +41,12 @@ def main():
         mp4_data = sample['mp4']
         process_video(mp4_data)
 
-        # # dwpose results
-        # dwpose_coords = sample["pose-dwpose.npz"]
-        # frame_poses = dwpose_coords['frames'].tolist()
-        # print(f"Frames in dwpose coords: {len(frame_poses)} poses")
-        # print(f"Pose coords shape: {len(frame_poses[0][0])}")
-        # print(f"One point looks like [x,y]: {frame_poses[0][0][0]}")
+        # dwpose results
+        dwpose_coords = sample["pose-dwpose.npz"]
+        frame_poses = dwpose_coords['frames'].tolist()
+        print(f"Frames in dwpose coords: {len(frame_poses)} poses")
+        print(f"Pose coords shape: {len(frame_poses[0][0])}")
+        print(f"One point looks like [x,y]: {frame_poses[0][0][0]}")
 
         # mediapipe results in .pose format
         pose_format_data = sample["pose-mediapipe"]

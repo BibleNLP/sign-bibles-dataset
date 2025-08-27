@@ -41,9 +41,9 @@ response_checksum_validation =when_required
 To view the contents:
 
 ```bash
-aws s3 s3://<bucket-name> --endpoint-url https://files.us-east-3.lambda.ai
+aws s3 ls s3://<bucket-name> --endpoint-url https://files.us-east-3.lambda.ai
 
-aws s3 s3://<bucket-name>/<folder-name> --endpoint-url https://files.us-east-3.lambda.ai
+aws s3 ls s3://<bucket-name>/<folder-name> --endpoint-url https://files.us-east-3.lambda.ai
 
 ```
 
