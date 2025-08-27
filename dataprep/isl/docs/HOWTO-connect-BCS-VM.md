@@ -2,8 +2,8 @@
 
 ### VM Details
 - Name: BCS-CHA-KAVITHASHARE
-- OS: Ubuntu
-- Storage: 
+- OS: Ubuntu 24.04.1 LTS
+- Storage: 24 GB only
 - Cores: 20 vCPUs
 - RAM: 64 GB
 - Mounted storage:

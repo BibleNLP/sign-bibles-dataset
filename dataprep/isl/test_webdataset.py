@@ -24,7 +24,7 @@ def main():
              'mp4', 'pose-dwpose.npz', 'pose-mediapipe.pose'
              'transcripts.json' and 'json'
         '''
-        # print(sample.keys())
+        print(sample.keys())
 
         # JSON metadata
         json_data = sample['json']
@@ -34,7 +34,7 @@ def main():
         print(json_data['signer'])
 
         # Text
-        text_json = sample['transcripts']
+        text_json = sample['transcripts.json']
         print(text_json[0]['text'])
 
         # main video
@@ -49,7 +49,7 @@ def main():
         print(f"One point looks like [x,y]: {frame_poses[0][0][0]}")
 
         # mediapipe results in .pose format
-        pose_format_data = sample["pose-mediapipe"]
+        pose_format_data = sample["pose-mediapipe.pose"]
         process_poseformat(pose_format_data)
 
         break

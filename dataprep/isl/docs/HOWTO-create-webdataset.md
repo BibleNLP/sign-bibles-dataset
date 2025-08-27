@@ -16,13 +16,13 @@ When using this dataset in code, the user can access these features like shown b
 for sample in dataset:
     json_data = sample['json']
 
-    text_json = sample['transcripts']
+    text_json = sample['transcripts.json']
 
     mp4_bytes = sample['mp4']
 
     dwpose_coords = sample["pose-dwpose.npz"]
 
-    pose_format_bytes = sample["pose-mediapipe"]
+    pose_format_bytes = sample["pose-mediapipe.pose"]
 ```
 
 ## Tar archives and dataset splits
