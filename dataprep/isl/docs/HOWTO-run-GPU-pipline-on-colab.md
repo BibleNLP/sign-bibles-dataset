@@ -11,7 +11,7 @@ gdown --id 1w9pXC8tT0p9ndMN-CArp1__b2GbzewWI -O models/yolox_l.onnx
 ```
 
 
-[This google colab](./) notebook that has the steps and code for running the pipeline. The major steps involved in it are:
+[This google colab](./ISL_Dataset_DWPose_run.ipynb) notebook has the steps and code for running the pipeline. The major steps involved in it are:
 
 1. Getting the input data and models to the GPU instance, in this case colab.
 2. Setting up code base.
