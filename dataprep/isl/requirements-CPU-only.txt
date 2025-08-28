@@ -1,0 +1,7 @@
+ffmpeg-python
+mediapipe
+opencv-python
+matplotlib
+python-dotenv
+webdataset==0.2.111
+pose-format==0.10.4

@@ -1,0 +1,25 @@
+{
+  "total_samples_estimated": 1114,
+  "languages": [
+    "ins"
+  ],
+  "projects": [
+    "Indian Sign Language Version - ISLV"
+  ],
+  "stats_per_folder": {
+    "ins/indian_sign_language_version_islv": {
+      "shard_count": 100,
+      "estimated_samples": 1114
+    }
+  },
+  "configs": {
+    "indian_sign_language_version_islv": [
+      "  - config_name: indian_sign_language_version_islv\n    data_files:",
+      "      - split: train\n        path: ins/indian_sign_language_version_islv/*train.tar",
+      "      - split: val\n        path: ins/indian_sign_language_version_islv/*val.tar",
+      "      - split: test\n        path: ins/indian_sign_language_version_islv/*test.tar"
+    ]
+  },
+  "shard_count": 100,
+  "subfolder_count": 1
+}

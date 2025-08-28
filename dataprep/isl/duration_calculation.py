@@ -9,8 +9,8 @@ def get_total_duration(json_files):
         try:
             with open(file, 'r', encoding='utf-8') as f:
                 data = json.load(f)
-                duration = data.get('duration')
-                duration = float(duration.replace(" seconds", ""))
+                duration = data.get('duration_sec')
+                duration = float(duration)
                 if isinstance(duration, (int, float)):
                     total_seconds += duration
         except Exception as e:
@@ -31,9 +31,9 @@ def main():
     print(f"{args.directories=}")
 
     json_files = [
-        json_file 
+        video_file.with_suffix('.json') 
         for directory in args.directories
-        for json_file in Path(directory).rglob("*.json") 
+        for video_file in Path(directory).rglob("*.mp4") 
      ]
     print(f'Total number of videos : {len(json_files)}')
     total_seconds = get_total_duration(json_files)

@@ -1,0 +1,23 @@
+resources:
+  cloud: lambda
+  accelerators: GH200:1   # 1x GPU(96 GB), 64 vCPUs, 432 GB RAM, 4 TB SSD
+  region: us-east-3
+
+# Mount an existing R2 bucket
+file_mounts:
+  /my_data: ./lambda_fs
+  /my_models: ./lambda_models
+  /my_logs: ./lambda_logs
+
+workdir: ./lambda
+
+setup: |
+  pip install --upgrade pip
+  pip install -r requirements-dwpose-on_GPU.txt
+  sudo apt-get install -y parallel
+  cp /my_models/dw-ll_ucoco_384.onnx scripts/ckpts/
+  cp /my_models/yolox_l.onnx scripts/ckpts/
+
+run: |
+  mkdir -p /my_logs/logs
+  bash scripts/parallel_run.sh

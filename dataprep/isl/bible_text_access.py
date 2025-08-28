@@ -50,10 +50,10 @@ def get_verses(ref, bible_name="WEB"):
 
 
 book_code_lookup = {
-	"Matthew" : "MAT",
-	"Mark" : "MRK",
-	"Luke" : "LUK",
-	"John" : "JHN"
+	"matthew" : "MAT",
+	"mark" : "MRK",
+	"luke" : "LUK",
+	"john" : "JHN"
 }
 
 book_codes = ["MAT", "MRK", "LUK", "JHN"]

@@ -1,0 +1,8 @@
+opencv-python
+onnx==1.17.0
+onnxruntime-gpu
+matplotlib
+accelerate
+torch
+numpy
+tqdm
