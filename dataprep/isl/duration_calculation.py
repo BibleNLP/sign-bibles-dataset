@@ -14,7 +14,7 @@ def get_total_duration(json_files):
                 duration = float(duration)
                 if isinstance(duration, (int, float)):
                     total_seconds += duration
-                vrefs += data.get('vrefs', [])
+                vrefs += data.get('biblenlp-vref', [])
         except Exception as e:
             print(f"Error reading {file}: {e}")
     return total_seconds, len(set(vrefs))

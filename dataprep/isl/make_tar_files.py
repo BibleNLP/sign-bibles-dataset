@@ -106,6 +106,7 @@ if __name__ == '__main__':
         grouped_files = get_file_groups(SOURCE_DIR)
         print(f"Grouped files: {len(grouped_files)}")
         splits = split_grouped_files(sorted(grouped_files.keys()))
+        # splits = { "train": sorted(grouped_files.keys()) }  # For now, put all in train}
         chunks = group_files_into_chunks(grouped_files, splits, SOURCE_DIR, MAX_TAR_SIZE)
         print(f"Created chunks: {len(chunks)}")
         create_tarballs(chunks, OUTPUT_DIR, count_start=COUNT_START)
