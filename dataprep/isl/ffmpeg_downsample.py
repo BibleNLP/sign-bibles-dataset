@@ -1,5 +1,6 @@
 import io
 import os
+import sys
 import ffmpeg
 
 
@@ -60,3 +61,32 @@ def downsample_video_ondisk(input_path, output_path):
     except ffmpeg.Error as e:
         print("FFmpeg error:", e.stderr.decode())
         raise
+
+def main(input_video_path, output_video_path):
+    """
+    Recursively downsample all .mp4/.MP4 files in input_video_path,
+    preserving the directory structure in output_video_path.
+    """
+    for root, dirs, files in os.walk(input_video_path):
+        for file in files:
+            if file.lower().endswith('.mp4'):
+                input_path = os.path.join(root, file)
+                # Compute relative path from input_video_path
+                rel_path = os.path.relpath(input_path, input_video_path)
+                output_path = os.path.join(output_video_path, rel_path)
+                os.makedirs(os.path.dirname(output_path), exist_ok=True)
+                print(f"Downsampling {input_path} to {output_path}")
+                downsample_video_ondisk(input_path, output_path)
+
+
+if __name__ == "__main__":
+    if sys.argv[1:]:
+        input_video_dir = sys.argv[1]
+        output_video_dir = sys.argv[2]
+    else:
+        input_video_dir = "/home/kavitha/Documents/Sign/ISL dataset/test_downsampling_script/raw/"
+        output_video_dir = "/home/kavitha/Documents/Sign/ISL dataset/test_downsampling_script/downsampled/"
+    os.makedirs(output_video_dir, exist_ok=True)
+
+    main(input_video_dir, output_video_dir)
+
