@@ -1,9 +1,9 @@
 #!/bin/bash
 
-INPUT_FILE="gospel_list.txt"
-OUT_PATH="/mnt/share/ISLGospel_processed/"
+INPUT_FILE="/content/input_list.txt"
+OUT_PATH="/content/dataprep_output"
 
-LOG_DIR="logs"
+LOG_DIR="/content/logs"
 SUCCESS_LOG="$LOG_DIR/success.log"
 FAIL_LOG="$LOG_DIR/fail.log"
 
@@ -19,7 +19,7 @@ run_job() {
     VIDEO_PATH="$2"
     PROCCESSED_PATH="$3"
 
-    if python3 isl_gospel_processing.py "$VIDEO_ID" "$VIDEO_PATH" "$PROCCESSED_PATH"; then
+    if python3 isl_bible_processing.py "$VIDEO_ID" "$VIDEO_PATH" "$PROCCESSED_PATH"; then
         echo -e "$VIDEO_ID\t$VIDEO_PATH" >> "$SUCCESS_LOG"
     else
         echo -e "$VIDEO_ID\t$VIDEO_PATH" >> "$FAIL_LOG"
@@ -29,13 +29,13 @@ run_job() {
 export -f run_job
 
 # Run in parallel
-parallel --tmpdir /mnt/share/temp -j 16 --colsep '\t' run_job {1} {2} "$OUT_PATH" :::: "$INPUT_FILE"
+parallel --tmpdir /content/temp -j 90 --colsep '\t' run_job {1} {2} "$OUT_PATH" :::: "$INPUT_FILE"
 
 
-if [ -s logs/fail.log ]; then
+if [ -s /content/logs/fail.log ]; then
     echo "Retrying failed jobs..."
-    cp logs/fail.log retry.txt
-    > logs/fail.log  # Clear old failures
+    cp /content/logs/fail.log retry.txt
+    > /content/logs/fail.log  # Clear old failures
 
-    parallel --tmpdir /mnt/share/temp -j 16 --colsep '\t' run_job {1} {2} "$OUT_PATH" :::: retry.txt
+    parallel --tmpdir /mnt/share/temp -j 50 --colsep '\t' run_job {1} {2} "$OUT_PATH" :::: retry.txt
 fi
