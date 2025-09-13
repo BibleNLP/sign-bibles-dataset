@@ -15,7 +15,7 @@ from pose_format_util import video2poseformat
 from bible_text_access import get_verses, book_code_lookup
 from biblenlp_util import ref2vref
 
-logging.basicConfig(filename='logs/app.log', level=logging.INFO,
+logging.basicConfig(filename='/content/logs/app.log', level=logging.INFO,
                     format='%(asctime)s - %(levelname)s - %(message)s')
 
 verse_john_pattern = re.compile(r"(\d+(\-\d+)?)\.MP4")
