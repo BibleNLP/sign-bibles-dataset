@@ -53,10 +53,31 @@ book_code_lookup = {
 	"matthew" : "MAT",
 	"mark" : "MRK",
 	"luke" : "LUK",
-	"john" : "JHN"
+	"john" : "JHN",
+	"1-Corinthians": "1CO",
+	"1-John": "1JN",
+	"1-Peter": "1PE",
+	"1-Thessalonians": "1TH",
+	"1-Timothy": "1TI",
+	"2-Corinthians": "2CO",
+	"2-John": "2JN",
+	"2-Peter": "2PE",
+	"2-Thessalonians": "2TH",
+	"2-Timothy": "2TI",
+	"3-John": "3JN",
+	"Acts": "ACT",
+	"Colossians": "COL",
+	"Ephesians": "EPH",
+	"Galatians": "GAL",
+	"Hebrews": "HEB",
+	"James": "JAS",
+	"Jude": "JUD",
+	"Philemon": "PHM",
+	"Philippians": "PHP",
+	"Titus": "TIT",
 }
 
-book_codes = ["MAT", "MRK", "LUK", "JHN"]
+book_codes = [item[1] for item in book_code_lookup.items()]
 
 known_missing_verses = {
 	"BSB": [
