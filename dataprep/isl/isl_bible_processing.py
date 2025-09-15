@@ -18,7 +18,7 @@ logging.basicConfig(filename='/content/logs/app.log', level=logging.INFO,
                     format='%(asctime)s - %(levelname)s - %(message)s')
 
 verse_john_pattern = re.compile(r"(\d+(\-\d+)?)\.MP4")
-verse_acts_pattern = re.compile(r"V=(\d+(\-\d+)?)$")
+verse_acts_pattern = re.compile(r"V=(\d+(\-\d+)?)")
 verse_generic_pattern = re.compile(r"(\d+(\-\d+)?)")
 
 def process_video(id, input_path, output_path):
