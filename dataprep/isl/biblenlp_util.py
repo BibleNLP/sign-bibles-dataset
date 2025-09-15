@@ -5,7 +5,6 @@ verse_pattern1 = re.compile(r"(\d+)$")
 verse_pattern_range = re.compile(r"(\d+)-(\d+)")
 
 def ref2vref(ref_range):
-	vrefs = []
 	match = re.match(ref_pattern, ref_range)
 	if match:
 		book = match.group(1)
@@ -21,7 +20,7 @@ def ref2vref(ref_range):
 			vref_start = ref_vref_map[f"{book} {chap}:{start}"]
 			vref_end = ref_vref_map[f"{book} {chap}:{end}"]
 			return list(range(vref_start, vref_end+1))
-		raise Exception(f"Cannot process verse part of the input reference:{verses}")
+		raise Exception(f"Cannot process verse part of the input reference:{verses}. {ref_range=}")
 	raise Exception(f"Cannot process input reference pattern:{ref_range}")
 
 ref_vref_map = {
