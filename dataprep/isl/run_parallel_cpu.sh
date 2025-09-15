@@ -37,5 +37,5 @@ if [ -s /content/logs/fail.log ]; then
     cp /content/logs/fail.log retry.txt
     > /content/logs/fail.log  # Clear old failures
 
-    parallel --tmpdir /mnt/share/temp -j 50 --colsep '\t' run_job {1} {2} "$OUT_PATH" :::: retry.txt
+    parallel --tmpdir /content/temp -j 50 --colsep '\t' run_job {1} {2} "$OUT_PATH" :::: retry.txt
 fi
