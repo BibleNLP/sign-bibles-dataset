@@ -40,7 +40,7 @@ def process_video(id, input_path, output_path):
 		parts = input_path.split("/")
 
 		signer = "Signer_1"
-		try
+		try:
 			if parts[3]=="john":
 				ref = f"{book_code_lookup[parts[3]]} {parts[4].replace("Ch-", "")}"
 				ver_match = re.search(verse_john_pattern, parts[-1])
