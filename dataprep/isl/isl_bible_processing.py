@@ -9,9 +9,8 @@ import logging
 from pathlib import Path
 import ffmpeg
 
-from ffmpeg_downsample import downsample_video_ondisk
-from mediapipe_trim import trim_off_storyboard
-from pose_format_util import video2poseformat
+# from mediapipe_trim import trim_off_storyboard
+# from pose_format_util import video2poseformat
 from bible_text_access import get_verses, book_code_lookup
 from biblenlp_util import ref2vref
 
@@ -25,19 +24,16 @@ def process_video(id, input_path, output_path):
 		output_path = output_path[:-1]
 	main_path = f"{output_path}/{id}.mp4"
 	try:
-		shutil.copy(input_path, f"./{id}.mp4")  
+		# shutil.copy(input_path, f"./{id}.mp4")  
 
-		# downsample_video_ondisk(input_path, f"{id}.mp4")
 
-		trimmed_stream = trim_off_storyboard(None, id)
-		if not trimmed_stream:
-			raise Exception("Processing with mediapipe failed")
-		video2poseformat(id) #  .pose format using mediapipe
-		# generate_pose_files_v2(id) # mp4, and npz usging dwpose
+		# trimmed_stream = trim_off_storyboard(None, id)
+		# if not trimmed_stream:
+		# 	raise Exception("Processing with mediapipe failed")
+		# video2poseformat(id) #  .pose format using mediapipe
 
-		shutil.move(f"{id}.mp4", output_path)
-		shutil.move(f"{id}_pose-mediapipe.pose", f"{output_path}/{id}.pose-mediapipe.pose")
-		# shutil.move(f"{id}_pose-dwpose.npz", f"{output_path}/{id}.pose-dwpose.npz")
+		# shutil.move(f"{id}.mp4", output_path)
+		# shutil.move(f"{id}_pose-mediapipe.pose", f"{output_path}/{id}.pose-mediapipe.pose")
 
 		parts = input_path.split("/")
 
@@ -57,7 +53,7 @@ def process_video(id, input_path, output_path):
 		ref = f"{ref}:{verse_parts}"
 		vref = ref2vref(ref)
 
-		probe = ffmpeg.probe(main_path)
+		probe = ffmpeg.probe(input_path) # probe = ffmpeg.probe(main_path)
 		duration = float(probe['format']['duration'])
 		width = 0
 		height = 0
