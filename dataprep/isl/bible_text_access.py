@@ -92,7 +92,9 @@ known_missing_verses = {
 		"LUK 17:36",
 		"LUK 23:17",
 		"JHN 5:4",
-		"3JN 1:15"
+		"3JN 1:15",
+		"ACT 24:7",
+		"ACT 28:29"
 	],
 	"ERV": [
 		"MAT 17:21",
