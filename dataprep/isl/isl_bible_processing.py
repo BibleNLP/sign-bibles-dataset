@@ -18,6 +18,7 @@ logging.basicConfig(filename='/content/logs/app.log', level=logging.INFO,
                     format='%(asctime)s - %(levelname)s - %(message)s')
 
 verse_john_pattern = re.compile(r"(\d+(\-\d+)?)\.MP4")
+verse_acts_pattern = re.compile(r"V=(\d+(\-\d+)?)$")
 verse_generic_pattern = re.compile(r"(\d+(\-\d+)?)")
 
 def process_video(id, input_path, output_path):
@@ -46,7 +47,13 @@ def process_video(id, input_path, output_path):
 				raise Exception(f"Cant compose reference from:{parts}")
 			verse_parts = ver_match.group(1)
 			signer = "Signer_2"
-		elif parts[3] in ["matthew", "mark", "luke"]:
+		elif parts[3] == "Acts":
+			book = parts[3]
+			chapter = re.search(r"(\d+)", parts[4]).group(0)
+			verse = re.search(verse_acts_pattern, parts[-1]).group(1)
+			ref = f"{book_code_lookup[book]} {chapter}"
+			verse_parts = verse
+		elif parts[3] in ["matthew", "mark", "luke","Titus" ]:
 			ref = f"{book_code_lookup[parts[3]]} {parts[4].replace("Ch ", "")}"
 			verse = parts[-1].split(".")[0].split(" ")[1]
 			verse_parts = "-".join(verse.split("-")[:-1])
@@ -58,6 +65,7 @@ def process_video(id, input_path, output_path):
 			verse_parts = verse
 
 		ref = f"{ref}:{verse_parts}"
+		print(f"{ref=}")
 		vref = ref2vref(ref)
 
 		probe = ffmpeg.probe(input_path) # probe = ffmpeg.probe(main_path)
