@@ -12,16 +12,24 @@ def ref2vref(ref_range):
 		verses = match.group(3)
 		v_match = re.match(verse_pattern1, verses)
 		if v_match:
-			return [ref_vref_map[ref_range]]
+			return [lookup_vref(ref_range)]
 		v_match2 = re.match(verse_pattern_range, verses)
 		if v_match2:
 			start = v_match2.group(1)
 			end = v_match2.group(2)
-			vref_start = ref_vref_map[f"{book} {chap}:{start}"]
-			vref_end = ref_vref_map[f"{book} {chap}:{end}"]
+			vref_start = lookup_vref(f"{book} {chap}:{start}")
+			vref_end = lookup_vref(f"{book} {chap}:{end}")
 			return list(range(vref_start, vref_end+1))
 		raise Exception(f"Cannot process verse part of the input reference:{verses}. {ref_range=}")
 	raise Exception(f"Cannot process input reference pattern:{ref_range}")
+
+def lookup_vref(ref):
+	try:
+		return ref_vref_map[ref]
+	except Exception as exce:
+		if ref in known_missing:
+			return known_missing[ref]	
+		raise Exception(f"Cannot find vref for {ref}") from exce
 
 ref_vref_map = {
 	"GEN 1:1": 1,
@@ -41924,5 +41932,7 @@ ref_vref_map = {
 	"ENO 42:15": 41898,
 	"ENO 42:16": 41899,
 }
+
+known_missing = {"ACT 19:41": ref_vref_map["ACT 19:40"]}
 
 # vref_ref_map = { ref_vref_map[key]:key for key in ref_vref_map}
