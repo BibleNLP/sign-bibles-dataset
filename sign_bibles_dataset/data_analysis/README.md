@@ -61,3 +61,9 @@ sign-bible-analysis
 I haven't been able to get this working usefully to count unique signers. 
 In "God Creates the World" it finds "45 unique faces" in 45 frames. 
 
+# Large Files
+find /data/petabyte/cleong/data/DBL_Deaf_Bibles/sign-bibles-dataset-script-downloads/ -size +2147483646c|grep -v pose-animation 2>&1|tee large_files_list.txt
+
+
+
+lftp -u cleong1@udayton.edu ftps://ftp.box.com
