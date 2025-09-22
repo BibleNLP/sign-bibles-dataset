@@ -86,7 +86,7 @@ def load_scores(parquet_files: list[Path]) -> pd.DataFrame:
             language = extract_language_from_filename(f)
             logging.debug(f"Language for {f}: {language}")
             df["Language"] = language
-            df["source"] = f
+            df["source"] = str(f)
             dfs.append(df)
         except (ValueError, OSError, KeyError) as e:
             logging.warning("Skipping %s: %s", f, e)
@@ -95,18 +95,24 @@ def load_scores(parquet_files: list[Path]) -> pd.DataFrame:
     return pd.DataFrame(columns=["score"])
 
 
-def summarize_scores(df: pd.DataFrame) -> dict[str, float]:
+def summarize_scores(df: pd.DataFrame) -> dict[str, float | str | int]:
     if df.empty:
         return {}
+
+    min_idx = df["score"].idxmin()
+    max_idx = df["score"].idxmax()
+
     return {
         "count": int(df["score"].count()),
         "mean": float(df["score"].mean()),
         "std": float(df["score"].std()),
         "min": float(df["score"].min()),
+        "min_source": str(df.loc[min_idx, "source"]) if pd.notna(min_idx) else "",
         "25%": float(df["score"].quantile(0.25)),
         "50%": float(df["score"].median()),
         "75%": float(df["score"].quantile(0.75)),
         "max": float(df["score"].max()),
+        "max_source": str(df.loc[max_idx, "source"]) if pd.notna(max_idx) else "",
     }
 
 
@@ -142,7 +148,7 @@ def extract_language_from_filename(filename: str) -> str:
             # get everything after "in"
             name = parent.name
             name = name.split(" in ", 1)[-1].removesuffix(".parquet").strip()
-            
+
             # Clean redundant text
             name = name.replace(" (119 Introductions and Passages)", "")
             name = name.replace(" (119 Introductions and Passages expanded with More Information)", "")
@@ -150,6 +156,38 @@ def extract_language_from_filename(filename: str) -> str:
             return name
 
     return "Unknown"
+
+
+def save_summary_csv_and_tex(summary: dict[str, dict[str, float | str | int]], output_dir: Path) -> None:
+    if not summary:
+        logging.warning("No summary data to save.")
+        return
+
+    df = pd.DataFrame.from_dict(summary, orient="index")
+    df.index.name = "subfolder"
+
+    csv_path = output_dir / "summary.csv"
+    tex_path = output_dir / "summary.tex"
+
+    df.to_csv(csv_path)
+    logging.info("Saved CSV summary to %s", csv_path)
+
+    df.to_latex(
+        tex_path,
+        index=True,
+        float_format="%.2f",
+        bold_rows=False,
+        na_rep="--",
+        column_format="l" + "r" * (len(df.columns)),  # align: left index + right for each column
+        escape=True,
+        caption="Summary of BRISQUE scores by subfolder.",
+        label="tab:brisque_summary",
+        longtable=False,
+        multicolumn=False,
+        multicolumn_format="c",
+        position="htbp",
+    )
+    logging.info("Saved LaTeX summary to %s", tex_path)
 
 
 def main() -> None:
