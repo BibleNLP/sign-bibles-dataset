@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
-"""
-Find unique verse indices from transcript JSON files grouped by language.
-"""
+"""Find unique verse indices from transcript JSON files grouped by language."""
 
 import argparse
 import json
@@ -18,7 +16,7 @@ from tqdm import tqdm
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Aggregate unique verse indices grouped by language.")
     parser.add_argument("input_dir", type=Path, help="Root directory to search for transcripts.")
-    parser.add_argument("--depth", type=int, default=3, help="Depth of subfolders to search.")
+    parser.add_argument("--depth", type=int, default=2, help="Depth of subfolders to search.")
     parser.add_argument(
         "--output_dir",
         type=Path,
@@ -136,7 +134,7 @@ def save_language_dataframe(df: pd.DataFrame, output_dir: Path) -> dict[str, set
     logging.info("Saved combined DataFrame with %d rows", len(df))
 
     grouped = df.groupby("Language")["verse_indices"]
-    return {lang: set(verse for verses in group for verse in verses) for lang, group in grouped}
+    return {lang: {verse for verses in group for verse in verses} for lang, group in grouped}
 
 
 def save_latex_table(verse_counts: dict[str, set[int]], output_file: Path) -> None:
@@ -179,50 +177,69 @@ def load_vrefs(path: Path):
     return vref_dict
 
 
-def plot_supervenn_diagram(verse_counts: dict[str, set[int]], output_file: Path | None = None) -> None:
+def plot_supervenn_diagram(
+    verse_counts: dict[str, set[int]],
+    output_file: Path | None = None,
+    combine_identical: bool = True,
+) -> None:
     """
     Plot a Supervenn diagram showing the overlap of verses between languages.
 
     Args:
         verse_counts (dict[str, set[int]]): Mapping from language to a set of verse IDs.
         output_file (Path | None): If provided, the plot will be saved to this file.
-    """
-    sets = list(verse_counts.values())
-    labels = list(verse_counts.keys())
+        combine_identical (bool): If True, combine labels that have identical verse sets.
 
-    # Configure global font size
+    """
+    if combine_identical:
+        grouped: dict[frozenset[int], list[str]] = defaultdict(list)
+        for label, verse_set in verse_counts.items():
+            grouped[frozenset(verse_set)].append(label)
+
+        sets = [set(verse_set) for verse_set in grouped]
+        labels = [", ".join(group) for group in grouped.values()]
+    else:
+        sets = list(verse_counts.values())
+        labels = list(verse_counts.keys())
+
     plt.rcParams.update(
         {
-            "font.size": 20,  # main font size
-            "axes.titlesize": 24,  # title font size
-            "axes.labelsize": 20,  # axis label font size
+            "font.size": 24,
+            "axes.titlesize": 26,
+            "axes.labelsize": 20,
             "xtick.labelsize": 16,
             "ytick.labelsize": 16,
         }
     )
 
-    # Choose a manageable figure size, or scale up for many labels
-    height_per_set = 0.6
+    height_per_set = 0.8
     width = max(12, len(sets) * 0.8)
     height = max(8, len(sets) * height_per_set)
     plt.figure(figsize=(width, height))
 
-    supervenn(
+    supervenn_obj = supervenn(
         sets,
         labels,
         side_plots=False,
-        widths_minmax_ratio=0.05,
-        min_width_for_annotation=100,
+        min_width_for_annotation=100_000,
+        rotate_col_annotations=True,
     )
 
+    supervenn_obj.axes["main"].set_xlabel("")
+    supervenn_obj.axes["main"].set_xticks([])
+    supervenn_obj.axes["main"].grid(False)
+
+    for label in supervenn_obj.axes["main"].get_xticklabels():
+        label.set_visible(False)
+
     plt.title("Verse Overlaps Across Languages", fontsize=24)
-    plt.tight_layout()
+    supervenn_obj.figure.tight_layout()
 
+    if output_file:
+        output_file.parent.mkdir(parents=True, exist_ok=True)
+        plt.savefig(output_file, dpi=300)
+        logging.info("Saved supervenn to %s", output_file.resolve())
 
-    output_file.parent.mkdir(parents=True, exist_ok=True)
-    plt.savefig(output_file, dpi=300)
-    logging.info(f"Saved supervenn to {output_file.resolve()}")
-    
     plt.close()
 
 
@@ -260,10 +277,14 @@ def main() -> None:
 
     english_indices = load_english_verse_indices(args.eng_ebible)
     vref_dict = load_vrefs(args.eng_vref)
-    verse_counts["English"] = english_indices
+    plot_supervenn_diagram(verse_counts, output_file=output_dir / "verse_overlap_supervenn_no_text.png")
+    verse_counts["English Text (BSB)"] = english_indices
     logging.info(f"Loaded {len(english_indices)} nonblank verse indices from {args.eng_ebible}")
 
     plot_supervenn_diagram(verse_counts, output_file=output_dir / "verse_overlap_supervenn.png")
+
+    all_languages_set = set().union(*(s for k, s in verse_counts.items() if k != "English Text (BSB)"))
+    verse_counts["All Sign Languages"] = all_languages_set
 
     for lang, verses in verse_counts.items():
         if lang == "English":
@@ -280,7 +301,6 @@ def main() -> None:
         for missing_verse_index in missing_verses:
             logging.info(vref_dict.get(missing_verse_index, missing_verse_index))
 
-
         rows = []
         for missing_verse_index in sorted(missing_verses):
             rows.append(
@@ -289,7 +309,7 @@ def main() -> None:
                     "Verse": vref_dict.get(missing_verse_index, ""),
                 }
             )
-        out_path = output_dir /f"{lang.lower()}_missing_verses.csv"
+        out_path = output_dir / f"{lang.lower()}_missing_verses.csv"
         missing_verses_df = pd.DataFrame(rows, columns=["missing_index", "Verse"])
         missing_verses_df.to_csv(out_path, index=False)
         logging.info("Saved missing verses CSV to %s", out_path)
