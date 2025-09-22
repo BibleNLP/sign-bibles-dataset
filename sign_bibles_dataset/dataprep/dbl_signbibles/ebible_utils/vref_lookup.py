@@ -8,9 +8,17 @@ BOOK_MAP_PATH = Path(__file__).parent / "data" / "usfm_book_identifiers.csv"
 BUNDLED_BIBLE_PATH = Path(__file__).parent / "data" / "eng-engbsb.txt"
 
 
-def load_vref_map(vref_path: str) -> dict[str, int]:
+def load_vref_map(vref_path: str) -> dict[str, int]:    
     with open(vref_path, encoding="utf-8") as f:
-        return {line.strip(): idx for idx, line in enumerate(f) if line.strip()}
+        vref_map = {line.strip(): idx for idx, line in enumerate(f) if line.strip()}
+        print(vref_map)
+        print(vref_map["DAN 6:1"])
+        if "DAN 5:31" not in vref_map and "DAN 6:1" in vref_map:
+            # in some bibles, this is DAN 6:1
+            vref_map["DAN 5:31"] = vref_map["DAN 6:1"]
+        return vref_map
+
+
 
 
 def load_bible_lines(bible_path: str) -> list[str]:
@@ -165,6 +173,8 @@ def citation_to_text_and_vrefs(
     expanded = expand_compound_citations(normalized)
     vrefs = parse_citation_string(expanded, vref_map)
     verses = [bible_verses[i] for i in vrefs if 0 <= i < len(bible_verses)]
+    if citation and not vrefs:
+        raise ValueError(f"Found no vrefs for citation {citation}. Expanded: {expanded}, Normalized: {normalized}")
     return " ".join(verses), vrefs
 
 

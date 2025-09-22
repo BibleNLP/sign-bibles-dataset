@@ -2,6 +2,8 @@ import json
 import xml.etree.ElementTree as ET
 from pathlib import Path
 
+import warnings
+
 BASE_DIR = Path(
     "/opt/home/cleong/projects/semantic_and_visual_similarity/nas_data/DBL_Deaf_Bibles/sign-bibles-dataset-script-downloads"
 )
@@ -28,6 +30,11 @@ def parse_metadata(xml_path: Path):
             for division in pub.findall("./structure/division"):
                 passage = division.attrib.get("role", "").strip()
                 for content in division.findall("content"):
+                    # Estonian subset is weird
+                    # It has "MRK" as the role at the division level
+                    #  then references at the video level
+                    if "/eso/" in str(xml_path):
+                        passage = content.attrib.get("role", "").strip()
                     src = content.attrib.get("src", "").strip()
                     filename = Path(src).name
                     file_to_passage[filename] = passage
@@ -43,8 +50,8 @@ def collect_video_metadata(base_dir: Path):
     results = []
 
     for language_dir in base_dir.iterdir():
-        if not language_dir.name == "esl":
-            continue
+        # if not language_dir.name == "esl":
+        #     continue
         if not language_dir.is_dir():
             continue
         language_code = language_dir.name
@@ -94,6 +101,7 @@ def collect_video_metadata(base_dir: Path):
 
 
 def main():
+    raise DeprecationWarning("This code is outdatated, look in ebible_utils")
     all_metadata = collect_video_metadata(BASE_DIR)
     with open(OUTPUT_JSON, "w", encoding="utf-8") as f:
         json.dump(all_metadata, f, indent=2, ensure_ascii=False)

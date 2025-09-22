@@ -114,34 +114,34 @@ def main():
     parser.add_argument("--bcp_code", help="BCP-47 for the Bible")
     parser.add_argument("--output_json", help="Path to write updated JSON")
     args = parser.parse_args()
+    raise DeprecationWarning("This code is outdatated, look in ebible_utils")
 
     vref_map = load_vref_map(args.vref_path)
     bible_lines = load_bible_lines(args.bible_path)
 
     with open(args.json_path, encoding="utf-8") as f:
         video_metadata = json.load(f)
-        video_metadata["transcripts"] = []
-
-        citation = video_metadata.get("bible-ref", "").strip()
-        if citation:
-            transcript = {}
-            indices = parse_citation_string(citation, vref_map)
-            video_metadata["biblenlp-vref"] = indices
-            transcript["bible_text"] = "".join([bible_lines[i] for i in indices if 0 <= i < len(bible_lines)])
-            transcript["language"] = {
-                "name": "English",
-                "ISO639-3": "eng",
-                "BCP-47": "en-US",
-            }
-            transcript["source"] = "Berean Standard Bible"
-            video_metadata["transcripts"].append(transcript)
+        transcripts = []
+        for transcript in video_metadata:
+            citation = transcript.get("bible-ref", "").strip()
+            if citation:
+                indices = parse_citation_string(citation, vref_map)
+                transcript["biblenlp-vref"] = indices
+                transcript["bible_text"] = "".join([bible_lines[i] for i in indices if 0 <= i < len(bible_lines)])
+                transcript["language"] = {
+                    "name": "English",
+                    "ISO639-3": "eng",
+                    "BCP-47": "en-US",
+                }
+                transcript["source"] = "Berean Standard Bible"
+                transcripts.append(transcript)
 
     if args.output_json:
         output_json = args.output_json
     else:
         output_json = args.json_path
     with open(output_json, "w", encoding="utf-8") as f:
-        json.dump(video_metadata, f, indent=2, ensure_ascii=False)
+        json.dump(transcripts, f, indent=2, ensure_ascii=False)
         print(f"Wrote output to {output_json}")
 
 

@@ -1,4 +1,10 @@
+NOTE: most of the things in this folder are outdated. The verse-matching code migrated to ebible utils, and is deprecated. The downloading code no longer works after the DBL added a login requirement.
+
+
+
 # DBL Sign Language Video Downloader
+
+
 
 A Python-based tool for downloading and managing sign language video content from the Digital Bible Library (DBL). Features include:
 - Modern GUI with progress tracking
