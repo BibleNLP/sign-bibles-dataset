@@ -32,8 +32,10 @@ def get_face_crop_for_frame(
     Return a list of cropped face regions from a single frame.
 
     Returns:
-        A list of cropped face regions (np.ndarray), one per person.
+        * A list of cropped face regions (np.ndarray), one per person.
+        * the frame itself
         Skips masked bboxes.
+
 
     """
     video_path = Path(video_path)
@@ -41,6 +43,7 @@ def get_face_crop_for_frame(
 
     pose = Pose.read(pose_path.read_bytes())
     face_pose = pose.get_components(["FACE_LANDMARKS"])
+    pose_bbox = pose.bbox()
     face_bbox = face_pose.bbox()
 
     cap = cv2.VideoCapture(str(video_path))
@@ -57,6 +60,7 @@ def get_face_crop_for_frame(
 
     img_height, img_width = frame.shape[:2]
     frame_bboxes = face_bbox.body.data[frame_index]
+    full_person_bboxes = pose_bbox.body.data[frame_index]
 
     crops = []
     for person, bbox in enumerate(frame_bboxes):
@@ -80,7 +84,7 @@ def get_face_crop_for_frame(
         crop = frame[ul_y:br_y, ul_x:br_x]
         crops.append(crop)
 
-    return crops
+    return crops, frame
 
 
 def main():
@@ -113,7 +117,10 @@ def main():
         raise FileNotFoundError(f"Pose file not found: {pose_path}")
 
     facecrop_dir = frames_dir / "facecrops"
+    people_dir = frames_dir / "frames_with_people"
+    
     facecrop_dir.mkdir(exist_ok=True)
+    people_dir.mkdir(exist_ok=True)
 
     frame_pattern = re.compile(r"frame_(\d+)\.png")
     frame_files = sorted(frames_dir.glob("frame_*.png"))
@@ -126,12 +133,16 @@ def main():
 
         frame_idx = int(match.group(1))
 
-        crops = get_face_crop_for_frame(
+        crops, frame = get_face_crop_for_frame(
             video_path=video_path,
             pose_path=pose_path,
             frame_index=frame_idx,
             expand_percent=expand_percent,
         )
+
+        if crops:
+            person_frame_filename = people_dir / f"frame_{frame_idx:05d}.png"
+            cv2.imwrite(person_frame_filename, frame)
 
         for i, crop in enumerate(crops):
             crop_filename = facecrop_dir / f"frame_{frame_idx:05d}_person_{i}.png"
