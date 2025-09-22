@@ -126,18 +126,21 @@ def main():
         parser.error("max-frame must be greater than min-frame.")
 
     for video in tqdm(videos, desc="Processing Videos"):
-        ocr_data = process_video(video, args.frame_skip, args.min_frame, args.max_frame)
+        
 
         out_path = args.out
         if out_path is None:
+            
             out_path = video.with_name(
-                video.stem
-                + f"_frameskip{args.frame_skip}_minframe{args.min_frame}_maxframe{args.max_frame}_ocrtext.json"
+                video.stem + ".ocr.json"
+                # + f"_frameskip{args.frame_skip}_minframe{args.min_frame}_maxframe{args.max_frame}_ocrtext.json"
             )
+            
 
         if out_path.is_file():
             print(f"[WARNING]: {out_path} exists: skipping!")
         else:
+            ocr_data = process_video(video, args.frame_skip, args.min_frame, args.max_frame)
             print(f"Writing OCR results to {out_path}")
             out_path.write_text(json.dumps(ocr_data, indent=2, ensure_ascii=False), encoding="utf-8")
 
