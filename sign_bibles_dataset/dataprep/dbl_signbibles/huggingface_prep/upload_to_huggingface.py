@@ -164,7 +164,9 @@ def create_dataset_card(
     return output_path
 
 
-def upload_to_huggingface(webdataset_path: str | Path, dataset_name: str, token: str | None = None) -> None:
+def upload_to_huggingface(
+    webdataset_path: str | Path, dataset_name: str, token: str | None = None, skip_readme=True
+) -> None:
     """
     Upload WebDataset shards (directly, preserving folders) to HuggingFace.
 
@@ -183,10 +185,11 @@ def upload_to_huggingface(webdataset_path: str | Path, dataset_name: str, token:
 
     print(f"Found {len(shards)} shards. Uploading in-place, preserving folders...")
 
-    # Create README.md in-place
-    readme_path = webdataset_path / "README.md"
-    create_dataset_card(webdataset_path, readme_path, dataset_name)
-    print(f"README CREATED at {readme_path.resolve()}")
+    if not skip_readme:
+        # Create README.md in-place
+        readme_path = webdataset_path / "README.md"
+        create_dataset_card(webdataset_path, readme_path, dataset_name)
+        print(f"README CREATED at {readme_path.resolve()}")
 
     print(f"Uploading to HuggingFace Hub as {dataset_name}")
     api = HfApi(token=token)
@@ -246,4 +249,8 @@ def main():
 if __name__ == "__main__":
     main()
 
-# cd /opt/home/cleong/projects/semantic_and_visual_similarity/sign-bibles-dataset && conda activate /opt/home/cleong/envs/sign-bibles-dataset && python sign_bibles_dataset/dataprep/dbl_signbibles/huggingface_prep/upload_to_huggingface.py webdataset bible-nlp/sign-bibles
+# cd /opt/home/cleong/projects/semantic_and_visual_similarity/sign-bibles-dataset && conda activate /opt/home/cleong/envs/sign-bibles-dataset && python sign_bibles_dataset/dataprep/dbl_signbibles/huggingface_prep/upload_to_huggingface.py webdataset_large_files_removed bible-nlp/sign-bibles
+
+# cd /opt/home/cleong/projects/semantic_and_visual_similarity/sign-bibles-dataset && conda activate /opt/home/cleong/envs/sign-bibles-dataset && python sign_bibles_dataset/dataprep/dbl_signbibles/huggingface_prep/upload_to_huggingface.py /data/petabyte/cleong/data/DBL_Deaf_Bibles/temp/ bible-nlp/sign-bibles
+
+# cd /opt/home/cleong/projects/semantic_and_visual_similarity/sign-bibles-dataset && conda activate /opt/home/cleong/envs/sign-bibles-dataset && python sign_bibles_dataset/dataprep/dbl_signbibles/huggingface_prep/upload_to_huggingface.py webdataset_large_files_removed bible-nlp/sign-bibles
