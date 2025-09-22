@@ -7,28 +7,11 @@ This script:
 * Puts each language in its own subfolder in the webdataset
 
 # TODO: size-based sharding, try for not too big?
-# TODO: add in "glosses" to match https://huggingface.co/datasets/bridgeconn/sign-bibles-isl?
-# example:
-"glosses": [
-        {
-            "text": [
-                [
-                    0,
-                    0,
-                    "nil"
-                ]
-            ],
-            "language": {
-                "name": "English",
-                "ISO639-3": "eng",
-                "BCP-47": "en-US"
-            }
-        }
-    ]
 
 """
 
 import argparse
+import datetime
 import io
 import json
 import logging
@@ -91,22 +74,26 @@ def setup_logger(log_file_path: str) -> logging.Logger:
     return logger
 
 
-LOG_FILE_PATH = Path("./output/run_log.txt")
+# Generate a timestamp in ISO-like format, but without ':' so it's filesystem safe
+timestamp = datetime.now().strftime("%Y-%m-%dT%H%M")
+
+LOG_FILE_PATH = Path("./output") / f"run_log_{timestamp}.txt"
 logger = setup_logger(LOG_FILE_PATH.resolve())
 logger.info(f"Command: {' '.join(sys.argv)}")
 
 # PyArrow capacity limit (2^31 - 2)
 PYARROW_MAX_BYTES = 2**31 - 2
+# PYARROW_MAX_BYTES = 2**60000 - 2
 
 
 class WebDatasetCreator:
     """Class to handle creating WebDataset format with subfolders per language, skipping samples with oversized files."""
 
-    def __init__(self, output_dir: str | Path = "webdataset"):
+    def __init__(self, output_dir: str | Path = "webdataset", max_file_size_bytes=None):
         self.output_dir = Path(output_dir)
         self.output_dir.mkdir(parents=True, exist_ok=True)
         self.skipped_samples = []
-        self.max_file_size_bytes = PYARROW_MAX_BYTES
+        self.max_file_size_bytes = max_file_size_bytes
 
     def _group_by_project(self, samples_info):
         groups = defaultdict(list)
@@ -191,7 +178,7 @@ class WebDatasetCreator:
                 files_to_check.append(path)
 
         for path in files_to_check:
-            if path.stat().st_size > self.max_file_size_bytes:
+            if self.max_file_size_bytes is not None and path.stat().st_size > self.max_file_size_bytes:
                 logger.warning(
                     f"Skipping sample {video_info.get('filename')} due to large file {path.name} ({path.stat().st_size / (1024**3):.2f} GB)"
                 )
@@ -303,6 +290,11 @@ def parse_metadata_to_bible_ref(xml_path: Path, filename):
             for division in pub.findall("./structure/division"):
                 passage = division.attrib.get("role", "").strip()
                 for content in division.findall("content"):
+                    # Estonian subset is weird
+                    # It has "MRK" as the role at the division level
+                    #  then references at the video level
+                    if "/eso/" in str(xml_path):
+                        passage = content.attrib.get("role", "").strip()
                     src = content.attrib.get("src", "").strip()
                     xml_filename = Path(src).name
                     file_to_passage[xml_filename] = passage
@@ -434,6 +426,7 @@ def build_transcripts(
             if not reference:
                 continue
 
+            # logger.info(str(ocr_csv.resolve()))
             verse_text, vref_indices = citation_to_text_and_vrefs(reference, vref_map, bible_verses)
 
             transcripts.append(
@@ -481,11 +474,14 @@ def process_without_gui(args):
     # === Step 0: Initialize Paths ===
     output_dir = Path(args.output_dir)
     downloads_dir = output_dir / "downloads"
-    webdataset_dir = output_dir / "webdataset"
+    webdataset_dir = (
+        output_dir / "webdataset_large_files_removed" if args.remove_large_files else output_dir / "webdataset"
+    )
     manifest_path = output_dir / "manifest.json"
 
     downloads_dir.mkdir(parents=True, exist_ok=True)
     webdataset_dir.mkdir(parents=True, exist_ok=True)
+    logger.info(f"made webdataset_dir: {webdataset_dir}, aka \n{webdataset_dir.resolve()}")
 
     # === Step 1: Load eBible Corpus ===
     ebible_corpus_path = args.ebible_corpus_path
@@ -562,7 +558,8 @@ def process_without_gui(args):
 
     # === Step 4: Create WebDataset ===
     logger.info(f"=== Creating WebDataset with {len(enriched_video_info_list)} samples ===")
-    creator = WebDatasetCreator(webdataset_dir)
+    max_file_size_bytes = PYARROW_MAX_BYTES if args.remove_large_files else None
+    creator = WebDatasetCreator(webdataset_dir, max_file_size_bytes=max_file_size_bytes)
     shard_paths = creator.create_webdataset(enriched_video_info_list, shard_size=args.shard_size)
     # Get parent folders for all shards
     parent_folders = [str(Path(shard_path).parent.resolve()) for shard_path in shard_paths]
@@ -623,6 +620,11 @@ def main():
         default=5,  # we were getting some big ones
         help="Number of samples per WebDataset shard",
     )
+    parser.add_argument(
+        "--remove-large-files",
+        action="store_true",
+        help=f"Whether or not to remove large files greater than PyArrow Max {PYARROW_MAX_BYTES}",
+    )
     args = parser.parse_args()
 
     process_without_gui(args)
@@ -637,6 +639,9 @@ if __name__ == "__main__":
 # cd "/opt/home/cleong/projects/semantic_and_visual_similarity/sign-bibles-dataset" && python /opt/home/cleong/projects/semantic_and_visual_similarity/sign-bibles-dataset/sign_bibles_dataset/dataprep/dbl_signbibles/huggingface_prep/prepare_webdataset.py --output-dir . --language-code ase --language-code esl --language-code eso --language-code gse --language-code ins --language-code nsp --language-code sqs --num-videos 50000000
 # Do those same ones but NOT ase
 # cd "/opt/home/cleong/projects/semantic_and_visual_similarity/sign-bibles-dataset" && python /opt/home/cleong/projects/semantic_and_visual_similarity/sign-bibles-dataset/sign_bibles_dataset/dataprep/dbl_signbibles/huggingface_prep/prepare_webdataset.py --output-dir . --language-code esl --language-code eso --language-code gse --language-code ins --language-code nsp --language-code sqs --num-videos 50000000
+# do ONLY ase
+# cd "/opt/home/cleong/projects/semantic_and_visual_similarity/sign-bibles-dataset" && python /opt/home/cleong/projects/semantic_and_visual_similarity/sign-bibles-dataset/sign_bibles_dataset/dataprep/dbl_signbibles/huggingface_prep/prepare_webdataset.py --output-dir . --language-code ase --num-videos 50000000
+# cd "/opt/home/cleong/projects/semantic_and_visual_similarity/sign-bibles-dataset" && python /opt/home/cleong/projects/semantic_and_visual_similarity/sign-bibles-dataset/sign_bibles_dataset/dataprep/dbl_signbibles/huggingface_prep/prepare_webdataset.py --output-dir /data/petabyte/cleong/data/DBL_Deaf_Bibles/webdataset_large_files_removed --language-code ase --num-videos 50000000
 
 
 # upload a project
