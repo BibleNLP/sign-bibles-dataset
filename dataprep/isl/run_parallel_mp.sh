@@ -16,13 +16,13 @@ export SUCCESS_LOG FAIL_LOG
 
 run_job() {
     VIDEO_ID="$1"
-    PATH="$2"
-    echo "Processing $VIDEO_ID in $PATH"
+    DATA_PATH="$2"
+    echo "Processing $VIDEO_ID in $DATA_PATH";
 
-    if python3 mp_processing.py "$VIDEO_ID" "$PATH"; then
-        echo -e "$VIDEO_ID\t$VIDEO_PATH" >> "$SUCCESS_LOG"
+    if python3 mp_processing.py "$VIDEO_ID" "$DATA_PATH"; then
+        echo -e "$VIDEO_ID\t$DATA_PATH" >> "$SUCCESS_LOG"
     else
-        echo -e "$VIDEO_ID\t$VIDEO_PATH" >> "$FAIL_LOG"
+        echo -e "$VIDEO_ID\t$DATA_PATH" >> "$FAIL_LOG"
     fi
 }
 
