@@ -1,4 +1,5 @@
 from pathlib import Path
+import sys
 
 # from nextcloud_connect import NextCloud_connection
 
@@ -33,13 +34,18 @@ def list_videofile_inputs_onmount(path, count_start=0):
 
 
 if __name__ == '__main__':
-	num = list_videofile_inputs_onmount("/mnt/share/matthew/", count_start=0)
+	if len(sys.argv) != 3:
+		print("Usage: python dataprep/isl/gospel_file_list.py <path_to_gospel_files> <count_start>")
+		sys.exit(1)
+	
+	path = sys.argv[1]
+	count_start = int(sys.argv[2])
 
-	num = list_videofile_inputs_onmount("/mnt/share/mark/", count_start=num)
+	num = list_videofile_inputs_onmount(path, count_start=count_start)
 
-
-	num = list_videofile_inputs_onmount("/mnt/share/luke/", count_start=num)
-
-	num = list_videofile_inputs_onmount("/mnt/share/john/", count_start=num)
+	# num = list_videofile_inputs_onmount("/mnt/share/matthew/", count_start=0)
+	# num = list_videofile_inputs_onmount("/mnt/share/mark/", count_start=num)
+	# num = list_videofile_inputs_onmount("/mnt/share/luke/", count_start=num)
+	# num = list_videofile_inputs_onmount("/mnt/share/john/", count_start=num)
 
 	# num = list_videofile_inputs_onmount("/mnt/share/original/", count_start=0)

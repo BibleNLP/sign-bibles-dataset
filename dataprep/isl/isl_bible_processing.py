@@ -9,52 +9,73 @@ import logging
 from pathlib import Path
 import ffmpeg
 
-from ffmpeg_downsample import downsample_video_ondisk
 from mediapipe_trim import trim_off_storyboard
 from pose_format_util import video2poseformat
 from bible_text_access import get_verses, book_code_lookup
 from biblenlp_util import ref2vref
 
-logging.basicConfig(filename='logs/app.log', level=logging.INFO,
+logging.basicConfig(filename='/content/logs/app.log', level=logging.INFO,
                     format='%(asctime)s - %(levelname)s - %(message)s')
 
 verse_john_pattern = re.compile(r"(\d+(\-\d+)?)\.MP4")
+verse_acts_pattern = re.compile(r"V=(\d+(\-\d+)?)")
+verse_generic_pattern = re.compile(r"(\d+(\-\d+)?)")
 
 def process_video(id, input_path, output_path):
 	if output_path.endswith("/"):
 		output_path = output_path[:-1]
 	main_path = f"{output_path}/{id}.mp4"
 	try:
-		# shutil.copy(input_path, f"./{id}_large.mp4")  
+		shutil.copy(input_path, f"./{id}.mp4")  
 
-		downsample_video_ondisk(input_path, f"{id}.mp4")
 
 		trimmed_stream = trim_off_storyboard(None, id)
 		if not trimmed_stream:
 			raise Exception("Processing with mediapipe failed")
 		video2poseformat(id) #  .pose format using mediapipe
-		# generate_pose_files_v2(id) # mp4, and npz usging dwpose
 
 		shutil.move(f"{id}.mp4", output_path)
 		shutil.move(f"{id}_pose-mediapipe.pose", f"{output_path}/{id}.pose-mediapipe.pose")
-		# shutil.move(f"{id}_pose-dwpose.npz", f"{output_path}/{id}.pose-dwpose.npz")
 
 		parts = input_path.split("/")
 
-		signer = "Signer_1"
-		if parts[3]=="john":
-			ref = f"{book_code_lookup[parts[3]]} {parts[4].replace("Ch-", "")}"
-			ver_match = re.search(verse_john_pattern, parts[-1])
-			if not ver_match:
-				raise Exception(f"Cant compose reference from:{parts}")
-			verse_parts = ver_match.group(1)
-			signer = "Signer_2"
-		else:
-			ref = f"{book_code_lookup[parts[3]]} {parts[4].replace("Ch ", "")}"
-			verse = parts[-1].split(".")[0].split(" ")[1]
-			verse_parts = "-".join(verse.split("-")[:-1])
+		book = book_code_lookup[parts[3]]
+		try:
+			if parts[3]=="john":
+				ref = f"{book} {parts[4].replace("Ch-", "")}"
+				ver_match = re.search(verse_john_pattern, parts[-1])
+				verse_parts = ver_match.group(1)
+			elif parts[3] == "Acts":
+				chapter = re.search(r"(\d+)", parts[4]).group(0)
+				verse = re.search(verse_acts_pattern, parts[-1]).group(1)
+				ref = f"{book} {chapter}"
+				verse_parts = verse
+			elif parts[3] in ["matthew", "mark", "luke","Titus" ]:
+				ref = f"{book} {parts[4].replace("Ch ", "")}"
+				verse = parts[-1].split(".")[0].split(" ")[1]
+				verse_parts = "-".join(verse.split("-")[:-1])
+			else:
+				chapter = re.search(r"(\d+)", parts[4]).group(0)
+				verse = re.search(verse_generic_pattern, parts[-1]).group(0)
+				ref = f"{book} {chapter}"
+				verse_parts = verse
+		except Exception as exce:
+			raise Exception(f"Cannot compose reference from: {parts=}") from exce
+		
+		signer = None
+		if book in ["MAT", "MRK", "LUK", "EPH", "TIT", "JUD"]:
+			signer = "signer_1"
+		elif book in ["JHN", "ACT", "1CO", "2CO", "COL", "1PE", "2PE", "1JN", "2JN", "3JN", "PHP"]:
+			signer = "signer_2"
+		elif book in ["HEB"]:
+			signer	= "signer_3"
+		elif book in ["1TH", "2TH", "1TI", "2TI","PHM"]:
+			signer = "signer_4"
+		elif book in ["GAL", "JAS"]:
+			signer = "signer_5"
 
 		ref = f"{ref}:{verse_parts}"
+		print(f"{ref=}")
 		vref = ref2vref(ref)
 
 		probe = ffmpeg.probe(main_path)

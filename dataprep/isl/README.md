@@ -28,12 +28,14 @@ For each sample:
 1. .json
 
 
-![dataflow](./docs/ISLDataprepArch.jpg)
+![dataflow](./docs/ISL_dataprep_arch.drawio.png)
 
 ## How to prepare the dataset?
 1. The raw data from BCS studios is shared as HD videos to us. It is about 2TB in size, for the 4 Gospels. And is shared on a BCS-VM. See [How to connect to BCS-VM](./docs/HOWTO-connect-BCS-VM.md). 
-1. The first part of the dataset preparation is running the CPU-pipeline. It down samples the resolutions, trims the video, runs mediapipe pose estimation and gets metadata like BibleNLP vrefs, verse text etc. See [How to run the CPU-pipeline](./docs/HOWTO-run-CPU-pipline-on-BCS-VM.md).
-1. The next part of the processing requires GPU. For transfering the data on the BCS-VM to a cloud GPU instance we need an intemediate storage solution. Lambda cloud filesystems are used for it now. See [How to avail a lambda filesystem](./docs/HOWTO-avail-lambda-fs.md).
-1. Google colab pro account is used for running the GPU requiring parts of the data-processing pipelines. See [note on running the pipeline](./docs/HOWTO-run-GPU-pipline-on-colab.md)  and [the notebook](./docs/ISL_Dataset_DWPose_run.ipynb).
+1. The first part of the dataset preparation is running the video down sampling. See [How to run down sampling](./docs/HOWTO-downsample.md).
+1. The remaining processing is down of high computes cloud environments. For transfering the data on the BCS-VM to a cloud GPU instance we need an intemediate storage solution. Lambda cloud filesystems are used for it now. See [How to avail a lambda filesystem](./docs/HOWTO-avail-lambda-fs.md).
+1. Then the CPU-pipeline which, trims the video, runs mediapipe pose estimation using pose-format library and gets metadata like BibleNLP vrefs, verse text etc are to be run on a multicore colab pro instance. See [How to run the CPU-pipeline](./docs/HOWTO-run-CPU-pipline-on-colab.md) and [the notebook](ISL_Dataset_CPU_pipline.ipynb).
+1. A GPU colab instance like A100, is used for running the GPU requiring parts of the data-processing pipelines. See [note on running the pipeline](./docs/HOWTO-run-GPU-pipline-on-colab.md)  and [the notebook](./docs/ISL_Dataset_DWPose_run.ipynb).
+1. Optionally, a mediapipe pose estimation can be done on the data to share output in numpy array format(`.npz`) along with the pose-format output. See [the notebook](./docs/ISL_Dataset_Mediapipe_run.ipynb)
 1. Once all the data files are prepared they are to be packaged in the format needed for a webdata set and published via Hugging Face repo. See [How to prepare webdataset](./docs/HOWTO-create-webdataset.md).
 

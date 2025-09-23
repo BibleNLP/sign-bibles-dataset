@@ -1,3 +1,0 @@
-skypilot[lambda]==0.10.1
-skypilot[aws]
-boto3

@@ -5,6 +5,7 @@ from pathlib import Path
 def get_total_duration(json_files):
     """Sum the duration field from all JSON files."""
     total_seconds = 0
+    vrefs = []
     for file in json_files:
         try:
             with open(file, 'r', encoding='utf-8') as f:
@@ -13,9 +14,10 @@ def get_total_duration(json_files):
                 duration = float(duration)
                 if isinstance(duration, (int, float)):
                     total_seconds += duration
+                vrefs += data.get('biblenlp-vref', [])
         except Exception as e:
             print(f"Error reading {file}: {e}")
-    return total_seconds
+    return total_seconds, len(set(vrefs))
 
 def format_duration(seconds):
     """Convert total seconds into hours, minutes, and seconds."""
@@ -36,10 +38,11 @@ def main():
         for video_file in Path(directory).rglob("*.mp4") 
      ]
     print(f'Total number of videos : {len(json_files)}')
-    total_seconds = get_total_duration(json_files)
+    total_seconds, total_verses = get_total_duration(json_files)
     print(f"{total_seconds=}")
     h, m, s = format_duration(total_seconds)
     print(f"Total duration: {h} hours, {m} minutes, {s} seconds")
+    print(f"Total number of unique verses: {total_verses}")
 
 if __name__ == '__main__':
     main()
