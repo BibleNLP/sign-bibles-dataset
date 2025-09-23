@@ -13,7 +13,7 @@ class PoseEstimator:
     holistic = mp_holistic.Holistic(static_image_mode=True)
 
     def __init__(self, thread_id, path):
-        path_to_video = os.path.join(path, f"{thread_id}.mp4")
+        self.path_to_video = os.path.join(path, f"{thread_id}.mp4")
         self.all_coords = []
         self.all_visibility = []
     
@@ -26,7 +26,6 @@ class PoseEstimator:
                 ret, frame = cap.read()
                 if not ret:
                     break
-                frame_idx += 1
                 image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
                 image.flags.writeable = False
 
@@ -59,10 +58,14 @@ class PoseEstimator:
                 else:
                     face_coords = np.full((468, 3), np.nan, dtype=np.float64)
                     face_visibility = np.full((468,), np.nan, dtype=np.float64)
-                combined_coords = np.hstack((pose_coords, right_hand_coords, left_hand_coords, face_coords))
+                # print(f'{pose_coords.shape=} {right_hand_coords.shape=} {left_hand_coords.shape=} {face_coords.shape=}')
+                combined_coords = np.vstack((pose_coords, right_hand_coords, left_hand_coords, face_coords))
+                # print(f'{combined_coords.shape=}')
+                # print(f'{pose_visibility.shape=} {right_hand_visibility.shape=} {left_hand_visibility.shape=} {face_visibility.shape=}')
                 combined_visibility = np.hstack((pose_visibility, right_hand_visibility, left_hand_visibility, face_visibility))
-                self.all_coords.append(combined_coords[np.newaxis, :, :])
-                self.all_visibility.append(combined_visibility[np.newaxis, :])
+                # print(f'{combined_visibility.shape=}')
+                self.all_coords.append(combined_coords)
+                self.all_visibility.append(combined_visibility)
             cap.release()
         except Exception as exce:
             raise Exception("Error with video processing with mediapipe") from exce
@@ -77,7 +80,7 @@ def pose_estimate_npz(id, path):
         coords, visibility = pose_estim.estimate()
 
         assert coords[0].shape == (MP_LANDMARKS_NUM,3), f"{coords.shape=}"
-        assert visibility[0].shape == (MP_LANDMARKS_NUM, 1), f"{visibility.shape=}"
+        assert visibility[0].shape == (MP_LANDMARKS_NUM,), f"{visibility[0].shape=}"
         assert coords.shape[0] == visibility.shape[0], f"{coords.shape=} {visibility.shape=}"
 
         output_path = os.path.join(path, f"{id}.pose-mediapipe.npz")    
@@ -94,4 +97,4 @@ if __name__ == '__main__':
       sys.exit(1)
   video_id = sys.argv[1]
   path = sys.argv[2] if len(sys.argv) > 2 else "/content/isl_gospel_videos"
-  pose_estimate_npz(video_id)
+  pose_estimate_npz(video_id, path)
