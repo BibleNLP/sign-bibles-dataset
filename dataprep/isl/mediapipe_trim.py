@@ -91,7 +91,7 @@ class VideoTrimmer:
 
           # print(f"about to trim! Width: {width}, Height: {height}, FPS: {fps}")
 
-          fourcc="mp4v"
+          fourcc="avc1"
           fourcc_code = cv2.VideoWriter_fourcc(*fourcc)  # Codec (e.g., 'mp4v', 'XVID')
           video_writer = cv2.VideoWriter(temp_file2, fourcc_code, fps, (width, height))
 
