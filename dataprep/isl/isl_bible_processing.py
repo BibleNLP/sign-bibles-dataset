@@ -50,7 +50,7 @@ def process_video(id, input_path, output_path):
 				verse = re.search(verse_acts_pattern, parts[-1]).group(1)
 				ref = f"{book} {chapter}"
 				verse_parts = verse
-			elif parts[3] in ["matthew", "mark", "luke","Titus" ]:
+			elif parts[3] in ["matthew", "mark", "luke","Titus", "Jude" ]:
 				ref = f"{book} {parts[4].replace("Ch ", "")}"
 				verse = parts[-1].split(".")[0].split(" ")[1]
 				verse_parts = "-".join(verse.split("-")[:-1])
