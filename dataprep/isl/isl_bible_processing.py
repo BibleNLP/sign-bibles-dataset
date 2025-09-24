@@ -29,7 +29,7 @@ def process_video(id, input_path, output_path):
 		shutil.copy(input_path, f"./{id}.mp4")  
 
 
-		trimmed_stream = trim_off_storyboard(None, id)
+		trimmed_stream = trim_off_storyboard(id)
 		if not trimmed_stream:
 			raise Exception("Processing with mediapipe failed")
 		video2poseformat(id) #  .pose format using mediapipe

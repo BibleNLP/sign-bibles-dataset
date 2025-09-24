@@ -9,7 +9,7 @@ class VideoTrimmer:
     mp_holistic = mp.solutions.holistic
     holistic = mp_holistic.Holistic(static_image_mode=True)
 
-    def __init__(self, video_stream, id):
+    def __init__(self, id):
         """Initialize with a video source (file path or camera index)."""
         # print("comes in videotrimmer init")
         self.thread_id = id
@@ -74,13 +74,9 @@ class VideoTrimmer:
             print("No valid trim frame found. Returning None.")
             return None
         # print(f"Trim frame found at frame {trim_frame}.")
-        output_stream = io.BytesIO()
         if trim_frame < 10:
           print(f"Trim frame {trim_frame} < 10. Hence keeping the video as such")
-          with open(f"{self.thread_id}.mp4", "rb") as f:
-            output_stream.write(f.read())
-          output_stream.seek(0)
-          return output_stream
+          return True
 
         # trim_frame += 10
 
@@ -109,20 +105,17 @@ class VideoTrimmer:
           video_writer.release()
           cap.release()
 
-          with open(temp_file2, "rb") as f:
-            output_stream.write(f.read())
         finally:
           os.remove(f"./{self.thread_id}.mp4")
           os.rename(temp_file2, f"./{self.thread_id}.mp4")
           # self.stream.seek(0)
 
-        output_stream.seek(0)
-        return output_stream  # Return the processed video stream
+        return True
 
 # Function for parallel processing
-def trim_off_storyboard(video_stream, id):
+def trim_off_storyboard(id):
     """Creates a VideoTrimmer object and processes a single video."""
     # print("Comes in trimmer!")
-    trimmer = VideoTrimmer(video_stream, id)
+    trimmer = VideoTrimmer(id)
     # print("Trimming!")
     return trimmer.trim_video()
