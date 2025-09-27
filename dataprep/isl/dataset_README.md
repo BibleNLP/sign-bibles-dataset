@@ -42,16 +42,16 @@ The dataset is licensed under the Creative Commons Attribution-ShareAlike 4.0 In
 
 ## Dataset Details
 
-Contains 1114 sign videos of 19.5 hours in total.
+Contains 1958 sign videos of 38 hours in total. Average length of a sample is 1 minute 10 seconds, with the longest video being 4 minutes 30 seconds and the shortest one being 38 seconds.
 
-### Dataset Description
+Dataset contains:
 
 - Continuous signing videos
 - Parallel text
 - Bible reference to signed verses
 - Pose estimation data in the following formats
   - Frames wise body landmarks detected by dwpose as a numpy array
-  - Frames wise body landmarks detected by mediapose as .pose format
+  - Frames wise body landmarks detected by mediapose as numpy array and .pose format
 - Signer id for each video
 
 ## Uses
@@ -86,7 +86,8 @@ def main():
     )
     for sample in dataset:
         ''' Each sample contains:
-             'mp4', 'pose-dwpose.npz', 'pose-mediapipe.pose'
+             'mp4', 'pose-dwpose.npz',
+             'pose-mediapipe.pose', 'pose-mediapipe.npz',
              'transcripts.json' and 'json'
         '''
         # print(sample.keys())
@@ -187,3 +188,4 @@ def process_video(mp4_data):
 if __name__ == '__main__':
 	main()
 ```
+

@@ -1,5 +1,5 @@
 {
-  "total_samples_estimated": 1114,
+  "total_samples_estimated": 1958,
   "languages": [
     "ins"
   ],
@@ -8,8 +8,8 @@
   ],
   "stats_per_folder": {
     "ins/indian_sign_language_version_islv": {
-      "shard_count": 100,
-      "estimated_samples": 1114
+      "shard_count": 159,
+      "estimated_samples": 1958
     }
   },
   "configs": {
@@ -20,6 +20,7 @@
       "      - split: test\n        path: ins/indian_sign_language_version_islv/*test.tar"
     ]
   },
-  "shard_count": 100,
+  "shard_count": 159,
   "subfolder_count": 1
 }
+
