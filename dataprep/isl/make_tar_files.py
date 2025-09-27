@@ -94,8 +94,8 @@ def create_tarballs(chunks, output_dir, count_start):
 
 
 if __name__ == '__main__':
-    SOURCE_DIR = "/mnt/share/ISLGospel_processed"
-    OUTPUT_DIR = "/mnt/share/ISLGospel_shards"
+    SOURCE_DIR = "/mnt/share/ISLNT_processed"
+    OUTPUT_DIR = "/mnt/share/ISLNT_shards"
     COUNT_START = 0
     MAX_TAR_SIZE = 1 * 1024 * 1024 * 1024 # 1 GB
 
