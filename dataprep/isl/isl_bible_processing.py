@@ -29,7 +29,7 @@ def process_video(id, input_path, output_path):
 		shutil.copy(input_path, f"./{id}.mp4")  
 
 
-		trimmed_stream = trim_off_storyboard(None, id)
+		trimmed_stream = trim_off_storyboard(id)
 		if not trimmed_stream:
 			raise Exception("Processing with mediapipe failed")
 		video2poseformat(id) #  .pose format using mediapipe
@@ -50,7 +50,7 @@ def process_video(id, input_path, output_path):
 				verse = re.search(verse_acts_pattern, parts[-1]).group(1)
 				ref = f"{book} {chapter}"
 				verse_parts = verse
-			elif parts[3] in ["matthew", "mark", "luke","Titus" ]:
+			elif parts[3] in ["matthew", "mark", "luke","Titus", "Jude" ]:
 				ref = f"{book} {parts[4].replace("Ch ", "")}"
 				verse = parts[-1].split(".")[0].split(" ")[1]
 				verse_parts = "-".join(verse.split("-")[:-1])

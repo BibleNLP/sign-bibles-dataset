@@ -5,6 +5,8 @@ from pathlib import Path
 def get_total_duration(json_files):
     """Sum the duration field from all JSON files."""
     total_seconds = 0
+    max = 0
+    min = 1000000
     vrefs = []
     for file in json_files:
         try:
@@ -13,11 +15,20 @@ def get_total_duration(json_files):
                 duration = data.get('duration_sec')
                 duration = float(duration)
                 if isinstance(duration, (int, float)):
+                    if duration > max:
+                        max = duration
+                    if duration < min:
+                        min = duration
                     total_seconds += duration
                 vrefs += data.get('biblenlp-vref', [])
         except Exception as e:
             print(f"Error reading {file}: {e}")
-    return total_seconds, len(set(vrefs))
+    avg = total_seconds / len(json_files) if json_files else 0
+    return {"total seconds":total_seconds, 
+            "unique verses": len(set(vrefs)),
+            "max": max,
+            "min": min,
+            "avg": avg}
 
 def format_duration(seconds):
     """Convert total seconds into hours, minutes, and seconds."""
@@ -38,11 +49,11 @@ def main():
         for video_file in Path(directory).rglob("*.mp4") 
      ]
     print(f'Total number of videos : {len(json_files)}')
-    total_seconds, total_verses = get_total_duration(json_files)
-    print(f"{total_seconds=}")
-    h, m, s = format_duration(total_seconds)
+    result = get_total_duration(json_files)
+    print(f"total_seconds={result['total seconds']}, max={result['max']}, min={result['min']}, avg={result['avg']}")
+    h, m, s = format_duration(result['total seconds'])
     print(f"Total duration: {h} hours, {m} minutes, {s} seconds")
-    print(f"Total number of unique verses: {total_verses}")
+    print(f"Total number of unique verses: {result['unique verses']}")
 
 if __name__ == '__main__':
     main()
